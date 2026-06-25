@@ -26,27 +26,27 @@
   header, .controls, .panel-table{grid-column:1/-1}
 
   /* LOGIN */
-  #login{position:fixed;inset:0;background:var(--bg);z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
-  #login .box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:32px;max-width:420px;width:100%;max-height:calc(100vh - 40px);overflow-y:auto}
-  #login h1{margin:0 0 4px;font-size:18px;letter-spacing:.5px}
+  #login{position:fixed;inset:0;background:var(--bg);z-index:5000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+  #login .box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px 24px;max-width:460px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto}
+  #login h1{margin:0 0 2px;font-size:17px;letter-spacing:.5px}
   #login h1 .accent{color:var(--accent)}
-  #login .sub{color:var(--muted);font-size:12px;margin-bottom:24px}
-  #login label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:14px 0 6px;font-weight:600}
+  #login .sub{color:var(--muted);font-size:11px;margin-bottom:14px;line-height:1.35}
+  #login label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:10px 0 4px;font-weight:600}
   #login select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:14px;font-family:inherit}
   #login select:focus{outline:none;border-color:var(--accent)}
-  #login button{width:100%;background:var(--accent);color:#000;border:0;padding:12px;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;margin-top:24px;letter-spacing:.5px}
+  #login button{width:100%;background:var(--accent);color:#000;border:0;padding:11px;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;margin-top:14px;letter-spacing:.5px}
   #login button:disabled{opacity:.4;cursor:not-allowed}
-  #login .err{color:var(--danger);font-size:12px;margin-top:8px;min-height:16px}
+  #login .err{color:var(--danger);font-size:12px;margin-top:6px;min-height:14px}
   #login .team-btn{
     background:var(--bg);color:var(--text);border:1.5px solid var(--border);
-    padding:14px;border-radius:6px;font-weight:700;font-size:15px;cursor:pointer;
+    padding:11px;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;
     letter-spacing:1px;transition:all .15s;
   }
   #login .team-btn:hover{border-color:var(--accent);color:var(--accent)}
   #login .team-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
   #login .pin-btn{
     background:var(--bg);color:var(--text);border:1px solid var(--border);
-    padding:10px 6px;border-radius:5px;font-weight:700;font-size:13px;cursor:pointer;
+    padding:8px 4px;border-radius:5px;font-weight:700;font-size:12px;cursor:pointer;
     font-family:var(--mono);letter-spacing:1.5px;transition:all .12s;
   }
   #login .pin-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -55,7 +55,7 @@
   #login .pin-btn.universal.active{background:var(--accent);color:#000}
   #login .member-btn{
     background:var(--bg);color:var(--text);border:1px solid var(--border);
-    padding:9px 8px;border-radius:5px;font-weight:600;font-size:12px;cursor:pointer;
+    padding:7px 8px;border-radius:5px;font-weight:600;font-size:11.5px;cursor:pointer;
     text-align:left;transition:all .12s;letter-spacing:.3px;
   }
   #login .member-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -493,333 +493,141 @@
   <button id="mirrorExit">Salir modo espejo</button>
 </div>
 
-<!-- ═══ FONDO TÁCTICO TECH · CSS PURO ═══ -->
+<!-- ═══ FONDO LOGIN · GLOBO TIERRA + SONAR ═══ -->
 <style>
-  #bgTech{
+  #bgScene{
     position:fixed;inset:0;z-index:4999;pointer-events:none;
     overflow:hidden;
-    background:
-      radial-gradient(ellipse at 30% 20%, rgba(20,60,80,.35) 0%, transparent 50%),
-      radial-gradient(ellipse at 70% 80%, rgba(80,50,20,.25) 0%, transparent 50%),
-      radial-gradient(ellipse at center, #0a1218 0%, #050810 60%, #000 100%);
+    background:radial-gradient(ellipse at center, #050a16 0%, #020408 60%, #000 100%);
   }
-  #bgTech.hidden{display:none}
-  /* Grilla táctica */
-  #bgTech .grid-tech{
+  #bgScene.hidden{display:none}
+  #earthCanvas{
     position:absolute;inset:0;
-    background-image:
-      linear-gradient(rgba(255,193,7,.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,193,7,.05) 1px, transparent 1px);
-    background-size:60px 60px;
-    mask-image:radial-gradient(ellipse at center, #000 30%, transparent 80%);
-    -webkit-mask-image:radial-gradient(ellipse at center, #000 30%, transparent 80%);
+    width:100%;height:100%;
+    z-index:1;pointer-events:none;
   }
-  /* Cuadrícula más fina secundaria */
-  #bgTech .grid-fine{
-    position:absolute;inset:0;
-    background-image:
-      linear-gradient(rgba(100,180,220,.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(100,180,220,.04) 1px, transparent 1px);
-    background-size:12px 12px;
-    opacity:.6;
-  }
-  /* Esfera tecnológica (anillos concéntricos rotando) */
-  #bgTech .sphere{
+  /* Sonar: anillos expansivos que salen desde el centro */
+  #bgScene .sonar{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:min(80vh, 90vw);height:min(80vh, 90vw);
-    pointer-events:none;
-  }
-  #bgTech .ring{
-    position:absolute;inset:0;border-radius:50%;
-    border:1px solid rgba(255,193,7,.12);
-  }
-  #bgTech .ring.r1{animation:ringSpin1 80s linear infinite}
-  #bgTech .ring.r2{inset:8%;border-color:rgba(100,180,220,.1);animation:ringSpin2 120s linear infinite reverse}
-  #bgTech .ring.r3{inset:16%;border-color:rgba(255,193,7,.08);border-style:dashed;animation:ringSpin1 200s linear infinite}
-  #bgTech .ring.r4{inset:24%;border-color:rgba(100,180,220,.08);animation:ringSpin2 60s linear infinite reverse}
-  #bgTech .ring.r5{inset:38%;border-color:rgba(255,193,7,.06);border-style:dotted}
-  #bgTech .ring.r6{inset:46%;border-color:rgba(100,180,220,.1)}
-  @keyframes ringSpin1{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  @keyframes ringSpin2{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  /* Marcadores de coordenadas en los anillos */
-  #bgTech .ring::before, #bgTech .ring::after{
-    content:'';position:absolute;width:6px;height:6px;border-radius:50%;
-    background:rgba(255,193,7,.5);box-shadow:0 0 10px rgba(255,193,7,.8);
-  }
-  #bgTech .ring.r1::before{top:-3px;left:50%;margin-left:-3px}
-  #bgTech .ring.r1::after{bottom:-3px;left:50%;margin-left:-3px;background:rgba(100,180,220,.5);box-shadow:0 0 10px rgba(100,180,220,.7)}
-  #bgTech .ring.r3::before{top:50%;left:-3px;margin-top:-3px}
-  #bgTech .ring.r3::after{top:50%;right:-3px;margin-top:-3px}
-  /* Radar sweep */
-  #bgTech .radar{
-    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:min(80vh, 90vw);height:min(80vh, 90vw);
+    width:min(70vh, 70vw);height:min(70vh, 70vw);
     border-radius:50%;
-    background:conic-gradient(from 0deg, transparent 0%, transparent 85%, rgba(255,193,7,.18) 95%, rgba(255,193,7,.35) 100%);
-    animation:radarSweep 6s linear infinite;
-    mask-image:radial-gradient(circle, #000 60%, transparent 100%);
-    -webkit-mask-image:radial-gradient(circle, #000 60%, transparent 100%);
+    border:1.5px solid rgba(100,180,220,.5);
+    opacity:0;
+    z-index:2;
+    animation:sonarPulse 4s ease-out infinite;
   }
-  @keyframes radarSweep{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
-  /* Cruz central */
-  #bgTech .crosshair{
-    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:40px;height:40px;
+  #bgScene .sonar.s2{animation-delay:1.3s}
+  #bgScene .sonar.s3{animation-delay:2.6s}
+  @keyframes sonarPulse{
+    0%{transform:translate(-50%,-50%) scale(.6);opacity:0;border-color:rgba(100,180,220,.7)}
+    20%{opacity:.8}
+    100%{transform:translate(-50%,-50%) scale(1.6);opacity:0;border-color:rgba(100,180,220,0)}
   }
-  #bgTech .crosshair::before, #bgTech .crosshair::after{
-    content:'';position:absolute;background:rgba(255,193,7,.3);
-  }
-  #bgTech .crosshair::before{left:50%;top:0;bottom:0;width:1px;margin-left:-.5px}
-  #bgTech .crosshair::after{top:50%;left:0;right:0;height:1px;margin-top:-.5px}
-  /* Esquinas tipo HUD */
-  #bgTech .corner{
-    position:absolute;width:80px;height:80px;
-    border:1px solid rgba(255,193,7,.25);
-  }
-  #bgTech .corner.tl{top:24px;left:24px;border-right:0;border-bottom:0}
-  #bgTech .corner.tr{top:24px;right:24px;border-left:0;border-bottom:0}
-  #bgTech .corner.bl{bottom:24px;left:24px;border-right:0;border-top:0}
-  #bgTech .corner.br{bottom:24px;right:24px;border-left:0;border-top:0}
-  /* Texto HUD esquinas */
-  #bgTech .hud-text{
-    position:absolute;font-family:var(--mono);font-size:10px;
-    color:rgba(255,193,7,.45);letter-spacing:1px;text-transform:uppercase;
-  }
-  #bgTech .hud-text.tl{top:36px;left:118px}
-  #bgTech .hud-text.tr{top:36px;right:118px;text-align:right}
-  #bgTech .hud-text.bl{bottom:36px;left:118px}
-  #bgTech .hud-text.br{bottom:36px;right:118px;text-align:right}
-  /* Scanline horizontal sutil */
-  #bgTech .scanline{
-    position:absolute;left:0;right:0;height:2px;
-    background:linear-gradient(90deg, transparent, rgba(100,180,220,.4), transparent);
-    box-shadow:0 0 15px rgba(100,180,220,.6);
-    animation:scanLine 8s linear infinite;
-  }
-  @keyframes scanLine{
-    0%{top:-2%;opacity:0}
-    5%{opacity:.8}
-    95%{opacity:.8}
-    100%{top:102%;opacity:0}
-  }
-  /* Puntos de datos pulsantes */
-  #bgTech .dot{
-    position:absolute;width:8px;height:8px;border-radius:50%;
-    background:rgba(255,193,7,.8);box-shadow:0 0 12px rgba(255,193,7,.9);
-    animation:dotPulse 2.5s ease-in-out infinite;
-  }
-  #bgTech .dot.d1{top:22%;left:28%;animation-delay:0s}
-  #bgTech .dot.d2{top:35%;right:18%;animation-delay:.6s;background:rgba(100,180,220,.8);box-shadow:0 0 12px rgba(100,180,220,.9)}
-  #bgTech .dot.d3{bottom:28%;left:22%;animation-delay:1.2s}
-  #bgTech .dot.d4{bottom:18%;right:30%;animation-delay:1.8s;background:rgba(100,180,220,.8);box-shadow:0 0 12px rgba(100,180,220,.9)}
-  #bgTech .dot.d5{top:52%;left:16%;animation-delay:.9s}
-  @keyframes dotPulse{
-    0%,100%{transform:scale(1);opacity:.9}
-    50%{transform:scale(1.6);opacity:.4}
-  }
-
-  /* === BLIPS TÁCTICOS (objetos detectados moviéndose) === */
-  #bgTech .blip{
-    position:absolute;top:0;left:0;
-    width:14px;height:14px;
-    transform:translate(-50%,-50%);
-    pointer-events:none;
-  }
-  /* Triángulo orientado (escuadrón aéreo) */
-  #bgTech .blip .icon{
-    width:0;height:0;
-    border-left:6px solid transparent;
-    border-right:6px solid transparent;
-    border-bottom:11px solid var(--blip-color, #ffc107);
-    filter:drop-shadow(0 0 6px var(--blip-color, #ffc107));
-    transform:rotate(var(--blip-rot, 0deg));
-    transform-origin:center;
-  }
-  /* Anillo de detección que rodea cada blip */
-  #bgTech .blip .ring-det{
-    position:absolute;left:50%;top:50%;
-    width:30px;height:30px;margin:-15px 0 0 -15px;
-    border:1px solid var(--blip-color, #ffc107);
-    border-radius:50%;opacity:.4;
-    animation:blipPulse 1.8s ease-out infinite;
-  }
-  @keyframes blipPulse{
-    0%{transform:scale(.6);opacity:.8}
-    100%{transform:scale(2);opacity:0}
-  }
-  /* Etiqueta con código del objeto */
-  #bgTech .blip .tag{
-    position:absolute;left:14px;top:-4px;white-space:nowrap;
-    font-family:var(--mono);font-size:9px;letter-spacing:1px;
-    color:var(--blip-color, #ffc107);text-shadow:0 0 6px rgba(0,0,0,.9);
-    background:rgba(0,0,0,.5);padding:1px 4px;border-radius:2px;
-    border-left:2px solid var(--blip-color, #ffc107);
-  }
-  /* Estela detrás (línea decreciente) */
-  #bgTech .blip .trail{
-    position:absolute;left:50%;top:50%;
-    width:60px;height:1px;margin-top:-.5px;transform-origin:left center;
-    background:linear-gradient(90deg, var(--blip-color, #ffc107), transparent);
-    opacity:.4;transform:rotate(calc(var(--blip-rot, 0deg) - 90deg));
-  }
-  /* Trayectorias predefinidas */
-  @keyframes flyTrack1{
-    0%{left:-5%;top:25%;--blip-rot:95deg}
-    50%{left:50%;top:30%;--blip-rot:90deg}
-    100%{left:105%;top:35%;--blip-rot:85deg}
-  }
-  @keyframes flyTrack2{
-    0%{left:105%;top:75%;--blip-rot:265deg}
-    50%{left:50%;top:70%;--blip-rot:270deg}
-    100%{left:-5%;top:68%;--blip-rot:275deg}
-  }
-  @keyframes flyTrack3{
-    0%{left:15%;top:-5%;--blip-rot:160deg}
-    100%{left:30%;top:105%;--blip-rot:175deg}
-  }
-  @keyframes flyTrack4{
-    0%{left:80%;top:105%;--blip-rot:340deg}
-    100%{left:70%;top:-5%;--blip-rot:355deg}
-  }
-  @keyframes flyTrack5{
-    0%{left:-5%;top:50%;--blip-rot:90deg}
-    100%{left:105%;top:55%;--blip-rot:85deg}
-  }
-  #bgTech .blip.b1{animation:flyTrack1 24s linear infinite;--blip-color:#ffc107}
-  #bgTech .blip.b2{animation:flyTrack2 32s linear infinite;animation-delay:-8s;--blip-color:#5cb8e6}
-  #bgTech .blip.b3{animation:flyTrack3 28s linear infinite;animation-delay:-12s;--blip-color:#ffc107}
-  #bgTech .blip.b4{animation:flyTrack4 36s linear infinite;animation-delay:-20s;--blip-color:#ff6b3d}
-  #bgTech .blip.b5{animation:flyTrack5 20s linear infinite;animation-delay:-5s;--blip-color:#5cb8e6}
-
-  /* Línea de vector predictivo (donde irá el objeto) */
-  #bgTech .vector-line{
-    position:absolute;height:1px;
-    background:linear-gradient(90deg, rgba(255,193,7,.3) 0%, transparent 100%);
-    transform-origin:left center;
-    opacity:.5;
-  }
-
-  /* Cuadro de detección apareciendo y desapareciendo */
-  #bgTech .detection-box{
-    position:absolute;border:1px solid rgba(255,107,61,.7);
-    box-shadow:0 0 10px rgba(255,107,61,.4), inset 0 0 10px rgba(255,107,61,.15);
-    animation:detectBox 4s ease-in-out infinite;
-  }
-  #bgTech .detection-box::before, #bgTech .detection-box::after,
-  #bgTech .detection-box .c3, #bgTech .detection-box .c4{
-    content:'';position:absolute;width:8px;height:8px;border:1px solid #ff6b3d;
-  }
-  #bgTech .detection-box::before{top:-2px;left:-2px;border-right:0;border-bottom:0}
-  #bgTech .detection-box::after{top:-2px;right:-2px;border-left:0;border-bottom:0}
-  #bgTech .detection-box .c3{bottom:-2px;left:-2px;border-right:0;border-top:0}
-  #bgTech .detection-box .c4{bottom:-2px;right:-2px;border-left:0;border-top:0}
-  #bgTech .detection-box .label{
-    position:absolute;top:-18px;left:0;font-family:var(--mono);font-size:9px;
-    color:#ff6b3d;letter-spacing:1px;text-shadow:0 0 4px rgba(0,0,0,.9);
-  }
-  @keyframes detectBox{
-    0%,100%{opacity:0;transform:scale(1.2)}
-    20%,80%{opacity:1;transform:scale(1)}
-  }
-  #bgTech .detection-box.db1{top:38%;right:18%;width:80px;height:60px;animation-delay:2s}
-  #bgTech .detection-box.db2{bottom:28%;left:22%;width:60px;height:50px;animation-delay:8s;animation-duration:5s}
-  #bgTech .detection-box.db3{top:18%;left:38%;width:100px;height:70px;animation-delay:14s;animation-duration:6s}
-
-  /* Login encima */
+  /* Login encima — bien transparente */
   #login{background:transparent !important}
   #login .box{
-    background:rgba(10, 14, 22, .82) !important;
-    backdrop-filter:blur(10px) saturate(140%);
-    -webkit-backdrop-filter:blur(10px) saturate(140%);
-    border:1px solid rgba(255,193,7,.15) !important;
+    background:rgba(8, 12, 20, .42) !important;
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    border:1px solid rgba(255,193,7,.18) !important;
     box-shadow:
       0 25px 70px rgba(0,0,0,.8),
-      0 0 60px rgba(255,193,7,.06),
-      inset 0 1px 0 rgba(255,255,255,.06);
-    /* Scrollbar discreta (Firefox) */
+      0 0 80px rgba(70,130,200,.12),
+      inset 0 1px 0 rgba(255,255,255,.08);
     scrollbar-width:thin;
     scrollbar-color:rgba(255,193,7,.3) rgba(255,255,255,.02);
   }
-  /* Scrollbar discreta (Chrome / Edge / Safari) */
   #login .box::-webkit-scrollbar{width:6px}
   #login .box::-webkit-scrollbar-track{background:rgba(255,255,255,.02);border-radius:3px}
-  #login .box::-webkit-scrollbar-thumb{
-    background:rgba(255,193,7,.3);border-radius:3px;
-  }
+  #login .box::-webkit-scrollbar-thumb{background:rgba(255,193,7,.3);border-radius:3px}
   #login .box::-webkit-scrollbar-thumb:hover{background:rgba(255,193,7,.55)}
 </style>
 
-<div id="bgTech">
-  <div class="grid-fine"></div>
-  <div class="grid-tech"></div>
-  <div class="radar"></div>
-  <div class="sphere">
-    <div class="ring r1"></div>
-    <div class="ring r2"></div>
-    <div class="ring r3"></div>
-    <div class="ring r4"></div>
-    <div class="ring r5"></div>
-    <div class="ring r6"></div>
-  </div>
-  <div class="crosshair"></div>
-  <div class="dot d1"></div>
-  <div class="dot d2"></div>
-  <div class="dot d3"></div>
-  <div class="dot d4"></div>
-  <div class="dot d5"></div>
-  <div class="scanline"></div>
-
-  <!-- Blips tácticos (objetos detectados moviéndose) -->
-  <div class="blip b1">
-    <div class="trail"></div>
-    <div class="ring-det"></div>
-    <div class="icon"></div>
-    <div class="tag">ESC-01 · 320kt</div>
-  </div>
-  <div class="blip b2">
-    <div class="trail"></div>
-    <div class="ring-det"></div>
-    <div class="icon"></div>
-    <div class="tag">UAV-44 · 180kt</div>
-  </div>
-  <div class="blip b3">
-    <div class="trail"></div>
-    <div class="ring-det"></div>
-    <div class="icon"></div>
-    <div class="tag">ESC-07 · 290kt</div>
-  </div>
-  <div class="blip b4">
-    <div class="trail"></div>
-    <div class="ring-det"></div>
-    <div class="icon"></div>
-    <div class="tag">DESCONOCIDO</div>
-  </div>
-  <div class="blip b5">
-    <div class="trail"></div>
-    <div class="ring-det"></div>
-    <div class="icon"></div>
-    <div class="tag">UAV-12 · 200kt</div>
-  </div>
-
-  <!-- Cuadros de detección de objetos en tierra -->
-  <div class="detection-box db1"><div class="c3"></div><div class="c4"></div><div class="label">OBJETO · 89%</div></div>
-  <div class="detection-box db2"><div class="c3"></div><div class="c4"></div><div class="label">MAQUINARIA · 76%</div></div>
-  <div class="detection-box db3"><div class="c3"></div><div class="c4"></div><div class="label">DEFORESTACIÓN</div></div>
-
-  <div class="corner tl"></div>
-  <div class="corner tr"></div>
-  <div class="corner bl"></div>
-  <div class="corner br"></div>
-  <div class="hud-text tl">SISTEMA · BRCMI v2.0</div>
-  <div class="hud-text tr">SATÉLITE · CONECTADO</div>
-  <div class="hud-text bl">LAT 04°35'N  LNG 074°04'W</div>
-  <div class="hud-text br">STATUS · OPERATIVO</div>
+<div id="bgScene">
+  <canvas id="earthCanvas"></canvas>
+  <div class="sonar"></div>
+  <div class="sonar s2"></div>
+  <div class="sonar s3"></div>
 </div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+(async function initEarth(){
+  const canvas = document.getElementById('earthCanvas');
+  if (!canvas) return;
+
+  const URL_EARTH = 'https://raw.githubusercontent.com/turban/webgl-earth/master/images/2_no_clouds_4k.jpg';
+  const URL_CLOUDS = 'https://raw.githubusercontent.com/turban/webgl-earth/master/images/fair_clouds_4k.png';
+  const URL_BUMP = 'https://raw.githubusercontent.com/turban/webgl-earth/master/images/elev_bump_4k.jpg';
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
+  camera.position.z = 3.2;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  function resize(){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  resize();
+
+  scene.add(new THREE.AmbientLight(0x334466, 0.6));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.7);
+  sun.position.set(5, 2, 4);
+  scene.add(sun);
+
+  const loader = new THREE.TextureLoader();
+  loader.crossOrigin = 'anonymous';
+  const loadTex = url => new Promise((res, rej) => loader.load(url, res, undefined, rej));
+
+  let earthTex, cloudsTex, bumpTex;
+  try {
+    [earthTex, cloudsTex, bumpTex] = await Promise.all([loadTex(URL_EARTH), loadTex(URL_CLOUDS), loadTex(URL_BUMP)]);
+  } catch(e) { console.warn('Texturas Tierra no cargaron:', e); return; }
+
+  const earth = new THREE.Mesh(
+    new THREE.SphereGeometry(1, 64, 64),
+    new THREE.MeshPhongMaterial({
+      map: earthTex, bumpMap: bumpTex, bumpScale: 0.015,
+      specular: new THREE.Color(0x223344), shininess: 14
+    })
+  );
+  const clouds = new THREE.Mesh(
+    new THREE.SphereGeometry(1.012, 64, 64),
+    new THREE.MeshPhongMaterial({ map: cloudsTex, transparent:true, opacity:0.55, depthWrite:false })
+  );
+  const atmo = new THREE.Mesh(
+    new THREE.SphereGeometry(1.3, 64, 64),
+    new THREE.ShaderMaterial({
+      vertexShader: `varying vec3 vN; void main(){ vN = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+      fragmentShader: `varying vec3 vN; void main(){ float i = pow(0.75 - dot(vN, vec3(0.,0.,1.)), 2.2); gl_FragColor = vec4(0.4,0.7,1.0,1.0) * i; }`,
+      blending: THREE.AdditiveBlending, side: THREE.BackSide, transparent: true, depthWrite: false
+    })
+  );
+  earth.rotation.z = 0.41; clouds.rotation.z = 0.41;
+  earth.rotation.y = -1.3; clouds.rotation.y = -1.3;
+  scene.add(earth); scene.add(clouds); scene.add(atmo);
+
+  const clock = new THREE.Clock();
+  (function loop(){
+    const dt = clock.getDelta();
+    earth.rotation.y += dt * 0.04;
+    clouds.rotation.y += dt * 0.052;
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  })();
+
+  window.addEventListener('resize', resize);
+})();
+</script>
 
 <script>
 (function(){
   const login = document.getElementById('login');
-  const bg = document.getElementById('bgTech');
+  const bg = document.getElementById('bgScene');
   if (login && bg) {
     const obs = new MutationObserver(() => {
       if (login.style.display === 'none' || !login.offsetParent) {
@@ -835,9 +643,9 @@
 <div id="login">
   <div class="box">
     <h1><span class="accent">◆</span> GEO-CONSULTA · BRCMI</h1>
-    <div class="sub">Identifíquese para iniciar la sesión<br><span style="color:var(--accent);font-size:11px;line-height:1.4;display:inline-block;margin-top:4px">Esta plataforma funciona exclusivamente para el territorio colombiano. Compruebe esto permitiendo el acceso a su ubicación.</span></div>
+    <div class="sub">Identifíquese para iniciar la sesión<br><span style="color:var(--accent);font-size:10px;line-height:1.3;display:inline-block;margin-top:2px">Esta plataforma funciona exclusivamente para el territorio colombiano. Compruebe esto permitiendo el acceso a su ubicación.</span></div>
     <label>Equipo</label>
-    <div id="teamButtons" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px">
+    <div id="teamButtons" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:2px">
       <button type="button" class="team-btn" data-team="EE1">EE1</button>
       <button type="button" class="team-btn" data-team="EE2">EE2</button>
       <button type="button" class="team-btn" data-team="EE3">EE3</button>
@@ -845,31 +653,32 @@
 
     <div id="staffFields" style="display:none">
       <label>Integrante</label>
-      <div id="memberGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px"></div>
+      <div id="memberGrid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:2px"></div>
       <div id="pinSection" style="display:none">
-        <label style="margin-top:14px">PIN personal</label>
-        <div id="pinGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px"></div>
+        <label style="margin-top:8px">PIN personal</label>
+        <div id="pinGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:2px"></div>
       </div>
     </div>
 
-    <div id="specialUserSection" style="margin-top:18px;padding-top:14px;border-top:1px dashed var(--border)">
-      <button type="button" id="toggleSpecial" style="width:100%;background:transparent;color:var(--accent);border:1px dashed var(--accent);padding:9px;border-radius:6px;font-size:11px;cursor:pointer;letter-spacing:.8px;font-weight:600;transition:all .2s">
-        ✦ Soy un usuario especial →
-      </button>
-      <div id="guestFields" style="display:none;margin-top:10px">
-        <label for="loginGuestCode" style="color:var(--accent)">Código de acceso privilegiado</label>
+    <div id="specialUserSection" style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <button type="button" id="toggleSpecial" style="background:transparent;color:var(--accent);border:1px dashed var(--accent);padding:7px 6px;border-radius:6px;font-size:10.5px;cursor:pointer;letter-spacing:.5px;font-weight:600;transition:all .2s;margin:0">
+          ✦ Usuario especial
+        </button>
+        <button type="button" id="toggleBackup" style="background:transparent;color:var(--muted);border:1px dashed var(--border);padding:7px 6px;border-radius:6px;font-size:10.5px;cursor:pointer;letter-spacing:.5px;margin:0">
+          Acceso respaldo
+        </button>
+      </div>
+      <div id="guestFields" style="display:none;margin-top:8px">
+        <label for="loginGuestCode" style="color:var(--accent);margin-top:0">Código de acceso privilegiado</label>
         <input type="text" id="loginGuestCode" maxlength="10" autocomplete="off" placeholder=""
           class="guest-code-input"
-          style="width:100%;background:linear-gradient(180deg, rgba(212,160,23,.08), rgba(212,160,23,.02));color:var(--accent);border:1.5px solid var(--accent);border-radius:6px;padding:14px 12px;font-size:16px;font-family:var(--mono);letter-spacing:4px;text-align:center;text-transform:uppercase;font-weight:700;box-shadow:0 0 18px rgba(212,160,23,.25), inset 0 0 12px rgba(212,160,23,.06)">
+          style="width:100%;background:linear-gradient(180deg, rgba(212,160,23,.08), rgba(212,160,23,.02));color:var(--accent);border:1.5px solid var(--accent);border-radius:6px;padding:11px 12px;font-size:15px;font-family:var(--mono);letter-spacing:4px;text-align:center;text-transform:uppercase;font-weight:700;box-shadow:0 0 18px rgba(212,160,23,.25), inset 0 0 12px rgba(212,160,23,.06)">
       </div>
-
-      <button type="button" id="toggleBackup" style="width:100%;background:transparent;color:var(--muted);border:1px dashed var(--border);padding:8px;border-radius:6px;font-size:11px;cursor:pointer;letter-spacing:.5px;margin-top:8px">
-        Acceso de respaldo →
-      </button>
-      <div id="backupFields" style="display:none;margin-top:10px">
-        <label for="loginBackupCode" style="color:var(--muted)">Código de respaldo</label>
+      <div id="backupFields" style="display:none;margin-top:8px">
+        <label for="loginBackupCode" style="color:var(--muted);margin-top:0">Código de respaldo</label>
         <input type="password" id="loginBackupCode" maxlength="10" autocomplete="off" placeholder=""
-          style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:14px;font-family:var(--mono);letter-spacing:6px;text-align:center;font-weight:700">
+          style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:9px 12px;font-size:14px;font-family:var(--mono);letter-spacing:6px;text-align:center;font-weight:700">
       </div>
     </div>
     <button id="loginBtn" disabled>Ingresar</button>
