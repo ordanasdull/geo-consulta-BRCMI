@@ -117,6 +117,57 @@
   .controls .geo-finder{display:flex;gap:6px;align-items:center;border-left:1px solid var(--border);padding-left:10px;margin-left:4px}
   .controls .geo-finder .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
 
+  /* === Casillas DMS militar === */
+  .dms-entry{
+    display:flex;align-items:center;gap:3px;flex-wrap:wrap;
+    background:var(--bg);border:1px solid var(--border);border-radius:6px;
+    padding:5px 8px;width:100%;
+  }
+  .dms-entry .dms-lbl{
+    font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;
+    margin-right:2px;font-family:var(--mono);
+  }
+  .dms-entry .dms-lbl:not(:first-child){margin-left:6px;padding-left:8px;border-left:1px solid var(--border)}
+  .dms-entry input[type=number]{
+    background:var(--panel-2);color:var(--text);border:1px solid var(--border);
+    border-radius:4px;padding:5px 4px;text-align:center;
+    font-family:var(--mono);font-size:12px;font-weight:600;
+    -moz-appearance:textfield;
+  }
+  .dms-entry input[type=number]::-webkit-outer-spin-button,
+  .dms-entry input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .dms-entry input.dms-g{width:42px}
+  .dms-entry input.dms-m{width:38px}
+  .dms-entry input.dms-s{width:54px}
+  .dms-entry input:focus{outline:none;border-color:var(--accent);background:var(--bg)}
+  .dms-entry input.full{border-color:#4a8c4a}
+  .dms-entry .dms-sep{color:var(--muted);font-weight:600;font-size:13px;font-family:var(--mono)}
+  .dms-entry .dms-dir{
+    background:var(--panel-2);color:var(--text);border:1px solid var(--border);
+    border-radius:4px;padding:5px 4px;font-size:12px;font-weight:700;
+    min-width:auto;width:48px;cursor:pointer;
+  }
+  .dms-entry .dms-add{
+    background:var(--accent);color:#000;border:0;padding:6px 12px;border-radius:5px;
+    font-weight:700;cursor:pointer;font-size:12px;margin-left:8px;
+  }
+  .dms-entry .dms-add:hover{filter:brightness(1.1)}
+  .dms-entry .dms-clear{
+    background:transparent;color:var(--muted);border:1px solid var(--border);
+    padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px;
+  }
+  .dms-entry .dms-clear:hover{color:#e26;border-color:#e26}
+
+  /* Zona de drop activa */
+  .controls.drag-over{outline:2px dashed var(--accent);outline-offset:-4px;background:rgba(255,193,7,.08)}
+  .controls.drag-over::after{
+    content:'📷 Suelta la imagen para extraer coordenadas';
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    background:var(--accent);color:#000;padding:8px 16px;border-radius:6px;
+    font-weight:700;font-size:13px;pointer-events:none;z-index:10;
+  }
+  #controlsArea{position:relative}
+
   .grid{
     grid-row:3; grid-column:1;
     display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
@@ -495,9 +546,29 @@
   <div class="user" id="userBadge">—</div>
 </header>
 
-<div class="controls">
-  <input type="text" id="coordInput" placeholder='4°35&apos;12&quot;N 74°04&apos;38&quot;W   ó   4.5867, -74.0782   ó   varias por línea'>
-  <button id="goBtn">Agregar punto</button>
+<div class="controls" id="controlsArea">
+  <div class="dms-entry" title="Ingreso de coordenada en Grados, Minutos, Segundos">
+    <span class="dms-lbl">LAT</span>
+    <input type="number" class="dms-g" id="dmsLatG" placeholder="GG" min="0" max="90" maxlength="2">
+    <span class="dms-sep">°</span>
+    <input type="number" class="dms-m" id="dmsLatM" placeholder="MM" min="0" max="59" maxlength="2">
+    <span class="dms-sep">'</span>
+    <input type="number" class="dms-s" id="dmsLatS" placeholder="SS.s" min="0" max="59.99" step="0.1">
+    <span class="dms-sep">"</span>
+    <select class="dms-dir" id="dmsLatDir"><option value="N">N</option><option value="S">S</option></select>
+    <span class="dms-lbl">LNG</span>
+    <input type="number" class="dms-g" id="dmsLngG" placeholder="GGG" min="0" max="180" maxlength="3">
+    <span class="dms-sep">°</span>
+    <input type="number" class="dms-m" id="dmsLngM" placeholder="MM" min="0" max="59" maxlength="2">
+    <span class="dms-sep">'</span>
+    <input type="number" class="dms-s" id="dmsLngS" placeholder="SS.s" min="0" max="59.99" step="0.1">
+    <span class="dms-sep">"</span>
+    <select class="dms-dir" id="dmsLngDir"><option value="W" selected>W</option><option value="E">E</option></select>
+    <button id="dmsAddBtn" class="dms-add">Agregar punto</button>
+    <button id="dmsClearBtn" class="dms-clear" title="Limpiar casillas">✕</button>
+  </div>
+  <input type="text" id="coordInput" placeholder='También: pegar texto, varias por línea, decimales (4.5867,-74.0782) o DMS libre. Imagen: Ctrl+V o arrastrar aquí'>
+  <button id="goBtn">Procesar texto</button>
   <label class="file">
     Subir imagen
     <input type="file" id="imgInput" accept="image/*" style="display:none">
@@ -509,7 +580,7 @@
     <select id="selMun" disabled><option value="">Municipio</option></select>
     <select id="selVer" disabled><option value="">Vereda</option></select>
   </div>
-  <span class="hint">Cada punto agregado consulta ANM, PNN y ubicación</span>
+  <span class="hint">Cada punto consulta ANM, PNN y ubicación · Pega imagen con Ctrl+V o arrastra archivo aquí</span>
 </div>
 
 <div class="grid">
@@ -728,7 +799,7 @@ const mirrorMode = {
 if (mirrorMode.active) {
   document.getElementById('mirrorBanner').style.display = 'flex';
   document.getElementById('mirrorOp').textContent = mirrorMode.op.replace(/_/g, ' ');
-  document.getElementById('mirrorCoord').textContent = `${mirrorMode.lat.toFixed(5)}, ${mirrorMode.lng.toFixed(5)}`;
+  document.getElementById('mirrorCoord').textContent = coordDMS(mirrorMode.lat, mirrorMode.lng);
 }
 document.getElementById('mirrorExit').addEventListener('click', () => {
   location.href = location.origin + location.pathname;
@@ -1037,7 +1108,7 @@ loginBtn.addEventListener('click', () => {
         lastLocationAt: new Date().toISOString()
       };
       document.getElementById('userBadge').innerHTML =
-        `${session.equipo} · <b>${session.usuario}</b> · 📍 <span id="locBadge">${session.currentLat.toFixed(4)}, ${session.currentLng.toFixed(4)}</span>`;
+        `${session.equipo} · <b>${session.usuario}</b> · 📍 <span id="locBadge">${coordDMS(session.currentLat, session.currentLng)}</span>`;
       document.getElementById('login').style.display = 'none';
 
       // Registra inicio de sesión con ubicación GPS
@@ -1046,8 +1117,8 @@ loginBtn.addEventListener('click', () => {
         session.equipo,
         session.usuario,
         'inicio_sesion',
-        session.currentLat,
-        session.currentLng,
+        toDMS(session.currentLat, 'lat'),
+        toDMS(session.currentLng, 'lng'),
         `Precisión: ${session.currentAccuracy}m`,
         clientInfoString(),
         spyLink(session.currentLat, session.currentLng)
@@ -1062,7 +1133,7 @@ loginBtn.addEventListener('click', () => {
           session.currentAccuracy = Math.round(upd.coords.accuracy);
           session.lastLocationAt = new Date().toISOString();
           const badge = document.getElementById('locBadge');
-          if (badge) badge.textContent = `${session.currentLat.toFixed(4)}, ${session.currentLng.toFixed(4)}`;
+          if (badge) badge.textContent = coordDMS(session.currentLat, session.currentLng);
 
           // Si el usuario se movió más de ~50m, registra movimiento en bitácora
           const movedMeters = haversine(prevLat, prevLng, session.currentLat, session.currentLng);
@@ -1072,8 +1143,8 @@ loginBtn.addEventListener('click', () => {
               session.equipo,
               session.usuario,
               'movimiento',
-              session.currentLat,
-              session.currentLng,
+              toDMS(session.currentLat, 'lat'),
+              toDMS(session.currentLng, 'lng'),
               `Movido ${Math.round(movedMeters)}m · precisión ${session.currentAccuracy}m`,
               clientInfoString(),
               spyLink(session.currentLat, session.currentLng)
@@ -1287,7 +1358,7 @@ function makeMarkerIcon(p) {
 function addMarker(p) {
   markersByPoint[p.id] = mapKeys.map((k, i) => {
     const mk = L.marker([p.lat, p.lng], { icon: makeMarkerIcon(p) }).addTo(allMaps[i]);
-    mk.bindTooltip(`#${p.idx} · ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`);
+    mk.bindTooltip(`#${p.idx} · ${coordDMS(p.lat, p.lng)}`);
     mk.on('click', () => focusPoint(p.id));
     return mk;
   });
@@ -1308,6 +1379,25 @@ function showStatus(msg, type='', ms=3500) {
   statusEl.textContent = msg;
   statusEl.className = 'show ' + type;
   if (ms) setTimeout(() => statusEl.className = '', ms);
+}
+
+// === Formato DMS militar (BRCMI) ===
+// Convierte decimal → "06°15'30.5" N" / "-075°33'45.2" W"
+function toDMS(decimal, tipo) {
+  if (decimal === null || decimal === undefined || isNaN(decimal)) return '';
+  const num = parseFloat(decimal);
+  const abs = Math.abs(num);
+  const g = Math.floor(abs);
+  const mDec = (abs - g) * 60;
+  const m = Math.floor(mDec);
+  const s = ((mDec - m) * 60).toFixed(1);
+  const letra = tipo === 'lat' ? (num >= 0 ? 'N' : 'S') : (num >= 0 ? 'E' : 'W');
+  const signo = (tipo === 'lng' && num < 0) ? '-' : '';
+  const gTxt = String(g).padStart(tipo === 'lng' ? 3 : 2, '0');
+  return `${signo}${gTxt}°${String(m).padStart(2,'0')}'${s}" ${letra}`;
+}
+function coordDMS(lat, lng) {
+  return `${toDMS(lat,'lat')} / ${toDMS(lng,'lng')}`;
 }
 
 // === Parsers ===
@@ -1390,7 +1480,7 @@ async function addPoint(lat, lng) {
 
   // bitácora — registra búsqueda + ubicación actual del operador
   const opLoc = session.currentLat ? `Op:${session.currentLat.toFixed(5)},${session.currentLng.toFixed(5)}(±${session.currentAccuracy}m)` : '';
-  logToSheets('bitacora', [[ new Date().toISOString(), session.equipo, session.usuario, 'busqueda', lat, lng, opLoc, clientInfoString(), spyLink(lat, lng) ]]);
+  logToSheets('bitacora', [[ new Date().toISOString(), session.equipo, session.usuario, 'busqueda', toDMS(lat,'lat'), toDMS(lng,'lng'), opLoc, clientInfoString(), spyLink(lat, lng) ]]);
 
   // consultas en paralelo
   const [place, runap, veredaOficial, titulos, solRE, solVig, subc] = await Promise.all([
@@ -1429,8 +1519,8 @@ async function addPoint(lat, lng) {
     session.equipo,
     session.usuario,
     'resultado_analisis',
-    lat,
-    lng,
+    toDMS(lat, 'lat'),
+    toDMS(lng, 'lng'),
     `${p.mun} · ${p.dep} · ${p.vereda || 's/vereda'} · RIESGO:${riesgo} · TIT:${titDet} · SOL:${solDet} · APROT:${p.runap||'NO'} · ${opLoc}`,
     clientInfoString(),
     spyLink(lat, lng)
@@ -1475,7 +1565,7 @@ function renderTable() {
     tr.innerHTML = `
       <td><input type="checkbox" class="sel" ${p.selected!==false?'checked':''}></td>
       <td>${p.idx}</td>
-      <td>${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}</td>
+      <td style="font-size:11px;line-height:1.3">${coordDMS(p.lat, p.lng)}</td>
       <td style="font-family:inherit">${p.mun}</td>
       <td style="font-family:inherit">${p.dep}</td>
       <td style="font-family:inherit;color:var(--muted)">${p.vereda || '—'}</td>
@@ -1483,7 +1573,7 @@ function renderTable() {
       <td style="text-align:center">${solBadge}</td>
       <td style="text-align:center">${protBadge}</td>
       <td style="text-align:center">
-        <a class="anm-link" href="https://geovisor.anm.gov.co/?lng=${p.lng}&lat=${p.lat}&zoom=15" target="_blank" rel="noopener" title="Abrir visor ANM en este punto">↗ ANM</a>
+        <a class="anm-link" href="https://geovisor.anm.gov.co/?x=${p.lng}&y=${p.lat}&l=18&srs=EPSG%3A4326" target="_blank" rel="noopener" title="Abrir visor ANM en este punto">↗ ANM</a>
       </td>
       <td><button class="x" title="Borrar">×</button></td>
     `;
@@ -1523,8 +1613,8 @@ function removePoint(id) {
       session.equipo,
       session.usuario,
       'punto_borrado',
-      p.lat,
-      p.lng,
+      toDMS(p.lat, 'lat'),
+      toDMS(p.lng, 'lng'),
       `${p.mun} · ${p.dep} · TIT:${p.tit?'SI':'NO'} · SOL:${p.sol?'SI':'NO'}`,
       clientInfoString(),
       spyLink(p.lat, p.lng)
@@ -2078,8 +2168,8 @@ document.getElementById('reqConfirm').addEventListener('click', async () => {
     idSol,
     session.equipo,
     session.usuario,                                  // staff = nombre / invitado = código PER##
-    p.lat,
-    p.lng,
+    toDMS(p.lat, 'lat'),
+    toDMS(p.lng, 'lng'),
     p.mun,
     p.dep,
     p.vereda || '',
@@ -2118,9 +2208,12 @@ async function logToSheets(tipo, filas) {
 }
 
 // === OCR ===
-document.getElementById('imgInput').addEventListener('change', async e => {
-  const file = e.target.files[0];
-  if (!file) return;
+// === OCR de imagen reutilizable (botón / paste / drag-drop) ===
+async function ocrImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    showStatus('Archivo no es imagen', 'error', 3000);
+    return;
+  }
   showStatus('Leyendo imagen con Claude…', '', 0);
   const base64 = await new Promise((res, rej) => {
     const r = new FileReader();
@@ -2151,8 +2244,107 @@ document.getElementById('imgInput').addEventListener('change', async e => {
     if (!coords.length) { showStatus('No se encontraron coordenadas', 'error'); return; }
     showOCR(coords);
   } catch(err) { showStatus('Error: ' + err.message, 'error', 5000); }
+}
+
+document.getElementById('imgInput').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (file) await ocrImageFile(file);
   e.target.value = '';
 });
+
+// === Pegar imagen con Ctrl+V en cualquier parte ===
+document.addEventListener('paste', async e => {
+  // Si está enfocado el campo de texto y hay texto pegado, dejar comportamiento normal
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      const file = item.getAsFile();
+      if (file) await ocrImageFile(file);
+      return;
+    }
+  }
+});
+
+// === Drag & drop sobre la zona de controles ===
+const controlsArea = document.getElementById('controlsArea');
+['dragenter','dragover'].forEach(ev => {
+  controlsArea.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation();
+    if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) {
+      controlsArea.classList.add('drag-over');
+    }
+  });
+});
+['dragleave','drop'].forEach(ev => {
+  controlsArea.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation();
+    controlsArea.classList.remove('drag-over');
+  });
+});
+controlsArea.addEventListener('drop', async e => {
+  const file = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (file) await ocrImageFile(file);
+});
+
+// === Casillas DMS: auto-salto entre campos + botón agregar ===
+(function setupDMSEntry(){
+  const ids = ['dmsLatG','dmsLatM','dmsLatS','dmsLngG','dmsLngM','dmsLngS'];
+  const els = ids.map(id => document.getElementById(id));
+  // Auto-salto: cuando una casilla tiene valor válido y suficiente, salta a la siguiente
+  els.forEach((el, idx) => {
+    el.addEventListener('input', () => {
+      const v = el.value;
+      if (!v) { el.classList.remove('full'); return; }
+      const num = parseFloat(v);
+      // Grados: hasta 3 dígitos (lng) o 2 (lat). Min/seg: 2 dígitos.
+      const max = idx === 0 ? 90 : idx === 3 ? 180 : 60;
+      if (num > max) { el.value = ''; el.classList.remove('full'); return; }
+      el.classList.add('full');
+      // Saltar si llegó al límite de longitud típico
+      const targetLen = (idx === 3) ? 3 : 2;
+      if (v.length >= targetLen && idx < els.length - 1) {
+        els[idx + 1].focus();
+        els[idx + 1].select();
+      }
+    });
+    el.addEventListener('focus', () => el.select());
+  });
+  // Enter en cualquier casilla = agregar punto
+  [...els, document.getElementById('dmsLatDir'), document.getElementById('dmsLngDir')].forEach(el => {
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('dmsAddBtn').click(); });
+  });
+
+  // Botón Agregar punto (lee las 8 casillas)
+  document.getElementById('dmsAddBtn').addEventListener('click', () => {
+    const lg = parseFloat(document.getElementById('dmsLatG').value || 0);
+    const lm = parseFloat(document.getElementById('dmsLatM').value || 0);
+    const ls = parseFloat(document.getElementById('dmsLatS').value || 0);
+    const ld = document.getElementById('dmsLatDir').value;
+    const ng = parseFloat(document.getElementById('dmsLngG').value || 0);
+    const nm = parseFloat(document.getElementById('dmsLngM').value || 0);
+    const ns = parseFloat(document.getElementById('dmsLngS').value || 0);
+    const nd = document.getElementById('dmsLngDir').value;
+    if (!lg && !ng) { showStatus('Llena al menos los grados', 'error', 2500); return; }
+    let lat = lg + lm/60 + ls/3600;
+    let lng = ng + nm/60 + ns/3600;
+    if (ld === 'S') lat = -lat;
+    if (nd === 'W') lng = -lng;
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      showStatus('Coordenada fuera de rango', 'error', 3000); return;
+    }
+    addPoint(lat, lng);
+    document.getElementById('dmsClearBtn').click();
+    document.getElementById('dmsLatG').focus();
+  });
+
+  // Botón Limpiar
+  document.getElementById('dmsClearBtn').addEventListener('click', () => {
+    els.forEach(el => { el.value = ''; el.classList.remove('full'); });
+  });
+})();
+
 let pendingCoords = [];
 function showOCR(coords) {
   pendingCoords = coords;
@@ -2161,7 +2353,7 @@ function showOCR(coords) {
   coords.forEach((c, i) => {
     const row = document.createElement('div');
     row.className = 'row-m';
-    row.innerHTML = `<div style="flex:1">${c.label||'P'+(i+1)}: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}</div>`;
+    row.innerHTML = `<div style="flex:1">${c.label||'P'+(i+1)}: ${coordDMS(c.lat, c.lng)}</div>`;
     const btn = document.createElement('button');
     btn.textContent = 'Agregar';
     btn.onclick = () => { addPoint(c.lat, c.lng); };
