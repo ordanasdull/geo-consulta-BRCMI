@@ -493,6 +493,263 @@
   <button id="mirrorExit">Salir modo espejo</button>
 </div>
 
+<!-- ═══ FONDO LOGIN · SOBRIO MODERNO (CSS PURO) ═══ -->
+<style>
+  #bgModern{
+    position:fixed;inset:0;z-index:4999;pointer-events:none;
+    overflow:hidden;
+    background:#06080d;
+  }
+  #bgModern.hidden{display:none}
+  /* Manchas de luz tipo aurora moviéndose lentamente */
+  #bgModern .aurora{
+    position:absolute;border-radius:50%;
+    filter:blur(80px);opacity:.55;
+    will-change:transform;
+  }
+  #bgModern .a1{
+    width:55vw;height:55vw;left:-15vw;top:-15vw;
+    background:radial-gradient(circle, #1a4d6b 0%, transparent 70%);
+    animation:auroraDrift1 28s ease-in-out infinite alternate;
+  }
+  #bgModern .a2{
+    width:50vw;height:50vw;right:-12vw;top:30%;
+    background:radial-gradient(circle, #6b4a1a 0%, transparent 70%);
+    animation:auroraDrift2 34s ease-in-out infinite alternate;
+    opacity:.4;
+  }
+  #bgModern .a3{
+    width:45vw;height:45vw;left:25%;bottom:-15vw;
+    background:radial-gradient(circle, #2a3a5c 0%, transparent 70%);
+    animation:auroraDrift3 24s ease-in-out infinite alternate;
+  }
+  @keyframes auroraDrift1{
+    from{transform:translate(0,0) scale(1)}
+    to{transform:translate(15vw,10vh) scale(1.15)}
+  }
+  @keyframes auroraDrift2{
+    from{transform:translate(0,0) scale(1.1)}
+    to{transform:translate(-12vw,-8vh) scale(.95)}
+  }
+  @keyframes auroraDrift3{
+    from{transform:translate(0,0) scale(.95)}
+    to{transform:translate(8vw,-10vh) scale(1.2)}
+  }
+  /* Grilla sutil que "respira" */
+  #bgModern .grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size:50px 50px;
+    mask-image:radial-gradient(ellipse at center, #000 30%, transparent 75%);
+    -webkit-mask-image:radial-gradient(ellipse at center, #000 30%, transparent 75%);
+    animation:gridBreath 8s ease-in-out infinite;
+  }
+  @keyframes gridBreath{
+    0%,100%{opacity:.5}
+    50%{opacity:.9}
+  }
+  /* Línea horizontal que cruza muy lento */
+  #bgModern .hline{
+    position:absolute;left:0;right:0;height:1px;top:50%;
+    background:linear-gradient(90deg, transparent, rgba(212,160,23,.4) 30%, rgba(212,160,23,.6) 50%, rgba(212,160,23,.4) 70%, transparent);
+    animation:hlineMove 16s ease-in-out infinite;
+    box-shadow:0 0 18px rgba(212,160,23,.25);
+  }
+  @keyframes hlineMove{
+    0%,100%{top:30%;opacity:.6}
+    50%{top:70%;opacity:1}
+  }
+  /* Línea vertical que cruza */
+  #bgModern .vline{
+    position:absolute;top:0;bottom:0;width:1px;left:50%;
+    background:linear-gradient(180deg, transparent, rgba(100,170,220,.25) 40%, rgba(100,170,220,.4) 50%, rgba(100,170,220,.25) 60%, transparent);
+    animation:vlineMove 22s ease-in-out infinite;
+  }
+  @keyframes vlineMove{
+    0%,100%{left:25%;opacity:.5}
+    50%{left:75%;opacity:.9}
+  }
+  /* Partículas flotando */
+  #bgModern .particle{
+    position:absolute;width:2px;height:2px;border-radius:50%;
+    background:rgba(255,255,255,.4);
+    box-shadow:0 0 6px rgba(255,255,255,.3);
+    animation:floatUp linear infinite;
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(0) translateX(0);opacity:0}
+    10%{opacity:.8}
+    90%{opacity:.5}
+    100%{transform:translateY(-105vh) translateX(40px);opacity:0}
+  }
+  #bgModern .p1{left:8%;bottom:-5px;animation-duration:25s;animation-delay:0s}
+  #bgModern .p2{left:22%;bottom:-5px;animation-duration:32s;animation-delay:3s;width:1.5px;height:1.5px}
+  #bgModern .p3{left:38%;bottom:-5px;animation-duration:28s;animation-delay:7s}
+  #bgModern .p4{left:55%;bottom:-5px;animation-duration:35s;animation-delay:12s;width:2.5px;height:2.5px;background:rgba(212,160,23,.5)}
+  #bgModern .p5{left:72%;bottom:-5px;animation-duration:30s;animation-delay:5s}
+  #bgModern .p6{left:88%;bottom:-5px;animation-duration:27s;animation-delay:15s;background:rgba(100,170,220,.5)}
+  #bgModern .p7{left:15%;bottom:-5px;animation-duration:38s;animation-delay:18s;width:1.5px;height:1.5px}
+  #bgModern .p8{left:45%;bottom:-5px;animation-duration:33s;animation-delay:10s}
+  #bgModern .p9{left:62%;bottom:-5px;animation-duration:29s;animation-delay:20s;width:1.5px;height:1.5px;background:rgba(212,160,23,.5)}
+  #bgModern .p10{left:80%;bottom:-5px;animation-duration:36s;animation-delay:2s}
+  /* Esquinas decorativas finas */
+  #bgModern .corner{
+    position:absolute;width:50px;height:50px;
+    border:1px solid rgba(255,255,255,.08);
+  }
+  #bgModern .corner.tl{top:32px;left:32px;border-right:0;border-bottom:0}
+  #bgModern .corner.tr{top:32px;right:32px;border-left:0;border-bottom:0}
+  #bgModern .corner.bl{bottom:32px;left:32px;border-right:0;border-top:0}
+  #bgModern .corner.br{bottom:32px;right:32px;border-left:0;border-top:0}
+  /* Texto de marca discreto en esquina */
+  #bgModern .brand{
+    position:absolute;bottom:36px;right:90px;
+    font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.25);
+    letter-spacing:3px;text-transform:uppercase;
+  }
+  #bgModern .brand .dot{
+    display:inline-block;width:5px;height:5px;border-radius:50%;
+    background:rgba(212,160,23,.7);margin-right:6px;
+    animation:brandPulse 2s ease-in-out infinite;
+    vertical-align:middle;
+  }
+  @keyframes brandPulse{
+    0%,100%{opacity:.7;transform:scale(1)}
+    50%{opacity:1;transform:scale(1.3);box-shadow:0 0 8px rgba(212,160,23,.6)}
+  }
+  /* Mapa de Colombia vectorizado */
+  #bgModern .colombia-map{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(128vh, 90vw);height:min(128vh, 90vw);
+    opacity:.85;
+    filter:drop-shadow(0 0 40px rgba(212,160,23,.18));
+    animation:mapFloat 12s ease-in-out infinite;
+  }
+  @keyframes mapFloat{
+    0%,100%{transform:translate(-50%,-50%) scale(1)}
+    50%{transform:translate(-50%,-50%) scale(1.02)}
+  }
+  /* Cuadro de login con vidrio elegante */
+  #login{background:transparent !important}
+  #login .box{
+    background:rgba(10, 14, 20, .01) !important;
+    backdrop-filter:blur(2px);
+    -webkit-backdrop-filter:blur(2px);
+    border:1px solid rgba(255,255,255,.12) !important;
+    box-shadow:
+      0 30px 80px rgba(0,0,0,.4),
+      inset 0 1px 0 rgba(255,255,255,.05);
+    scrollbar-width:thin;
+    scrollbar-color:rgba(212,160,23,.3) rgba(255,255,255,.02);
+  }
+  #login .box::-webkit-scrollbar{width:5px}
+  #login .box::-webkit-scrollbar-track{background:rgba(255,255,255,.02);border-radius:3px}
+  #login .box::-webkit-scrollbar-thumb{background:rgba(212,160,23,.3);border-radius:3px}
+  #login .box::-webkit-scrollbar-thumb:hover{background:rgba(212,160,23,.55)}
+</style>
+
+<div id="bgModern">
+  <div class="aurora a1"></div>
+  <div class="aurora a2"></div>
+  <div class="aurora a3"></div>
+  <div class="grid"></div>
+  <div class="hline"></div>
+  <div class="vline"></div>
+  <div class="particle p1"></div>
+  <div class="particle p2"></div>
+  <div class="particle p3"></div>
+  <div class="particle p4"></div>
+  <div class="particle p5"></div>
+  <div class="particle p6"></div>
+  <div class="particle p7"></div>
+  <div class="particle p8"></div>
+  <div class="particle p9"></div>
+  <div class="particle p10"></div>
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+  <div class="brand"><span class="dot"></span>SISTEMA ACTIVO</div>
+
+  <!-- Mapa de Colombia vectorizado (contorno real - Natural Earth) -->
+  <svg class="colombia-map" viewBox="-83 -13.5 17 19" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="colombiaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="rgba(212,160,23,.08)"/>
+        <stop offset="100%" stop-color="rgba(100,170,220,.05)"/>
+      </linearGradient>
+    </defs>
+    <!-- Colombia continental -->
+    <path d="M-78.83,-1.43L-78.86,-1.56L-79.02,-1.64L-78.85,-1.82L-78.57,-1.78L-78.55,-1.91L-78.61,-2.03L-78.67,-1.98L-78.70,-2.19L-78.57,-2.43L-78.56,-2.38L-78.35,-2.65L-78.25,-2.54L-78.25,-2.66L-78.13,-2.49L-78.10,-2.65L-77.76,-2.59L-77.81,-2.76L-77.69,-2.79L-77.72,-2.84L-77.64,-2.87L-77.71,-2.92L-77.62,-2.93L-77.63,-2.99L-77.72,-2.98L-77.48,-3.23L-77.54,-3.25L-77.46,-3.36L-77.32,-3.32L-77.33,-3.51L-77.26,-3.47L-77.32,-3.55L-77.12,-3.68L-77.20,-3.74L-77.13,-3.73L-77.15,-3.81L-77.03,-3.92L-77.25,-3.84L-77.30,-3.97L-77.21,-3.98L-77.19,-4.07L-77.26,-4.11L-77.35,-3.93L-77.44,-4.03L-77.43,-4.18L-77.24,-4.27L-77.39,-4.35L-77.31,-4.47L-77.33,-4.75L-77.26,-4.70L-77.35,-4.85L-77.38,-5.40L-77.56,-5.50L-77.25,-5.73L-77.48,-6.19L-77.48,-6.29L-77.42,-6.24L-77.38,-6.30L-77.35,-6.57L-77.41,-6.69L-77.54,-6.66L-77.59,-6.83L-77.70,-6.85L-77.67,-7.02L-77.90,-7.24L-77.82,-7.48L-77.73,-7.53L-77.76,-7.71L-77.58,-7.53L-77.34,-7.71L-77.38,-7.77L-77.30,-7.90L-77.16,-7.94L-77.49,-8.47L-77.43,-8.63L-77.35,-8.67L-77.27,-8.50L-76.96,-8.27L-76.94,-8.13L-76.83,-8.14L-76.91,-7.93L-76.76,-7.92L-76.77,-8.42L-76.95,-8.55L-76.32,-8.95L-76.17,-9.25L-75.94,-9.44L-75.81,-9.39L-75.62,-9.45L-75.58,-9.62L-75.71,-9.70L-75.53,-10.24L-75.70,-10.13L-75.52,-10.32L-75.58,-10.40L-75.50,-10.49L-75.49,-10.43L-75.49,-10.50L-75.52,-10.58L-75.25,-10.71L-75.27,-10.80L-74.84,-11.11L-74.30,-10.99L-74.49,-10.98L-74.48,-10.85L-74.60,-10.87L-74.60,-10.78L-74.56,-10.83L-74.54,-10.76L-74.50,-10.76L-74.51,-10.84L-74.40,-10.75L-74.15,-11.34L-73.29,-11.29L-72.74,-11.71L-72.26,-11.89L-72.14,-12.26L-71.97,-12.26L-72.02,-12.19L-71.94,-12.17L-71.87,-12.26L-71.96,-12.28L-71.73,-12.41L-71.69,-12.37L-71.63,-12.43L-71.74,-12.42L-71.68,-12.47L-71.26,-12.34L-71.11,-12.09L-71.14,-12.02L-71.41,-11.81L-71.99,-11.65L-72.27,-11.15L-72.50,-11.12L-72.68,-10.86L-72.91,-10.43L-72.99,-9.81L-73.39,-9.17L-73.21,-9.17L-73.01,-9.30L-72.96,-9.10L-72.79,-9.11L-72.68,-8.65L-72.39,-8.36L-72.34,-8.10L-72.49,-7.94L-72.48,-7.48L-72.21,-7.38L-72.10,-7.09L-71.99,-7.01L-71.62,-7.05L-71.18,-6.96L-70.70,-7.10L-70.32,-6.94L-70.13,-6.97L-69.44,-6.12L-69.33,-6.16L-69.25,-6.08L-69.06,-6.22L-68.64,-6.14L-67.98,-6.22L-67.83,-6.31L-67.45,-6.20L-67.49,-6.11L-67.42,-5.98L-67.63,-5.78L-67.62,-5.54L-67.83,-5.34L-67.79,-5.06L-67.88,-4.53L-67.63,-3.76L-67.50,-3.72L-67.31,-3.38L-67.84,-2.89L-67.86,-2.79L-67.63,-2.81L-67.58,-2.69L-67.19,-2.39L-67.22,-2.27L-66.88,-1.35L-66.88,-1.22L-67.09,-1.18L-67.12,-1.71L-67.42,-2.14L-67.93,-1.74L-68.19,-2.01L-68.28,-1.83L-68.16,-1.72L-69.54,-1.77L-69.86,-1.71L-69.85,-1.06L-69.29,-1.04L-69.15,-0.87L-69.14,-0.65L-69.30,-0.62L-69.48,-0.73L-70.05,-0.59L-70.07,0.16L-69.62,0.52L-69.63,0.73L-69.40,1.18L-69.96,4.24L-70.31,3.83L-70.49,3.88L-70.73,3.78L-70.05,2.72L-70.11,2.63L-70.15,2.67L-70.58,2.41L-70.65,2.45L-70.90,2.21L-71.42,2.38L-71.46,2.26L-71.50,2.32L-71.54,2.22L-71.75,2.13L-71.95,2.32L-72.18,2.41L-72.38,2.45L-72.64,2.33L-72.71,2.42L-72.73,2.37L-72.94,2.43L-73.20,2.21L-73.11,2.07L-73.19,1.79L-73.35,1.79L-73.53,1.67L-73.50,1.48L-73.64,1.26L-73.86,1.21L-74.08,0.99L-74.27,0.97L-74.42,0.54L-74.64,0.34L-74.79,0.31L-74.82,0.17L-74.93,0.21L-75.14,0.04L-75.28,0.11L-75.63,-0.08L-75.79,-0.08L-76.05,-0.36L-76.30,-0.46L-76.42,-0.40L-76.41,-0.25L-76.57,-0.22L-77.40,-0.39L-77.47,-0.65L-77.65,-0.72L-77.70,-0.84L-77.85,-0.81L-78.12,-0.92L-78.83,-1.43Z"
+      fill="url(#colombiaGrad)"
+      stroke="rgba(255,255,255,.65)"
+      stroke-width="0.08"
+      stroke-linejoin="round"/>
+    <!-- San Andrés -->
+    <path d="M-81.71,-12.52L-81.72,-12.54L-81.72,-12.56L-81.69,-12.59L-81.69,-12.58L-81.70,-12.50L-81.72,-12.50L-81.72,-12.51L-81.71,-12.52Z"
+      fill="rgba(212,160,23,.15)" stroke="rgba(212,160,23,.7)" stroke-width="0.04"/>
+    <!-- Providencia -->
+    <path d="M-81.38,-13.32L-81.39,-13.34L-81.38,-13.36L-81.37,-13.37L-81.35,-13.37L-81.35,-13.35L-81.35,-13.33L-81.38,-13.32Z"
+      fill="rgba(212,160,23,.15)" stroke="rgba(212,160,23,.7)" stroke-width="0.04"/>
+    <!-- Malpelo -->
+    <path d="M-81.61,-3.96L-81.62,-3.96L-81.61,-3.97L-81.60,-3.98L-81.60,-3.99L-81.58,-3.99L-81.58,-3.98L-81.59,-3.97L-81.59,-3.97L-81.61,-3.96L-81.61,-3.96Z"
+      fill="rgba(212,160,23,.15)" stroke="rgba(212,160,23,.7)" stroke-width="0.04"/>
+    <!-- Recuadritos alrededor de las islas para llamar la atención -->
+    <rect x="-81.85" y="-12.75" width="0.4" height="0.55" fill="none" stroke="rgba(212,160,23,.3)" stroke-width="0.03" stroke-dasharray="0.1,0.06"/>
+    <rect x="-81.5" y="-13.5" width="0.3" height="0.4" fill="none" stroke="rgba(212,160,23,.3)" stroke-width="0.03" stroke-dasharray="0.1,0.06"/>
+    <rect x="-81.75" y="-4.1" width="0.3" height="0.3" fill="none" stroke="rgba(212,160,23,.3)" stroke-width="0.03" stroke-dasharray="0.1,0.06"/>
+    <!-- Etiquetas islas -->
+    <text x="-81.65" y="-12.15" fill="rgba(212,160,23,.6)" font-size="0.22" font-family="monospace">SAN ANDRÉS</text>
+    <text x="-81.35" y="-12.95" fill="rgba(212,160,23,.6)" font-size="0.22" font-family="monospace">PROVIDENCIA</text>
+    <text x="-81.6" y="-3.7" fill="rgba(212,160,23,.6)" font-size="0.18" font-family="monospace">MALPELO</text>
+    <!-- Punto Bogotá pulsante -->
+    <circle cx="-74.08" cy="-4.7" r="0.1" fill="rgba(212,160,23,.95)">
+      <animate attributeName="r" values="0.1;0.22;0.1" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;.4;1" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="-74.08" cy="-4.7" r="0.25" fill="none" stroke="rgba(212,160,23,.7)" stroke-width="0.04">
+      <animate attributeName="r" values="0.1;0.6;0.1" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values=".8;0;.8" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Otras ciudades -->
+    <circle cx="-75.57" cy="-6.25" r="0.07" fill="rgba(100,170,220,.8)">
+      <animate attributeName="opacity" values=".8;.2;.8" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="-74.8" cy="-10.96" r="0.07" fill="rgba(100,170,220,.8)">
+      <animate attributeName="opacity" values=".8;.2;.8" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="-76.53" cy="-3.45" r="0.07" fill="rgba(100,170,220,.8)">
+      <animate attributeName="opacity" values=".8;.2;.8" dur="2.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="-72.5" cy="-0.5" r="0.07" fill="rgba(100,170,220,.8)">
+      <animate attributeName="opacity" values=".8;.2;.8" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="-67.5" cy="-6.2" r="0.07" fill="rgba(100,170,220,.8)">
+      <animate attributeName="opacity" values=".8;.2;.8" dur="3.3s" repeatCount="indefinite"/>
+    </circle>
+  </svg>
+</div>
+
+<script>
+(function(){
+  const login = document.getElementById('login');
+  const bg = document.getElementById('bgModern');
+  const btn = document.getElementById('loginBtn');
+  if (btn && bg) {
+    btn.addEventListener('click', () => setTimeout(() => bg.classList.add('hidden'), 300), { once:true });
+  }
+  if (login && bg) {
+    setInterval(() => {
+      if (!login || login.style.display === 'none' || login.offsetHeight === 0) {
+        bg.classList.add('hidden');
+      }
+    }, 2000);
+  }
+})();
+</script>
+
 <!-- LOGIN -->
 <div id="login">
   <div class="box">
