@@ -2240,22 +2240,16 @@ async function ocrImageFile(file) {
     r.readAsDataURL(file);
   });
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: file.type, data: base64 } },
-            { type: 'text', text: 'Extrae TODAS las coordenadas geográficas. Devuelve SOLO un JSON array sin markdown: [{"lat": 4.5867, "lng": -74.0782, "label":"P1"}]. Convierte DMS a decimales. En Colombia lat entre -4 y 13, lng entre -79 y -66 (siempre negativa). Si nada, [].' }
-          ]
-        }]
+        image: base64,
+        mediaType: file.type
       })
     });
     const data = await resp.json();
+    if (data.error) { showStatus('Error: ' + data.error, 'error', 5000); return; }
     const txt = data.content.map(c => c.text || '').join('').replace(/```json|```/g, '').trim();
     const coords = JSON.parse(txt);
     statusEl.className = '';
