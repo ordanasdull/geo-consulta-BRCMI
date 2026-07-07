@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Geo-Consulta · BRCMI</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
 <style>
   :root{
     --bg:#0e1116;
@@ -324,6 +323,31 @@
   aside.side .tool-result.ok{color:var(--accent-2);border-color:rgba(63,185,80,.3)}
   aside.side .tool-result:empty{display:none}
 
+  /* Autocompletado de municipios en la sección de rutas */
+  aside.side .autocomplete-wrap { position: relative; }
+  aside.side .autocomplete-list {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--panel); border: 1px solid var(--border); border-top: 0;
+    border-radius: 0 0 5px 5px; max-height: 200px; overflow-y: auto;
+    z-index: 4000; display: none; margin-top: -4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.4);
+  }
+  aside.side .autocomplete-list.show { display: block; }
+  aside.side .autocomplete-item {
+    padding: 7px 10px; font-size: 11px; cursor: pointer; border-bottom: 1px solid var(--border);
+    line-height: 1.3; color: var(--text);
+  }
+  aside.side .autocomplete-item:last-child { border-bottom: 0; }
+  aside.side .autocomplete-item:hover,
+  aside.side .autocomplete-item.active {
+    background: rgba(212,160,23,.15); color: var(--accent);
+  }
+  aside.side .autocomplete-item .main { font-weight: 600; }
+  aside.side .autocomplete-item .sub { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+  aside.side .autocomplete-loading {
+    padding: 8px 10px; font-size: 10px; color: var(--muted); font-style: italic; text-align: center;
+  }
+
   /* Marcador de posición en vivo del operador */
   .live-marker {
     width:22px;height:22px;position:relative;
@@ -428,6 +452,22 @@
   #restoreHidden:hover { background: var(--accent); color: #000 }
   #restoreHidden.show { display: block }
 
+  /* OpenTopoMap: mezcla con multiply para que las líneas de vías/curvas
+     se vean sobre el satélite sin ocultar el fondo. */
+  .topo-blend { mix-blend-mode: multiply; filter: contrast(1.15) saturate(1.3); }
+
+  /* Banner flotante mientras se mide */
+  .measure-banner {
+    position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+    background: rgba(212,160,23,.97); color:#000; padding: 10px 22px; border-radius: 6px;
+    font-weight: 700; font-size: 13px; letter-spacing: .3px; z-index: 5500;
+    box-shadow: 0 4px 18px rgba(0,0,0,.5); pointer-events: none;
+    animation: measure-banner-in .25s ease-out;
+  }
+  @keyframes measure-banner-in {
+    from { opacity: 0; transform: translate(-50%, -12px); }
+    to { opacity: 1; transform: translateX(-50%); }
+  }
   /* Tooltip permanente de mediciones */
   .measure-tooltip {
     background: rgba(212,160,23,.95); color:#000; border:0; font-weight:700;
@@ -655,9 +695,12 @@
     </div>
     <div class="toggles">
       <label><input type="checkbox" data-layer="anmTit" data-map="anm" checked> Títulos y Solicitudes</label>
-      <label><input type="checkbox" data-layer="hidroIdeam" data-map="anm"> Red hídrica (IDEAM)</label>
+      <label><input type="checkbox" data-layer="hidroIdeam" data-map="anm"> Red hídrica (ríos)</label>
       <label><input type="checkbox" data-layer="rfLey2" data-map="anm"> Reserva Forestal Ley 2ª</label>
-      <label><input type="checkbox" data-layer="vias" data-map="anm"> Vías y trochas</label>
+      <label><input type="checkbox" data-layer="viasInvias" data-map="anm"> Vías INVIAS oficial</label>
+      <label><input type="checkbox" data-layer="viasAni" data-map="anm"> Concesiones ANI</label>
+      <label><input type="checkbox" data-layer="vias" data-map="anm"> Vías + terreno (topo)</label>
+      <label><input type="checkbox" data-layer="trochas" data-map="anm"> Trochas y senderos</label>
       <label><input type="checkbox" data-layer="runap" data-map="anm"> Áreas protegidas</label>
     </div>
     <div id="map1" class="map"></div>
@@ -666,6 +709,12 @@
   <div class="map-cell">
     <div class="map-label"><span class="dot" style="background:#4285f4"></span> Google · Satélite</div>
     <div class="toggles">
+      <label><input type="checkbox" data-layer="hidroIdeam" data-map="google"> Red hídrica</label>
+      <label><input type="checkbox" data-layer="rfLey2" data-map="google"> RF Ley 2ª</label>
+      <label><input type="checkbox" data-layer="viasInvias" data-map="google"> INVIAS oficial</label>
+      <label><input type="checkbox" data-layer="viasAni" data-map="google"> Concesiones ANI</label>
+      <label><input type="checkbox" data-layer="vias" data-map="google"> Vías + terreno</label>
+      <label><input type="checkbox" data-layer="trochas" data-map="google"> Trochas</label>
       <label><input type="checkbox" data-layer="runap" data-map="google"> Áreas protegidas</label>
       <label><input type="checkbox" data-layer="labels" data-map="google" checked> Etiquetas</label>
     </div>
@@ -676,6 +725,8 @@
     <div class="map-label"><span class="dot" style="background:var(--accent-2)"></span> Deforestación · GFW</div>
     <div class="toggles">
       <label><input type="checkbox" data-layer="treeloss" data-map="gfw" checked> Pérdida cobertura</label>
+      <label><input type="checkbox" data-layer="hidroIdeam" data-map="gfw"> Red hídrica</label>
+      <label><input type="checkbox" data-layer="rfLey2" data-map="gfw"> RF Ley 2ª</label>
       <label><input type="checkbox" data-layer="runap" data-map="gfw"> Áreas protegidas</label>
     </div>
     <div id="map3" class="map"></div>
@@ -687,7 +738,10 @@
       <label><input type="checkbox" data-layer="anmTit" data-map="esri"> Catastro</label>
       <label><input type="checkbox" data-layer="hidroIdeam" data-map="esri"> Red hídrica</label>
       <label><input type="checkbox" data-layer="rfLey2" data-map="esri"> RF Ley 2ª</label>
-      <label><input type="checkbox" data-layer="vias" data-map="esri"> Vías</label>
+      <label><input type="checkbox" data-layer="viasInvias" data-map="esri"> INVIAS</label>
+      <label><input type="checkbox" data-layer="viasAni" data-map="esri"> ANI</label>
+      <label><input type="checkbox" data-layer="vias" data-map="esri"> Vías + terreno</label>
+      <label><input type="checkbox" data-layer="trochas" data-map="esri"> Trochas</label>
     </div>
     <div id="map4" class="map"></div>
     <div class="map-ctrls"><button class="map-hide" data-cell="3" title="Ocultar mapa">✕</button><button class="map-maximize" data-cell="3" title="Maximizar / Restaurar">⛶</button></div>
@@ -721,17 +775,23 @@
 
   <div class="group">
     <h3>📏 Medir en mapa</h3>
-    <button id="measureDistBtn" class="tool-btn" title="Medir distancia entre 2 o más puntos">📐 Distancia</button>
-    <button id="measureAreaBtn" class="tool-btn" title="Medir área de un polígono">⬡ Área</button>
+    <button id="measureDistBtn" class="tool-btn" title="Medir distancia con múltiples puntos">📐 Medir distancia</button>
+    <button id="measureAreaBtn" class="tool-btn" title="Medir área de un polígono">⬡ Medir área</button>
     <button id="measureClearBtn" class="tool-btn danger-btn">🗑 Borrar mediciones</button>
     <div id="measureResult" class="tool-result"></div>
-    <div class="hint-side">Clic para agregar vértices · doble clic para terminar · arrastre vértices para ajustar</div>
+    <div class="hint-side">Clic en el mapa para agregar puntos · doble clic para terminar · ESC cancela</div>
   </div>
 
   <div class="group">
     <h3>🛣 Rutas entre municipios</h3>
-    <input type="text" id="routeFromInp" class="tool-inp" placeholder="Origen (municipio, depto)" autocomplete="off">
-    <input type="text" id="routeToInp" class="tool-inp" placeholder="Destino (municipio, depto)" autocomplete="off">
+    <div class="autocomplete-wrap">
+      <input type="text" id="routeFromInp" class="tool-inp" placeholder="Origen (ej: quibdo, choco)" autocomplete="off" spellcheck="false">
+      <div class="autocomplete-list" id="routeFromSug"></div>
+    </div>
+    <div class="autocomplete-wrap">
+      <input type="text" id="routeToInp" class="tool-inp" placeholder="Destino (ej: medellin)" autocomplete="off" spellcheck="false">
+      <div class="autocomplete-list" id="routeToSug"></div>
+    </div>
     <button id="routeBtn" class="tool-btn primary-btn">🧭 Calcular ruta</button>
     <button id="routeClearBtn" class="tool-btn danger-btn">✕ Limpiar</button>
     <div id="routeResult" class="tool-result"></div>
@@ -744,6 +804,23 @@
     <button id="myLocClearBtn" class="tool-btn danger-btn">✕ Quitar</button>
     <div id="myLocStatus" class="tool-result"></div>
     <div class="hint-side">Si tienes GPS encendido, muestra dónde estás en los 4 mapas. Pulsa de nuevo para refrescar.</div>
+  </div>
+
+  <div class="group">
+    <h3>🛣 Red vial FULL</h3>
+    <button id="viasFullOn" class="tool-btn primary-btn">✓ Activar TODAS las capas viales</button>
+    <button id="viasFullOff" class="tool-btn danger-btn">✕ Apagar todas</button>
+    <div class="hint-side">Enciende INVIAS oficial + ANI + OpenTopoMap + CyclOSM en los 4 mapas simultáneamente. Máxima cobertura de carreteras, secundarias, terciarias, trochas y senderos.</div>
+  </div>
+
+  <div class="group">
+    <h3>🔍 Verificar en fuente oficial</h3>
+    <button id="verifyANM" class="tool-btn">Catastro ANM</button>
+    <button id="verifyRunap" class="tool-btn">RUNAP · Parques Nacionales</button>
+    <button id="verifyRF" class="tool-btn">Reserva Forestal · SIAC</button>
+    <button id="verifyIGAC" class="tool-btn">Cartografía IGAC</button>
+    <button id="verifyOSM" class="tool-btn">OpenStreetMap (vías/trochas)</button>
+    <div class="hint-side">Abre el visor oficial de cada institución centrado en el último punto o la vista actual, para comparar y verificar.</div>
   </div>
 
   <div class="group">
@@ -833,7 +910,6 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 <script>
 /* ============================================================
    GEO-CONSULTA v3 — BRCMI
@@ -1400,30 +1476,55 @@ function makeArcGISLayer(baseUrl, layerIds, opacity=0.6) {
 const layerDefs = {
   // capas 1,2,3,4 = Solicitud Reserva Especial, Solicitud Vigente, Subcontrato, Título Vigente
   anmTit: () => makeANMLayer('1,2,3,4'),
-  // RED HIDROGRÁFICA OFICIAL — Drenajes dobles y sencillos del IGAC (1:100.000)
-  // publicados por IDEAM en su servicio de Cartografía Básica.
-  hidroIdeam: () => L.tileLayer.wms('http://dhime.ideam.gov.co/server/services/Cartografia_Basica/Hidrografia/MapServer/WMSServer', {
-    layers: '0,1,2,3',
-    format: 'image/png',
-    transparent: true,
-    version: '1.3.0',
-    opacity: 0.85,
-    attribution: '© IDEAM · IGAC'
-  }),
-  // RESERVA FORESTAL LEY 2ª de 1959 — MinAmbiente/SIAC (7 áreas nacionales).
-  // Servicio ArcGIS REST oficial del CVC (réplica de la capa MADS).
-  rfLey2: () => makeArcGISLayer(
-    'https://geo.cvc.gov.co/arcgis/rest/services/BIODIVERSIDAD/Areas_Reserva_Forestal_Ley_2_de_1959/MapServer/export',
-    '1', 0.55
+  // RED HIDROGRÁFICA — Esri World Hydro Reference Overlay.
+  // Ríos principales, quebradas grandes y cuerpos de agua hasta z15.
+  // Global, HTTPS, siempre disponible.
+  hidroIdeam: () => L.tileLayer(
+    'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Hydro_Reference_Overlay/MapServer/tile/{z}/{y}/{x}',
+    { maxZoom: 15, opacity: 0.9, attribution: '© Esri World Hydro' }
   ),
-  // VÍAS Y TROCHAS — Red vial de OpenStreetMap (la más actualizada de Colombia,
-  // incluye trochas rurales que INVÍAS no reporta). Estilo "Voyager" resalta vías.
-  vias: () => L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    opacity: 0.75,
-    attribution: '© OpenStreetMap · Carto'
-  }),
-  runap: () => L.tileLayer('https://mapas.parquesnacionales.gov.co/arcgis/rest/services/pnn/runap/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.55 }),
+  // RESERVA FORESTAL LEY 2ª de 1959 — IGAC (ambiente/reservasforestalesley2da).
+  rfLey2: () => makeArcGISLayer(
+    'https://mapas.igac.gov.co/server/rest/services/ambiente/reservasforestalesley2da/MapServer/export',
+    '0', 0.55
+  ),
+  // ============================================================
+  // STACK DE VÍAS Y CARRETERAS DE COLOMBIA — todas las fuentes.
+  // Se pueden activar simultáneamente para máxima cobertura:
+  //   * INVIAS oficial: primarias, secundarias, concesiones ANI
+  //   * ANI: concesiones viales bajo Agencia Nacional de Infraestructura
+  //   * OpenTopoMap: vías + relieve + trochas mapeadas en OSM
+  //   * CyclOSM Lite: overlay de trochas, senderos y caminos rurales
+  // ============================================================
+
+  // INVIAS oficial — Red Vial Nacional (INVIAS + ANI + PVR secundarias).
+  // Fuente: hermes.invias.gov.co ArcGIS. Actualización institucional periódica.
+  // Layer 5 = red vial completa con simbología oficial.
+  viasInvias: () => makeArcGISLayer(
+    'https://hermes.invias.gov.co/arcgis/rest/services/Mapa_Carreteras/Mapa_de_Carreteras/MapServer/export',
+    '5,6,7,1,2,3,4', 0.9
+  ),
+  // ANI — Concesiones viales de la Agencia Nacional de Infraestructura.
+  // Complementa INVIAS con datos de carreteras concesionadas 4G/5G.
+  viasAni: () => makeArcGISLayer(
+    'https://sig.ani.gov.co/arcgis/rest/services/Mapa_de_Referencia/Red_Nacional_de_Carreteras/MapServer/export',
+    '0', 0.85
+  ),
+  // OpenTopoMap — Mapa topográfico global con vías, caminos rurales y relieve.
+  // Aplicado con blend multiply para verse sobre satélite sin ocultarlo.
+  vias: () => L.tileLayer(
+    'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    { maxZoom: 17, opacity: 0.7, subdomains: 'abc', className: 'topo-blend',
+      attribution: '© OpenTopoMap · OSM' }
+  ),
+  // CyclOSM Lite — Overlay especializado en trochas, senderos, ciclovías y caminos.
+  // Transparente por diseño. Actualización semi-live desde OSM.
+  trochas: () => L.tileLayer(
+    'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm-lite/{z}/{x}/{y}.png',
+    { maxZoom: 18, opacity: 0.85, subdomains: 'abc',
+      attribution: '© CyclOSM · OSM-FR' }
+  ),
+  runap: () => L.tileLayer('https://mapas.parquesnacionales.gov.co/arcgis/rest/services/pnn/runap/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.6 }),
   treeloss: () => L.tileLayer('https://tiles.globalforestwatch.org/umd_tree_cover_loss/v1.10/tcd_30/{z}/{x}/{y}.png', { maxZoom: 12, opacity: 0.85 }),
   labels: () => L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png', { maxZoom: 19, opacity: 0.9 })
 };
@@ -1474,7 +1575,7 @@ function syncFrom(src) {
 }
 allMaps.forEach(m => {
   m.on('move zoom', () => syncFrom(m));
-  m.on('click', e => addPoint(e.latlng.lat, e.latlng.lng));
+  m.on('click', e => { if (!window.measuringActive) addPoint(e.latlng.lat, e.latlng.lng); });
 });
 
 // === ESTADO: lista de puntos ===
@@ -1725,17 +1826,17 @@ async function queryANMByLayer(lat, lng, layerId) {
   } catch(e) { return []; }
 }
 
-// Consulta Reserva Forestal Ley 2ª de 1959 — MinAmbiente/SIAC (vía servicio CVC).
-// Devuelve nombre de la reserva (Pacífico, Central, Río Magdalena, Sierra Nevada,
-// Cocuc, Amazonía, Serranía de los Motilones) si el punto cae dentro.
+// Consulta Reserva Forestal Ley 2ª de 1959 — servicio ArcGIS del IGAC (ambiente).
+// Devuelve nombre de la reserva si el punto cae dentro de alguna de las 7 zonas
+// (Pacífico, Central, Río Magdalena, Sierra Nevada, Motilones, Cocuy, Amazonía).
 async function queryRFLey2(lat, lng) {
   try {
-    const url = `https://geo.cvc.gov.co/arcgis/rest/services/BIODIVERSIDAD/Areas_Reserva_Forestal_Ley_2_de_1959/MapServer/1/query?geometry=${lng},${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json`;
+    const url = `https://mapas.igac.gov.co/server/rest/services/ambiente/reservasforestalesley2da/MapServer/0/query?geometry=${lng},${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json`;
     const r = await fetch(url);
     const d = await r.json();
     if (d.features && d.features.length) {
       const a = d.features[0].attributes;
-      return a.RES_ZONI || a.NOMBRE || a.nombre || 'Reserva Forestal Ley 2ª';
+      return a.NOMBRE || a.nombre || a.RES_ZONI || a.TIPO_ZONI || 'Reserva Forestal Ley 2ª';
     }
     return null;
   } catch(e) { return null; }
@@ -2166,7 +2267,7 @@ function makeIGACVeredasLayer() {
       this._map = map;
       this._img = L.DomUtil.create('img', 'leaflet-image-layer');
       this._img.style.position = 'absolute';
-      this._img.style.opacity = '0.7';
+      this._img.style.opacity = '0.9';
       this._img.style.pointerEvents = 'none';
       map.getPanes().overlayPane.appendChild(this._img);
       map.on('moveend zoomend', this._update, this);
@@ -2183,7 +2284,7 @@ function makeIGACVeredasLayer() {
       const size = map.getSize();
       const sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
       const bbox = `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`;
-      const url = `https://mapas.igac.gov.co/server/rest/services/limites/veredascolombia/MapServer/export?bbox=${bbox}&bboxSR=4326&imageSR=4326&size=${size.x},${size.y}&transparent=true&format=png32&f=image`;
+      const url = `https://mapas.igac.gov.co/server/rest/services/limites/veredascolombia/MapServer/export?bbox=${bbox}&bboxSR=4326&imageSR=4326&size=${size.x},${size.y}&layers=show:0&transparent=true&format=png32&dpi=96&f=image`;
       this._img.src = url;
       const nw = map.latLngToLayerPoint(bounds.getNorthWest());
       this._img.style.left = nw.x + 'px';
@@ -2660,12 +2761,18 @@ document.getElementById('modalAll').onclick = () => {
 };
 
 // ============================================================
-// HERRAMIENTAS DE MEDICIÓN (distancia / área) — Leaflet.draw
-// Se dibujan en el mapa ANM (principal). El resultado se muestra en el panel lateral.
+// HERRAMIENTAS DE MEDICIÓN — implementación propia clara.
+// Se dibuja sobre el mapa ANM (mapa principal). Un banner en la parte
+// superior guía al usuario paso a paso.
 // ============================================================
 const measureGroup = new L.FeatureGroup();
 maps.anm.addLayer(measureGroup);
-let activeDrawHandler = null;
+
+let measureMode = null;       // 'line' | 'area' | null
+let measureVertices = [];     // latlngs del trazo actual
+let measureTempLine = null;   // polyline en construcción
+let measureVertexDots = [];   // marcadores de vértices durante el trazo
+let measureBanner = null;
 
 function haversineKm(a, b) {
   const R = 6371, toRad = d => d * Math.PI / 180;
@@ -2679,7 +2786,6 @@ function polylineLengthKm(latlngs) {
   return d;
 }
 function polygonAreaHa(latlngs) {
-  // Fórmula del pentágono esférico simplificada (buena aprox. para escalas <100 km)
   const R = 6378137;
   let area = 0;
   const pts = latlngs.map(ll => [ll.lng * Math.PI/180, ll.lat * Math.PI/180]);
@@ -2687,8 +2793,7 @@ function polygonAreaHa(latlngs) {
     const [x1, y1] = pts[i], [x2, y2] = pts[(i+1) % pts.length];
     area += (x2 - x1) * (2 + Math.sin(y1) + Math.sin(y2));
   }
-  area = Math.abs(area * R * R / 2);
-  return area / 10000; // m² → ha
+  return Math.abs(area * R * R / 2) / 10000;
 }
 function fmtDistance(km) {
   if (km < 1) return `${(km*1000).toFixed(0)} m`;
@@ -2704,58 +2809,139 @@ function showMeasureResult(text, cls='') {
   el.className = 'tool-result ' + cls;
   el.innerHTML = text;
 }
-function updateMeasureLabel(layer) {
-  const ll = layer.getLatLngs ? layer.getLatLngs() : [];
-  const flat = Array.isArray(ll[0]) ? ll[0] : ll;
-  if (layer instanceof L.Polygon) {
-    const km = polylineLengthKm([...flat, flat[0]]);
-    const ha = polygonAreaHa(flat);
-    layer.bindTooltip(`⬡ ${fmtArea(ha)}<br>Perímetro: ${fmtDistance(km)}`, { permanent:true, direction:'center', className:'measure-tooltip' }).openTooltip();
-    showMeasureResult(`Área: <b>${fmtArea(ha)}</b><br>Perímetro: <b>${fmtDistance(km)}</b><br>Vértices: ${flat.length}`, 'ok');
-  } else if (layer instanceof L.Polyline) {
-    const km = polylineLengthKm(flat);
-    layer.bindTooltip(`📐 ${fmtDistance(km)}`, { permanent:true, direction:'top', className:'measure-tooltip' }).openTooltip();
-    showMeasureResult(`Distancia total: <b>${fmtDistance(km)}</b><br>Segmentos: ${flat.length - 1}`, 'ok');
+function showMeasureBanner(text) {
+  if (measureBanner) measureBanner.remove();
+  measureBanner = document.createElement('div');
+  measureBanner.className = 'measure-banner';
+  measureBanner.innerHTML = text + ' <span style="opacity:.7">· ESC cancelar</span>';
+  document.body.appendChild(measureBanner);
+}
+function hideMeasureBanner() {
+  if (measureBanner) { measureBanner.remove(); measureBanner = null; }
+}
+function startMeasureMode(mode) {
+  cancelMeasure(); // limpia estado previo
+  measureMode = mode;
+  measureVertices = [];
+  const btn = document.getElementById(mode === 'area' ? 'measureAreaBtn' : 'measureDistBtn');
+  btn.classList.add('active');
+  const otherBtn = document.getElementById(mode === 'area' ? 'measureDistBtn' : 'measureAreaBtn');
+  otherBtn.classList.remove('active');
+  const label = mode === 'area' ? '⬡ MIDIENDO ÁREA' : '📐 MIDIENDO DISTANCIA';
+  const help = mode === 'area' ? 'Clic en el mapa para agregar vértices. Doble clic para cerrar el polígono.' : 'Clic en el mapa para agregar puntos. Doble clic para terminar.';
+  showMeasureBanner(`${label} — ${help}`);
+  showMeasureResult(mode === 'area' ? 'Iniciando polígono...' : 'Iniciando línea...', 'warn');
+  // Cambiar cursor en los 4 mapas
+  allMaps.forEach(m => m.getContainer().style.cursor = 'crosshair');
+  // Deshabilitar la creación normal de puntos mientras se mide
+  setMeasuringActive(true);
+}
+function cancelMeasure() {
+  measureMode = null;
+  measureVertices = [];
+  if (measureTempLine) { measureTempLine.remove(); measureTempLine = null; }
+  measureVertexDots.forEach(d => d.remove());
+  measureVertexDots = [];
+  document.getElementById('measureDistBtn').classList.remove('active');
+  document.getElementById('measureAreaBtn').classList.remove('active');
+  hideMeasureBanner();
+  allMaps.forEach(m => m.getContainer().style.cursor = '');
+  setMeasuringActive(false);
+}
+function addMeasureVertex(latlng) {
+  measureVertices.push(latlng);
+  // Punto visual del vértice
+  const dot = L.circleMarker(latlng, {
+    radius: 5, color:'#d4a017', fillColor:'#fff', fillOpacity:1, weight:2
+  }).addTo(maps.anm);
+  measureVertexDots.push(dot);
+  // Redibuja la línea/polígono temporal
+  if (measureTempLine) measureTempLine.remove();
+  if (measureVertices.length >= 2) {
+    const style = { color:'#d4a017', weight:3, opacity:0.9 };
+    if (measureMode === 'area') {
+      measureTempLine = L.polygon(measureVertices, { ...style, fillOpacity:0.15 }).addTo(maps.anm);
+    } else {
+      measureTempLine = L.polyline(measureVertices, style).addTo(maps.anm);
+    }
+  }
+  // Muestra el total en curso
+  if (measureMode === 'area' && measureVertices.length >= 3) {
+    const km = polylineLengthKm([...measureVertices, measureVertices[0]]);
+    const ha = polygonAreaHa(measureVertices);
+    showMeasureResult(`Vértices: ${measureVertices.length}<br>Área parcial: <b>${fmtArea(ha)}</b><br>Perímetro: ${fmtDistance(km)}<br><small style="color:var(--muted)">Doble clic para cerrar</small>`, 'warn');
+  } else if (measureMode === 'line' && measureVertices.length >= 2) {
+    const km = polylineLengthKm(measureVertices);
+    showMeasureResult(`Puntos: ${measureVertices.length}<br>Distancia: <b>${fmtDistance(km)}</b><br><small style="color:var(--muted)">Doble clic para terminar</small>`, 'warn');
+  } else {
+    showMeasureResult(`Vértice ${measureVertices.length} agregado`, 'warn');
   }
 }
-function startMeasure(kind) {
-  if (activeDrawHandler) { activeDrawHandler.disable(); activeDrawHandler = null; }
-  document.querySelectorAll('#measureDistBtn, #measureAreaBtn').forEach(b => b.classList.remove('active'));
-  const opts = kind === 'polygon'
-    ? { shapeOptions: { color: '#d4a017', weight: 3, fillOpacity: 0.15 }, showArea: false }
-    : { shapeOptions: { color: '#d4a017', weight: 4 }, metric: true, showLength: true };
-  activeDrawHandler = new L.Draw[kind === 'polygon' ? 'Polygon' : 'Polyline'](maps.anm, opts);
-  activeDrawHandler.enable();
-  document.getElementById(kind === 'polygon' ? 'measureAreaBtn' : 'measureDistBtn').classList.add('active');
-  showMeasureResult(kind === 'polygon' ? 'Clic para agregar vértices, doble clic para cerrar el polígono' : 'Clic para agregar puntos, doble clic para terminar', 'warn');
+function finishMeasure() {
+  if (!measureMode) return;
+  if (measureMode === 'line' && measureVertices.length < 2) {
+    cancelMeasure();
+    showMeasureResult('Necesita al menos 2 puntos', 'danger');
+    return;
+  }
+  if (measureMode === 'area' && measureVertices.length < 3) {
+    cancelMeasure();
+    showMeasureResult('Necesita al menos 3 vértices para un polígono', 'danger');
+    return;
+  }
+  const style = { color:'#d4a017', weight:3, opacity:0.9 };
+  let final, tooltip;
+  if (measureMode === 'area') {
+    const km = polylineLengthKm([...measureVertices, measureVertices[0]]);
+    const ha = polygonAreaHa(measureVertices);
+    final = L.polygon(measureVertices, { ...style, fillOpacity:0.2 });
+    tooltip = `⬡ ${fmtArea(ha)}<br>Perímetro: ${fmtDistance(km)}`;
+    showMeasureResult(`Área: <b>${fmtArea(ha)}</b><br>Perímetro: <b>${fmtDistance(km)}</b><br>Vértices: ${measureVertices.length}`, 'ok');
+  } else {
+    const km = polylineLengthKm(measureVertices);
+    final = L.polyline(measureVertices, style);
+    tooltip = `📐 ${fmtDistance(km)}`;
+    showMeasureResult(`Distancia total: <b>${fmtDistance(km)}</b><br>Segmentos: ${measureVertices.length - 1}`, 'ok');
+  }
+  final.bindTooltip(tooltip, { permanent:true, direction:'center', className:'measure-tooltip' });
+  measureGroup.addLayer(final);
+  cancelMeasure();
 }
-maps.anm.on(L.Draw.Event.CREATED, e => {
-  const layer = e.layer;
-  measureGroup.addLayer(layer);
-  updateMeasureLabel(layer);
-  // Los vértices son editables al hacer clic en la capa
-  layer.on('click', () => {
-    if (layer.editing && !layer.editing.enabled()) {
-      layer.editing.enable();
-      showMeasureResult('Modo edición — arrastre los vértices para ajustar. Clic afuera para terminar.', 'warn');
-      const stop = () => {
-        layer.editing.disable();
-        updateMeasureLabel(layer);
-        maps.anm.off('click', stop);
-      };
-      setTimeout(() => maps.anm.on('click', stop), 400);
+// Registrar handlers en los 4 mapas
+let measuringActive = false;
+window.measuringActive = false;
+function setMeasuringActive(v) { measuringActive = v; window.measuringActive = v; }
+allMaps.forEach(m => {
+  m.on('click', e => {
+    if (measureMode) {
+      L.DomEvent.stop(e.originalEvent);
+      addMeasureVertex(e.latlng);
+    }
+    // Si no está en modo medir, el handler original de addPoint hace su trabajo
+  });
+  m.on('dblclick', e => {
+    if (measureMode) {
+      L.DomEvent.stop(e.originalEvent);
+      finishMeasure();
     }
   });
-  document.querySelectorAll('#measureDistBtn, #measureAreaBtn').forEach(b => b.classList.remove('active'));
-  activeDrawHandler = null;
 });
-document.getElementById('measureDistBtn').onclick = () => startMeasure('polyline');
-document.getElementById('measureAreaBtn').onclick = () => startMeasure('polygon');
+// Bloqueamos el zoom por doble clic cuando estamos midiendo
+allMaps.forEach(m => {
+  const origDblZoom = m.doubleClickZoom;
+  m.on('click', () => { if (measureMode) m.doubleClickZoom.disable(); else m.doubleClickZoom.enable(); });
+});
+// ESC cancela
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && measureMode) cancelMeasure();
+});
+document.getElementById('measureDistBtn').onclick = () => startMeasureMode('line');
+document.getElementById('measureAreaBtn').onclick = () => startMeasureMode('area');
 document.getElementById('measureClearBtn').onclick = () => {
-  if (activeDrawHandler) { activeDrawHandler.disable(); activeDrawHandler = null; }
-  document.querySelectorAll('#measureDistBtn, #measureAreaBtn').forEach(b => b.classList.remove('active'));
+  cancelMeasure();
   measureGroup.clearLayers();
-  showMeasureResult('');
+  showMeasureResult('Mediciones borradas', '');
+  setTimeout(() => showMeasureResult(''), 1500);
 };
 
 // ============================================================
@@ -2779,15 +2965,23 @@ function showRouteResult(text, cls='') {
   el.innerHTML = text;
 }
 async function calcRoute() {
-  const from = document.getElementById('routeFromInp').value.trim();
-  const to = document.getElementById('routeToInp').value.trim();
+  const fromInp = document.getElementById('routeFromInp');
+  const toInp = document.getElementById('routeToInp');
+  const from = fromInp.value.trim();
+  const to = toInp.value.trim();
   if (!from || !to) { showRouteResult('Escriba origen y destino', 'danger'); return; }
   showRouteResult('Buscando ubicaciones...', 'warn');
   try {
-    const [a, b] = await Promise.all([geocodeCol(from), geocodeCol(to)]);
+    // Si el usuario seleccionó del autocompletado, ya tenemos lat/lng — no re-geocodificamos
+    const a = fromInp.dataset.lat
+      ? { lat: parseFloat(fromInp.dataset.lat), lng: parseFloat(fromInp.dataset.lng), name: from }
+      : await geocodeCol(from);
+    const b = toInp.dataset.lat
+      ? { lat: parseFloat(toInp.dataset.lat), lng: parseFloat(toInp.dataset.lng), name: to }
+      : await geocodeCol(to);
     if (!a) { showRouteResult(`No se encontró: ${from}`, 'danger'); return; }
     if (!b) { showRouteResult(`No se encontró: ${to}`, 'danger'); return; }
-    showRouteResult(`Calculando ruta...<br>A: ${a.name.split(',').slice(0,2).join(',')}<br>B: ${b.name.split(',').slice(0,2).join(',')}`, 'warn');
+    showRouteResult(`Calculando ruta...`, 'warn');
     // OSRM público — motor de rutas OpenStreetMap
     const url = `https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson&alternatives=true`;
     const r = await fetch(url);
@@ -2831,9 +3025,180 @@ document.getElementById('routeClearBtn').onclick = () => {
   document.getElementById('routeToInp').value = '';
   showRouteResult('');
 };
-[document.getElementById('routeFromInp'), document.getElementById('routeToInp')].forEach(inp => {
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') calcRoute(); });
-});
+// === Autocompletado de municipios (Nominatim) para los inputs de rutas ===
+// Escribe "quibdo" → sugiere "Quibdó, Chocó, Colombia" etc. Tolerante a tildes.
+async function suggestPlaces(query) {
+  if (query.length < 2) return [];
+  try {
+    const q = encodeURIComponent(query + ', Colombia');
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${q}&countrycodes=co&limit=6&addressdetails=1&accept-language=es`;
+    const r = await fetch(url);
+    const d = await r.json();
+    // Filtramos y limpiamos: preferimos municipios, ciudades y pueblos
+    return d.map(x => {
+      const a = x.address || {};
+      const main = a.city || a.town || a.village || a.municipality || a.county || x.display_name.split(',')[0];
+      const dept = a.state || a.region || '';
+      return {
+        lat: parseFloat(x.lat),
+        lng: parseFloat(x.lon),
+        main: main,
+        dept: dept,
+        display: main + (dept ? ` · ${dept}` : ''),
+        raw: x.display_name
+      };
+    });
+  } catch(e) { return []; }
+}
+
+function attachAutocomplete(inputEl, listEl) {
+  let currentSuggestions = [];
+  let activeIdx = -1;
+  let debounceTimer = null;
+  let selectedItem = null;
+
+  function render() {
+    if (!currentSuggestions.length) { listEl.classList.remove('show'); return; }
+    listEl.innerHTML = currentSuggestions.map((s, i) =>
+      `<div class="autocomplete-item ${i === activeIdx ? 'active' : ''}" data-idx="${i}">
+        <div class="main">${s.main}</div>
+        <div class="sub">${s.dept || 'Colombia'}</div>
+      </div>`
+    ).join('');
+    listEl.classList.add('show');
+    listEl.querySelectorAll('.autocomplete-item').forEach(el => {
+      el.addEventListener('mousedown', e => {
+        e.preventDefault(); // evita blur del input antes de aplicar
+        const i = parseInt(el.dataset.idx);
+        pick(i);
+      });
+    });
+  }
+  function pick(i) {
+    const s = currentSuggestions[i];
+    if (!s) return;
+    inputEl.value = s.display;
+    selectedItem = s;
+    inputEl.dataset.lat = s.lat;
+    inputEl.dataset.lng = s.lng;
+    currentSuggestions = [];
+    activeIdx = -1;
+    listEl.classList.remove('show');
+  }
+
+  inputEl.addEventListener('input', () => {
+    // El usuario está editando → invalida cualquier selección previa
+    delete inputEl.dataset.lat;
+    delete inputEl.dataset.lng;
+    selectedItem = null;
+    const q = inputEl.value.trim();
+    clearTimeout(debounceTimer);
+    if (q.length < 2) { currentSuggestions = []; listEl.classList.remove('show'); return; }
+    listEl.innerHTML = '<div class="autocomplete-loading">Buscando...</div>';
+    listEl.classList.add('show');
+    debounceTimer = setTimeout(async () => {
+      currentSuggestions = await suggestPlaces(q);
+      activeIdx = -1;
+      render();
+      if (!currentSuggestions.length) {
+        listEl.innerHTML = '<div class="autocomplete-loading">Sin resultados</div>';
+      }
+    }, 300);
+  });
+
+  inputEl.addEventListener('keydown', e => {
+    if (!currentSuggestions.length) {
+      // Sin sugerencias abiertas, Enter dispara la búsqueda de ruta
+      if (e.key === 'Enter') { calcRoute(); }
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, currentSuggestions.length - 1);
+      render();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      render();
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      if (activeIdx >= 0) {
+        e.preventDefault();
+        pick(activeIdx);
+      } else if (currentSuggestions.length > 0) {
+        // Enter sin selección → toma la primera sugerencia
+        e.preventDefault();
+        pick(0);
+      }
+    } else if (e.key === 'Escape') {
+      currentSuggestions = [];
+      listEl.classList.remove('show');
+    }
+  });
+
+  inputEl.addEventListener('blur', () => {
+    setTimeout(() => listEl.classList.remove('show'), 200);
+  });
+  inputEl.addEventListener('focus', () => {
+    if (currentSuggestions.length) listEl.classList.add('show');
+  });
+}
+
+attachAutocomplete(document.getElementById('routeFromInp'), document.getElementById('routeFromSug'));
+attachAutocomplete(document.getElementById('routeToInp'), document.getElementById('routeToSug'));
+
+// === Verificar en fuentes oficiales ===
+// Al hacer clic abre el visor de la institución centrado en el último punto o
+// la vista actual. Sirve para confirmar visualmente que las capas del geovisor
+// coinciden con lo que el organismo oficial muestra.
+function currentFocus() {
+  // Prioridad: último punto consultado > centro del mapa ANM
+  const p = points.length ? points[points.length - 1] : null;
+  const c = maps.anm.getCenter();
+  const z = maps.anm.getZoom();
+  return {
+    lat: p ? p.lat : c.lat,
+    lng: p ? p.lng : c.lng,
+    z: z
+  };
+}
+document.getElementById('verifyANM').onclick = () => {
+  const f = currentFocus();
+  window.open(`https://geovisor.anm.gov.co/?x=${f.lng}&y=${f.lat}&l=${Math.max(f.z, 15)}&srs=EPSG%3A4326`, '_blank');
+};
+document.getElementById('verifyRunap').onclick = () => {
+  const f = currentFocus();
+  window.open(`https://runap.parquesnacionales.gov.co/?lat=${f.lat}&lng=${f.lng}&zoom=${f.z}`, '_blank');
+};
+document.getElementById('verifyRF').onclick = () => {
+  const f = currentFocus();
+  window.open(`https://siac-datosabiertos-mads.hub.arcgis.com/datasets/MADS::reserva-forestal-nacional-2025`, '_blank');
+};
+document.getElementById('verifyIGAC').onclick = () => {
+  const f = currentFocus();
+  // Colombia en Mapas — visor oficial IGAC con todas las capas
+  window.open(`https://colombiaenmapas.gov.co/?e=${f.lng-0.05},${f.lat-0.05},${f.lng+0.05},${f.lat+0.05},4686&b=igac`, '_blank');
+};
+document.getElementById('verifyOSM').onclick = () => {
+  const f = currentFocus();
+  // OpenStreetMap oficial — para verificar si las vías/trochas están mapeadas
+  window.open(`https://www.openstreetmap.org/#map=${f.z}/${f.lat}/${f.lng}`, '_blank');
+};
+
+// === Activar/Apagar TODAS las capas viales ===
+// Enciende INVIAS + ANI + Vías topo + Trochas en los 4 mapas a la vez.
+// Simula un clic en cada checkbox para reusar la lógica existente.
+const VIAS_STACK = ['viasInvias', 'viasAni', 'vias', 'trochas'];
+function toggleAllViasLayers(activate) {
+  document.querySelectorAll('.toggles input[type=checkbox]').forEach(cb => {
+    if (VIAS_STACK.includes(cb.dataset.layer) && cb.checked !== activate) {
+      cb.checked = activate;
+      cb.dispatchEvent(new Event('change'));
+    }
+  });
+  showStatus(activate ? '🛣 Red vial FULL activada (INVIAS + ANI + Topo + Trochas)' : 'Capas viales apagadas', activate ? 'ok' : '', 3000);
+}
+document.getElementById('viasFullOn').onclick = () => toggleAllViasLayers(true);
+document.getElementById('viasFullOff').onclick = () => toggleAllViasLayers(false);
 
 // ============================================================
 // MI UBICACIÓN GPS — una lectura por clic, sin tracking continuo.
