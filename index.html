@@ -468,6 +468,41 @@
     from { opacity: 0; transform: translate(-50%, -12px); }
     to { opacity: 1; transform: translateX(-50%); }
   }
+  /* Indicador flotante de carga de capas (abajo centro) */
+  .loading-indicator {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: rgba(22,27,34,.95); color: var(--accent);
+    border: 1px solid var(--accent); border-radius: 22px;
+    padding: 8px 16px; font-size: 12px; font-weight: 600;
+    display: none; align-items: center; gap: 10px; z-index: 5500;
+    box-shadow: 0 6px 20px rgba(0,0,0,.5);
+    font-family: var(--mono);
+  }
+  .loading-indicator.show { display: inline-flex; }
+  .loading-indicator .spinner {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid rgba(212,160,23,.25); border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Capa hídrica: blend multiply refuerza el azul sobre imagen satelital */
+  .hydro-blend {
+    mix-blend-mode: screen;
+    filter: brightness(1.4) saturate(2) contrast(1.2);
+  }
+
+  /* Botón borrador flotante junto a cada medición */
+  .measure-delete-btn {
+    width: 22px; height: 22px; background: rgba(248,81,73,.95);
+    color: #fff; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 12px; cursor: pointer; border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.5);
+    transition: transform .12s;
+  }
+  .measure-delete-btn:hover { transform: scale(1.2); background: #f85149; }
+
   /* Etiqueta de distancia sobre cada segmento (medición) */
   .seg-label {
     background: rgba(212,160,23,.95); color:#000; font-weight:700;
@@ -501,12 +536,76 @@
 
   /* Popup del marcador (arrastrar / borrar) */
   .point-popup .leaflet-popup-content-wrapper{
-    background:#161b22;color:#e6edf3;border:1px solid #2a323d;border-radius:6px;
+    background:#161b22;color:#e6edf3;border:1px solid #2a323d;border-radius:5px;
+    padding: 0;
   }
   .point-popup .leaflet-popup-tip{background:#161b22;border:1px solid #2a323d}
-  .point-popup .leaflet-popup-close-button{color:#8b949e}
-  .point-popup .leaflet-popup-content{margin:10px 12px}
-  .point-popup b{color:#e6edf3}
+  .point-popup .leaflet-popup-close-button{color:#8b949e; z-index:10; font-size: 15px !important; padding: 3px 6px 0 0 !important;}
+  .point-popup .leaflet-popup-content{margin:0; width:auto !important; max-height: 55vh;}
+  .point-popup .leaflet-popup-content b{color:#e6edf3}
+
+  .point-pop-inner {
+    font-family:-apple-system,sans-serif;font-size:11px;
+    padding: 7px 9px 8px; min-width: 210px; max-width: 250px;
+    max-height: 55vh; overflow-y: auto;
+  }
+  .point-pop-inner .pp-title { font-weight:700; font-size:11.5px; margin-bottom:2px; }
+  .point-pop-inner .pp-coord { color:#888; font-family:ui-monospace,monospace; font-size:9px; margin-bottom:5px; }
+  .point-pop-inner .pp-info { line-height:1.4; font-size:10.5px; }
+  .point-pop-inner .pp-info div { padding: 0; }
+  .point-pop-inner .pp-anm-title {
+    margin-top: 7px; margin-bottom: 4px;
+    font-size: 9px; font-weight: 700; letter-spacing: .4px;
+    color: #d4a017; text-transform: uppercase; padding-bottom: 2px;
+    border-bottom: 1px solid #2a323d;
+  }
+  .point-pop-inner .pp-anm-list { display: flex; flex-direction: column; gap: 4px; }
+  .point-pop-inner .anm-card {
+    background: #0d1117; border: 1px solid #2a323d;
+    border-radius: 3px; padding: 4px 6px;
+    font-size: 10px; line-height: 1.3;
+  }
+  .point-pop-inner .anm-card-head {
+    display: flex; align-items: center; gap: 5px;
+    margin-bottom: 3px; padding-bottom: 2px;
+    border-bottom: 1px dashed #2a323d;
+  }
+  .point-pop-inner .anm-tag {
+    display: inline-block; padding: 0 5px; border-radius: 2px;
+    font-size: 8px; font-weight: 800; letter-spacing: .4px;
+    line-height: 14px;
+  }
+  .point-pop-inner .anm-code {
+    font-family: ui-monospace,monospace; font-size: 10px;
+    font-weight: 700; color: #e6edf3; word-break: break-all;
+  }
+  .point-pop-inner .anm-row {
+    display: flex; gap: 5px; align-items: baseline;
+    padding: 0;
+  }
+  .point-pop-inner .anm-row span:first-child {
+    color: #8b949e; min-width: 52px; font-size: 8.5px;
+    text-transform: uppercase; letter-spacing: .2px;
+  }
+  .point-pop-inner .anm-row b { color: #e6edf3; font-weight: 600; }
+  .point-pop-inner .pp-buttons {
+    margin-top: 7px; display: flex; gap: 5px;
+  }
+  .point-pop-inner .pp-buttons button {
+    flex: 1; border: 0; padding: 4px;
+    border-radius: 3px; font-weight: 700;
+    cursor: pointer; font-size: 10px;
+  }
+  .point-pop-inner .pp-buttons .pp-focus { background:#d4a017; color:#000; }
+  .point-pop-inner .pp-buttons .pp-del { background:#f85149; color:#fff; }
+  .point-pop-inner .pp-hint {
+    margin-top: 4px; font-size: 8.5px; color: #666;
+    text-align: center; font-style: italic;
+  }
+  /* Scrollbar oscura dentro del popup */
+  .point-pop-inner::-webkit-scrollbar { width: 5px; }
+  .point-pop-inner::-webkit-scrollbar-track { background: #0d1117; }
+  .point-pop-inner::-webkit-scrollbar-thumb { background: #2a323d; border-radius: 2px; }
 
   /* === BANNER MODO ESPEJO === */
   .mirror-banner {
@@ -615,6 +714,7 @@
 </style>
 </head>
 <body>
+<div id="loadingIndicator" class="loading-indicator"></div>
 
 <div id="mirrorBanner" class="mirror-banner" style="display:none">
   <span>🔍 MODO ESPEJO · Revisando punto consultado por <b id="mirrorOp">—</b> · <span id="mirrorCoord">—</span></span>
@@ -810,12 +910,6 @@
     <button id="myLocBtn" class="tool-btn primary-btn">📍 Mostrar mi ubicación</button>
     <button id="myLocClearBtn" class="tool-btn danger-btn">✕ Quitar</button>
     <div id="myLocStatus" class="tool-result"></div>
-  </div>
-
-  <div class="group">
-    <h3>🛣 Red vial FULL</h3>
-    <button id="viasFullOn" class="tool-btn primary-btn">✓ Activar TODAS las capas viales</button>
-    <button id="viasFullOff" class="tool-btn danger-btn">✕ Apagar todas</button>
   </div>
 
   <div class="group">
@@ -1445,10 +1539,12 @@ function makeArcGISLayer(baseUrl, layerIds, opacity=0.6) {
   const Lyr = L.Layer.extend({
     onAdd: function(map) {
       this._map = map;
-      this._img = L.DomUtil.create('img', 'leaflet-image-layer');
+      this._img = L.DomUtil.create('img', 'leaflet-image-layer ' + (this._className || ''));
       this._img.style.position = 'absolute';
       this._img.style.opacity = String(opacity);
       this._img.style.pointerEvents = 'none';
+      this._img.addEventListener('load', () => { this.fire('load'); notifyLayerLoaded(this); });
+      this._img.addEventListener('error', () => { this.fire('tileerror'); notifyLayerLoaded(this); });
       map.getPanes().overlayPane.appendChild(this._img);
       map.on('moveend zoomend', this._update, this);
       this._update();
@@ -1456,6 +1552,7 @@ function makeArcGISLayer(baseUrl, layerIds, opacity=0.6) {
     onRemove: function(map) {
       if (this._img.parentNode) map.getPanes().overlayPane.removeChild(this._img);
       map.off('moveend zoomend', this._update, this);
+      notifyLayerLoaded(this);
     },
     _update: function() {
       const map = this._map;
@@ -1466,6 +1563,8 @@ function makeArcGISLayer(baseUrl, layerIds, opacity=0.6) {
       const url = `${baseUrl}?bbox=${bbox}&bboxSR=4326&imageSR=4326` +
         `&size=${size.x},${size.y}&layers=show:${layerIds}` +
         `&transparent=true&format=png32&f=image`;
+      notifyLayerLoading(this);
+      this.fire('loading');
       this._img.src = url;
       const nw = map.latLngToLayerPoint(bounds.getNorthWest());
       this._img.style.left = nw.x + 'px';
@@ -1477,19 +1576,34 @@ function makeArcGISLayer(baseUrl, layerIds, opacity=0.6) {
   return new Lyr();
 }
 
+// Indicador global de cargas de capas
+const _pendingLayers = new Set();
+function notifyLayerLoading(layer) { _pendingLayers.add(layer); updateLoadingIndicator(); }
+function notifyLayerLoaded(layer) { _pendingLayers.delete(layer); updateLoadingIndicator(); }
+function updateLoadingIndicator() {
+  const el = document.getElementById('loadingIndicator');
+  if (!el) return;
+  if (_pendingLayers.size > 0) {
+    el.classList.add('show');
+    el.innerHTML = `<div class="spinner"></div><span>Cargando ${_pendingLayers.size} capa(s)...</span>`;
+  } else {
+    el.classList.remove('show');
+  }
+}
+
 const layerDefs = {
   // capas 1,2,3,4 = Solicitud Reserva Especial, Solicitud Vigente, Subcontrato, Título Vigente
   anmTit: () => makeANMLayer('1,2,3,4'),
-  // RED HIDROGRÁFICA — Esri World Hydro Reference Overlay.
-  // Ríos, quebradas y cuerpos de agua con simbología azul clara.
-  // Servicio hosted tile layer estable, HTTPS, global.
-  // Nota: Los tiles en zoom bajo (<8) muestran solo ríos principales;
-  //       al acercarse aparecen quebradas más pequeñas hasta z15.
+  // RED HIDROGRÁFICA — servicio Esri World Hydro Reference Overlay.
+  // Se usa el endpoint export dinámico (no tiles cacheados) porque devuelve
+  // una imagen adaptada al bbox y tamaño exactos del viewport, con transparencia
+  // real. Los tiles cacheados a veces no cubren zooms >15 y desaparecen.
   hidroIdeam: () => {
-    const layer = L.tileLayer(
-      'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Hydro_Reference_Overlay/MapServer/tile/{z}/{y}/{x}',
-      { minZoom: 0, maxZoom: 18, maxNativeZoom: 15, opacity: 0.95, attribution: '© Esri World Hydro', pane: 'overlayPane' }
+    const layer = makeArcGISLayer(
+      'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Hydro_Reference_Overlay/MapServer/export',
+      '0,1,2,3,4,5,6,7,8', 0.95
     );
+    layer._className = 'hydro-blend';
     return layer;
   },
   // RESERVA FORESTAL LEY 2ª de 1959 — IGAC (ambiente/reservasforestalesley2da).
@@ -1566,10 +1680,21 @@ document.querySelectorAll('.toggles input').forEach(cb => {
   cb.addEventListener('change', () => {
     const mk = cb.dataset.map, lk = cb.dataset.layer;
     if (cb.checked) {
-      if (!layers[mk][lk]) layers[mk][lk] = layerDefs[lk]();
+      if (!layers[mk][lk]) {
+        const inst = layerDefs[lk]();
+        layers[mk][lk] = inst;
+        // Enganchar eventos de carga (para el indicador global)
+        if (inst.on) {
+          inst.on('loading', () => notifyLayerLoading(inst));
+          inst.on('load', () => notifyLayerLoaded(inst));
+          inst.on('tileerror', () => notifyLayerLoaded(inst));
+        }
+      }
+      notifyLayerLoading(layers[mk][lk]);
       layers[mk][lk].addTo(maps[mk]);
     } else if (layers[mk][lk]) {
       maps[mk].removeLayer(layers[mk][lk]);
+      notifyLayerLoaded(layers[mk][lk]);
     }
   });
 });
@@ -1652,28 +1777,67 @@ function removeMarkers(id) {
 }
 
 // Popup del marcador con datos y botón de borrado.
+// Muestra el resumen del punto + una tarjeta expandida por cada expediente ANM
+// (título vigente o solicitud) que interseca con la coordenada.
 function openPointPopup(p, mk, map) {
-  const tit = p.loading ? '…' : (p.tit ? '<span style="color:#3fb950">SI</span>' : '<span style="color:#f85149">NO</span>');
-  const sol = p.loading ? '…' : (p.sol ? '<span style="color:#e3b341">SI</span>' : '<span style="color:#8b949e">NO</span>');
-  const prot = p.loading ? '…' : (p.runap ? `<span style="color:#e3b341">${String(p.runap).slice(0,22)}</span>` : '<span style="color:#8b949e">NO</span>');
-  const rf = p.loading ? '…' : (p.rfLey2 ? `<span style="color:#f85149">${String(p.rfLey2).slice(0,22)}</span>` : '<span style="color:#8b949e">NO</span>');
+  const titBadge  = p.loading ? '…' : (p.tit ? `<span style="color:#3fb950">SI (${p.tit.length})</span>` : '<span style="color:#f85149">NO</span>');
+  const solBadge  = p.loading ? '…' : (p.sol ? `<span style="color:#e3b341">SI (${p.sol.length})</span>` : '<span style="color:#8b949e">NO</span>');
+  const protBadge = p.loading ? '…' : (p.runap ? `<span style="color:#e3b341">${String(p.runap).slice(0,22)}</span>` : '<span style="color:#8b949e">NO</span>');
+  const rfBadge   = p.loading ? '…' : (p.rfLey2 ? `<span style="color:#f85149">${String(p.rfLey2).slice(0,22)}</span>` : '<span style="color:#8b949e">NO</span>');
+
+  // --- Construye las tarjetas de detalle ANM ---
+  // Cada feature devuelto por la ANM tiene un objeto .attributes con los campos oficiales.
+  const featuresToCards = (arr, tipo) => {
+    if (!arr || !arr.length) return '';
+    return arr.map(f => {
+      const a = f.attributes || f;
+      const cod  = a.CODIGO_EXPEDIENTE || '—';
+      const est  = a.TITULO_ESTADO || '—';
+      const mod  = a.MODALIDAD || '—';
+      const etp  = a.ETAPA || '';
+      const min  = (a.MINERALES || '').slice(0, 120);
+      const area = a.AREA_HA != null ? Number(a.AREA_HA).toFixed(1) + ' ha' : '';
+      const tit  = (a.SOLICITANTES_O_TITULARES || '').slice(0, 90);
+      const isLegalizacion = /LEGALIZACI/i.test(mod);
+      const badgeColor = tipo === 'TÍTULO' ? '#3fb950' : (isLegalizacion ? '#f85149' : '#e3b341');
+      return `
+      <div class="anm-card">
+        <div class="anm-card-head">
+          <span class="anm-tag" style="background:${badgeColor};color:${tipo==='TÍTULO'?'#000':'#fff'}">${tipo}</span>
+          <span class="anm-code">${cod}</span>
+        </div>
+        <div class="anm-row"><span>Estado:</span> <b>${est}</b></div>
+        <div class="anm-row"><span>Modalidad:</span> <b${isLegalizacion?' style="color:#ff8b7d"':''}>${mod}</b></div>
+        ${etp ? `<div class="anm-row"><span>Etapa:</span> ${etp}</div>` : ''}
+        ${area ? `<div class="anm-row"><span>Área:</span> ${area}</div>` : ''}
+        ${min ? `<div class="anm-row"><span>Minerales:</span> ${min}</div>` : ''}
+        ${tit ? `<div class="anm-row"><span>Titular:</span> ${tit}</div>` : ''}
+      </div>`;
+    }).join('');
+  };
+  const titCards = featuresToCards(p.tit, 'TÍTULO');
+  const solCards = featuresToCards(p.sol, 'SOLICITUD');
+  const hasCards = titCards || solCards;
+
   const html = `
-    <div style="font-family:-apple-system,sans-serif;font-size:12px;min-width:200px">
-      <div style="font-weight:700;margin-bottom:6px;font-size:13px">Punto #${p.idx}</div>
-      <div style="color:#666;font-family:ui-monospace,monospace;font-size:10px;margin-bottom:8px">${coordDMS(p.lat, p.lng)}</div>
-      <div style="line-height:1.6">
-        <div><b>Municipio:</b> ${p.mun}</div>
-        <div><b>Depto:</b> ${p.dep}</div>
-        <div><b>Vereda:</b> ${p.vereda || '—'}</div>
-        <div style="margin-top:4px"><b>Título:</b> ${tit} · <b>Sol.:</b> ${sol}</div>
-        <div><b>Área prot.:</b> ${prot}</div>
-        <div><b>RF Ley 2ª:</b> ${rf}</div>
+    <div class="point-pop-inner">
+      <div class="pp-title">Punto #${p.idx}</div>
+      <div class="pp-coord">${coordDMS(p.lat, p.lng)}</div>
+      <div class="pp-info">
+        <div>${p.mun} · ${p.dep}</div>
+        <div style="color:#8b949e">Vereda: ${p.vereda || '—'}</div>
+        <div style="margin-top:3px">Tít: ${titBadge} · Sol: ${solBadge}</div>
+        <div>Prot: ${protBadge} · RF2: ${rfBadge}</div>
       </div>
-      <div style="margin-top:10px;display:flex;gap:6px">
-        <button class="pp-focus" style="flex:1;background:#d4a017;color:#000;border:0;padding:6px;border-radius:4px;font-weight:700;cursor:pointer;font-size:11px">Centrar</button>
-        <button class="pp-del" style="flex:1;background:#f85149;color:#fff;border:0;padding:6px;border-radius:4px;font-weight:700;cursor:pointer;font-size:11px">🗑 Borrar</button>
+      ${hasCards ? `
+        <div class="pp-anm-title">Expedientes ANM en este punto</div>
+        <div class="pp-anm-list">${titCards}${solCards}</div>
+      ` : (p.loading ? '<div style="text-align:center;color:#888;margin-top:8px;font-size:11px">Consultando ANM...</div>' : '')}
+      <div class="pp-buttons">
+        <button class="pp-focus">Centrar</button>
+        <button class="pp-del">🗑 Borrar</button>
       </div>
-      <div style="margin-top:6px;font-size:10px;color:#888;text-align:center;font-style:italic">Arrastra el marcador para reubicar</div>
+      <div class="pp-hint">Arrastra el marcador para reubicar</div>
     </div>`;
   mk.unbindPopup();
   mk.bindPopup(html, { className: 'point-popup', maxWidth: 260, autoPan: true }).openPopup();
@@ -2785,6 +2949,7 @@ document.getElementById('modalAll').onclick = () => {
 const measurements = [];   // mediciones terminadas
 let measureMode = null;    // 'line' | 'area' | null
 let measureVertices = [];  // vértices en construcción
+let measureActiveMap = null; // mapa donde se está midiendo actualmente
 let measureTempLayers = { lines: [], dots: [], segTooltips: [] }; // temporales durante trazo
 let measureBanner = null;
 let measuringActive = false;
@@ -2847,28 +3012,25 @@ function clearTempLayers() {
 }
 function drawTemp() {
   clearTempLayers();
+  if (!measureActiveMap) return;
   const style = { color:'#d4a017', weight:3, opacity:0.9 };
-  // Vértices en todos los mapas
+  // Vértices solo en el mapa activo
   measureVertices.forEach(ll => {
-    allMaps.forEach(m => {
-      const dot = L.circleMarker(ll, { radius:5, color:'#d4a017', fillColor:'#fff', fillOpacity:1, weight:2 }).addTo(m);
-      measureTempLayers.dots.push(dot);
-    });
+    const dot = L.circleMarker(ll, { radius:5, color:'#d4a017', fillColor:'#fff', fillOpacity:1, weight:2 }).addTo(measureActiveMap);
+    measureTempLayers.dots.push(dot);
   });
-  // Líneas en todos los mapas
+  // Líneas solo en el mapa activo
   if (measureVertices.length >= 2) {
-    allMaps.forEach(m => {
-      const layer = measureMode === 'area'
-        ? L.polygon(measureVertices, { ...style, fillOpacity:0.15 }).addTo(m)
-        : L.polyline(measureVertices, style).addTo(m);
-      measureTempLayers.lines.push(layer);
-    });
-    // Tooltip por segmento con distancia (solo en mapa principal ANM para no saturar)
+    const layer = measureMode === 'area'
+      ? L.polygon(measureVertices, { ...style, fillOpacity:0.15 }).addTo(measureActiveMap)
+      : L.polyline(measureVertices, style).addTo(measureActiveMap);
+    measureTempLayers.lines.push(layer);
+    // Tooltip por segmento con distancia (todos, en el mapa activo)
     for (let i = 1; i < measureVertices.length; i++) {
       const a = measureVertices[i-1], b = measureVertices[i];
       const km = haversineKm(a, b);
       const mid = L.latLng((a.lat+b.lat)/2, (a.lng+b.lng)/2);
-      const tip = L.marker(mid, { icon: L.divIcon({ className:'seg-label', html:fmtDistance(km), iconSize:[70,18] }), interactive:false }).addTo(maps.anm);
+      const tip = L.marker(mid, { icon: L.divIcon({ className:'seg-label', html:fmtDistance(km), iconSize:[70,18] }), interactive:false }).addTo(measureActiveMap);
       measureTempLayers.segTooltips.push(tip);
     }
   }
@@ -2890,18 +3052,20 @@ function startMeasureMode(mode) {
   cancelMeasure();
   measureMode = mode;
   measureVertices = [];
+  measureActiveMap = null; // se define al primer clic
   document.getElementById(mode === 'area' ? 'measureAreaBtn' : 'measureDistBtn').classList.add('active');
   document.getElementById(mode === 'area' ? 'measureDistBtn' : 'measureAreaBtn').classList.remove('active');
   const label = mode === 'area' ? '⬡ MIDIENDO ÁREA' : '📐 MIDIENDO DISTANCIA';
-  const help = mode === 'area' ? 'Clic en cualquier mapa. Doble clic para cerrar.' : 'Clic en cualquier mapa. Doble clic para terminar.';
+  const help = mode === 'area' ? 'Clic en UN mapa. La medición queda solo en ese mapa. Doble clic para cerrar.' : 'Clic en UN mapa. Doble clic para terminar.';
   showMeasureBanner(`${label} — ${help}`);
-  showMeasureResult('Clic en un mapa para agregar el primer vértice', 'warn');
+  showMeasureResult('Elige un mapa y haz clic para el primer vértice', 'warn');
   allMaps.forEach(m => m.getContainer().style.cursor = 'crosshair');
   setMeasuringActive(true);
 }
 function cancelMeasure() {
   measureMode = null;
   measureVertices = [];
+  measureActiveMap = null;
   clearTempLayers();
   document.getElementById('measureDistBtn').classList.remove('active');
   document.getElementById('measureAreaBtn').classList.remove('active');
@@ -2909,7 +3073,11 @@ function cancelMeasure() {
   allMaps.forEach(m => m.getContainer().style.cursor = '');
   setMeasuringActive(false);
 }
-function addMeasureVertex(latlng) {
+function addMeasureVertex(latlng, srcMap) {
+  // La primera clic decide en qué mapa vive esta medición
+  if (!measureActiveMap) measureActiveMap = srcMap;
+  // Si el usuario clic en otro mapa por accidente, lo ignoramos
+  if (srcMap !== measureActiveMap) return;
   measureVertices.push(latlng);
   drawTemp();
   updateResultDuringDraw();
@@ -2921,7 +3089,7 @@ function finishMeasure() {
   if (!measureMode) return;
   if (measureMode === 'line' && measureVertices.length < 2) { cancelMeasure(); showMeasureResult('Necesita al menos 2 puntos', 'danger'); return; }
   if (measureMode === 'area' && measureVertices.length < 3) { cancelMeasure(); showMeasureResult('Necesita al menos 3 vértices', 'danger'); return; }
-  const m = { id: nextMeasureId++, mode: measureMode, vertices: [...measureVertices], layers: null };
+  const m = { id: nextMeasureId++, mode: measureMode, vertices: [...measureVertices], map: measureActiveMap, layers: null };
   measurements.push(m);
   clearTempLayers();
   renderMeasurement(m);
@@ -2929,87 +3097,107 @@ function finishMeasure() {
   // El resultado final se muestra por renderMeasurement (con el resumen actual)
 }
 
-// Dibuja una medición completa en los 4 mapas, con vértices arrastrables.
-// layers = { lines:[4], dots:[[4 per vertex]], segTooltips:[per segment] }
+// Dibuja una medición completa SOLO en el mapa donde se hizo, con vértices arrastrables.
 function renderMeasurement(m) {
-  // Limpia representación previa si existe
   if (m.layers) {
-    m.layers.lines.forEach(l => l.remove());
-    m.layers.dots.forEach(g => g.forEach(d => d.remove()));
+    if (m.layers.line) m.layers.line.remove();
+    m.layers.dots.forEach(d => d.remove());
     m.layers.segTooltips.forEach(t => t.remove());
     if (m.layers.centerTooltip) m.layers.centerTooltip.remove();
+    if (m.layers.deleteBtn) m.layers.deleteBtn.remove();
   }
+  const map = m.map;
   const style = { color:'#d4a017', weight:3, opacity:0.95 };
-  const lines = allMaps.map(map => {
-    return m.mode === 'area'
-      ? L.polygon(m.vertices, { ...style, fillOpacity:0.2 }).addTo(map)
-      : L.polyline(m.vertices, style).addTo(map);
-  });
-  // Vértices arrastrables — uno por cada mapa (sincronizados)
-  const dotGroups = m.vertices.map((v, i) => {
-    return allMaps.map(map => {
-      const dot = L.marker(v, {
-        draggable: true,
-        icon: L.divIcon({
-          className:'',
-          html:`<div class="measure-vertex-handle" title="Arrastra para ajustar"></div>`,
-          iconSize:[14,14], iconAnchor:[7,7]
-        })
-      }).addTo(map);
-      dot.on('drag', e => {
-        const ll = e.target.getLatLng();
-        m.vertices[i] = ll;
-        // Sincroniza los otros dots de este mismo vértice
-        dotGroups[i].forEach(d => { if (d !== dot) d.setLatLng(ll); });
-        // Redibuja las líneas de los 4 mapas
-        lines.forEach(line => {
-          if (m.mode === 'area') line.setLatLngs(m.vertices);
-          else line.setLatLngs(m.vertices);
-        });
-        updateMeasurementLabels(m);
-      });
-      dot.on('dragend', () => {
-        showMeasureResult(measurementSummary(m), 'ok');
-      });
-      return dot;
+  const line = m.mode === 'area'
+    ? L.polygon(m.vertices, { ...style, fillOpacity:0.2 }).addTo(map)
+    : L.polyline(m.vertices, style).addTo(map);
+  // Vértices arrastrables SOLO en el mapa de esta medición
+  const dots = m.vertices.map((v, i) => {
+    const dot = L.marker(v, {
+      draggable: true,
+      icon: L.divIcon({
+        className:'',
+        html:`<div class="measure-vertex-handle" title="Arrastra para ajustar"></div>`,
+        iconSize:[14,14], iconAnchor:[7,7]
+      })
+    }).addTo(map);
+    dot.on('drag', e => {
+      m.vertices[i] = e.target.getLatLng();
+      if (m.mode === 'area') line.setLatLngs(m.vertices);
+      else line.setLatLngs(m.vertices);
+      updateMeasurementLabels(m);
     });
+    dot.on('dragend', () => showMeasureResult(measurementSummary(m), 'ok'));
+    return dot;
   });
-  // Tooltips de segmento en el mapa ANM
-  const segTooltips = [];
-  for (let i = 1; i < m.vertices.length; i++) {
-    const a = m.vertices[i-1], b = m.vertices[i];
-    const km = haversineKm(a, b);
-    const mid = L.latLng((a.lat+b.lat)/2, (a.lng+b.lng)/2);
-    const tip = L.marker(mid, { icon: L.divIcon({ className:'seg-label', html:fmtDistance(km), iconSize:[70,18] }), interactive:false }).addTo(maps.anm);
-    segTooltips.push(tip);
-  }
-  // Etiqueta central con el total (área) o solo se usan los segmentos (línea)
+  // Tooltips de segmento en el mismo mapa (tanto para línea como para área,
+  // los lados del polígono también muestran su distancia)
+  const segTooltips = buildSegmentTooltips(m, map);
+  // Etiqueta central con área total (solo en modo área)
   let centerTooltip = null;
   if (m.mode === 'area') {
     const ha = polygonAreaHa(m.vertices);
     const c = L.polygon(m.vertices).getBounds().getCenter();
-    centerTooltip = L.marker(c, { icon: L.divIcon({ className:'seg-label-total', html:`⬡ ${fmtArea(ha)}`, iconSize:[110,20] }), interactive:false }).addTo(maps.anm);
+    centerTooltip = L.marker(c, { icon: L.divIcon({ className:'seg-label-total', html:`⬡ ${fmtArea(ha)}`, iconSize:[110,20] }), interactive:false }).addTo(map);
   }
-  m.layers = { lines, dots: dotGroups, segTooltips, centerTooltip };
+  // Botón borrador flotante: aparece cerca del primer vértice para borrar solo esta medición
+  const deleteBtn = L.marker(m.vertices[0], {
+    icon: L.divIcon({
+      className:'',
+      html:`<div class="measure-delete-btn" title="Borrar esta medición">🧽</div>`,
+      iconSize:[22,22], iconAnchor:[27,-6]
+    })
+  }).addTo(map);
+  deleteBtn.on('click', () => removeMeasurement(m.id));
+  m.layers = { line, dots, segTooltips, centerTooltip, deleteBtn };
   showMeasureResult(measurementSummary(m), 'ok');
 }
-function updateMeasurementLabels(m) {
-  // Reconstruye tooltips (más simple que moverlos uno a uno)
-  m.layers.segTooltips.forEach(t => t.remove());
-  m.layers.segTooltips = [];
+
+function buildSegmentTooltips(m, map) {
+  const tips = [];
+  // Segmentos consecutivos
   for (let i = 1; i < m.vertices.length; i++) {
     const a = m.vertices[i-1], b = m.vertices[i];
     const km = haversineKm(a, b);
     const mid = L.latLng((a.lat+b.lat)/2, (a.lng+b.lng)/2);
-    const tip = L.marker(mid, { icon: L.divIcon({ className:'seg-label', html:fmtDistance(km), iconSize:[70,18] }), interactive:false }).addTo(maps.anm);
-    m.layers.segTooltips.push(tip);
+    tips.push(L.marker(mid, { icon: L.divIcon({ className:'seg-label', html:fmtDistance(km), iconSize:[70,18] }), interactive:false }).addTo(map));
   }
+  // Cierre del polígono para área — muestra la distancia del último lado también
+  if (m.mode === 'area' && m.vertices.length >= 3) {
+    const a = m.vertices[m.vertices.length - 1], b = m.vertices[0];
+    const km = haversineKm(a, b);
+    const mid = L.latLng((a.lat+b.lat)/2, (a.lng+b.lng)/2);
+    tips.push(L.marker(mid, { icon: L.divIcon({ className:'seg-label', html:fmtDistance(km), iconSize:[70,18] }), interactive:false }).addTo(map));
+  }
+  return tips;
+}
+
+function updateMeasurementLabels(m) {
+  m.layers.segTooltips.forEach(t => t.remove());
+  m.layers.segTooltips = buildSegmentTooltips(m, m.map);
   if (m.mode === 'area' && m.layers.centerTooltip) {
     m.layers.centerTooltip.remove();
     const ha = polygonAreaHa(m.vertices);
     const c = L.polygon(m.vertices).getBounds().getCenter();
-    m.layers.centerTooltip = L.marker(c, { icon: L.divIcon({ className:'seg-label-total', html:`⬡ ${fmtArea(ha)}`, iconSize:[110,20] }), interactive:false }).addTo(maps.anm);
+    m.layers.centerTooltip = L.marker(c, { icon: L.divIcon({ className:'seg-label-total', html:`⬡ ${fmtArea(ha)}`, iconSize:[110,20] }), interactive:false }).addTo(m.map);
   }
+  // Mover el botón borrador al primer vértice actualizado
+  if (m.layers.deleteBtn) m.layers.deleteBtn.setLatLng(m.vertices[0]);
+}
+
+function removeMeasurement(id) {
+  const i = measurements.findIndex(x => x.id === id);
+  if (i < 0) return;
+  const m = measurements[i];
+  if (m.layers) {
+    if (m.layers.line) m.layers.line.remove();
+    m.layers.dots.forEach(d => d.remove());
+    m.layers.segTooltips.forEach(t => t.remove());
+    if (m.layers.centerTooltip) m.layers.centerTooltip.remove();
+    if (m.layers.deleteBtn) m.layers.deleteBtn.remove();
+  }
+  measurements.splice(i, 1);
+  showMeasureResult(measurements.length ? `${measurements.length} medición(es) activas` : '', 'ok');
 }
 function measurementSummary(m) {
   if (m.mode === 'area') {
@@ -3024,10 +3212,11 @@ function measurementSummary(m) {
 function clearAllMeasurements() {
   measurements.forEach(m => {
     if (m.layers) {
-      m.layers.lines.forEach(l => l.remove());
-      m.layers.dots.forEach(g => g.forEach(d => d.remove()));
+      if (m.layers.line) m.layers.line.remove();
+      m.layers.dots.forEach(d => d.remove());
       m.layers.segTooltips.forEach(t => t.remove());
       if (m.layers.centerTooltip) m.layers.centerTooltip.remove();
+      if (m.layers.deleteBtn) m.layers.deleteBtn.remove();
     }
   });
   measurements.length = 0;
@@ -3039,7 +3228,7 @@ allMaps.forEach(m => {
   m.on('click', e => {
     if (measureMode) {
       L.DomEvent.stop(e.originalEvent);
-      addMeasureVertex(e.latlng);
+      addMeasureVertex(e.latlng, m);
     }
   });
   m.on('dblclick', e => {
@@ -3305,22 +3494,6 @@ document.getElementById('verifyOSM').onclick = () => {
   // OpenStreetMap oficial — para verificar si las vías/trochas están mapeadas
   window.open(`https://www.openstreetmap.org/#map=${f.z}/${f.lat}/${f.lng}`, '_blank');
 };
-
-// === Activar/Apagar TODAS las capas viales ===
-// Enciende INVIAS + ANI + Vías topo + Trochas en los 4 mapas a la vez.
-// Simula un clic en cada checkbox para reusar la lógica existente.
-const VIAS_STACK = ['viasInvias', 'viasAni', 'vias', 'trochas'];
-function toggleAllViasLayers(activate) {
-  document.querySelectorAll('.toggles input[type=checkbox]').forEach(cb => {
-    if (VIAS_STACK.includes(cb.dataset.layer) && cb.dataset.map === 'gfw' && cb.checked !== activate) {
-      cb.checked = activate;
-      cb.dispatchEvent(new Event('change'));
-    }
-  });
-  showStatus(activate ? '🛣 Vías activadas en mapa Deforestación' : 'Vías apagadas', activate ? 'ok' : '', 3000);
-}
-document.getElementById('viasFullOn').onclick = () => toggleAllViasLayers(true);
-document.getElementById('viasFullOff').onclick = () => toggleAllViasLayers(false);
 
 // ============================================================
 // MI UBICACIÓN GPS — una lectura por clic, sin tracking continuo.
