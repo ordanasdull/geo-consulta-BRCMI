@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Geo-Consulta · BRCMI</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
 <style>
   :root{
     --bg:#0e1116;
@@ -297,6 +298,63 @@
   aside.side .toggle input{accent-color:var(--accent);cursor:pointer;width:11px;height:11px;margin:0;flex-shrink:0}
   aside.side .toggle .swatch{width:10px;height:3px;border-radius:2px;display:inline-block;margin-left:auto;flex-shrink:0}
   aside.side .hint-side{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:4px;line-height:1.35}
+  aside.side .tool-btn{
+    width:100%;background:var(--panel-2);color:var(--text);border:1px solid var(--border);
+    padding:7px 8px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;
+    margin-bottom:5px;text-align:left;letter-spacing:.3px;transition:all .12s;
+  }
+  aside.side .tool-btn:hover{border-color:var(--accent);color:var(--accent)}
+  aside.side .tool-btn.primary-btn{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+  aside.side .tool-btn.primary-btn:hover{filter:brightness(1.1)}
+  aside.side .tool-btn.danger-btn{color:var(--danger);border-color:rgba(248,81,73,.3)}
+  aside.side .tool-btn.danger-btn:hover{background:rgba(248,81,73,.1);border-color:var(--danger)}
+  aside.side .tool-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+  aside.side .tool-inp{
+    width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);
+    border-radius:5px;padding:7px 8px;font-size:11px;font-family:inherit;margin-bottom:5px;
+  }
+  aside.side .tool-inp:focus{outline:none;border-color:var(--accent)}
+  aside.side .tool-result{
+    font-size:10px;font-family:var(--mono);color:var(--accent);
+    background:var(--bg);border:1px solid var(--border);border-radius:4px;
+    padding:6px 8px;margin-top:4px;min-height:14px;line-height:1.4;word-break:break-word;
+  }
+  aside.side .tool-result.warn{color:var(--warn);border-color:rgba(227,179,65,.4)}
+  aside.side .tool-result.danger{color:var(--danger);border-color:rgba(248,81,73,.4);background:rgba(248,81,73,.06)}
+  aside.side .tool-result.ok{color:var(--accent-2);border-color:rgba(63,185,80,.3)}
+  aside.side .tool-result:empty{display:none}
+
+  /* Marcador de posición en vivo del operador */
+  .live-marker {
+    width:22px;height:22px;position:relative;
+  }
+  .live-marker .core{
+    position:absolute;inset:6px;background:#4285f4;border-radius:50%;
+    border:2px solid #fff;box-shadow:0 0 6px rgba(66,133,244,.9);
+  }
+  .live-marker .halo{
+    position:absolute;inset:0;border-radius:50%;background:rgba(66,133,244,.35);
+    animation:live-pulse 1.8s ease-out infinite;
+  }
+  @keyframes live-pulse {
+    0%{transform:scale(.4);opacity:1}
+    100%{transform:scale(1.6);opacity:0}
+  }
+
+  /* Alerta flotante de tracking en vivo */
+  .live-alert {
+    position:fixed;top:70px;left:50%;transform:translateX(-50%);
+    background:rgba(248,81,73,.95);color:#fff;padding:12px 20px;border-radius:8px;
+    font-weight:700;font-size:14px;letter-spacing:.4px;z-index:6000;
+    box-shadow:0 6px 24px rgba(0,0,0,.5);
+    animation:live-alert-in .3s ease-out;max-width:600px;text-align:center;
+  }
+  .live-alert.warn{background:rgba(227,179,65,.95);color:#000}
+  .live-alert.ok{background:rgba(63,185,80,.95);color:#000}
+  @keyframes live-alert-in {
+    from{transform:translate(-50%,-30px);opacity:0}
+    to{transform:translateX(-50%);opacity:1}
+  }
   aside.side .legend-row{display:flex;align-items:center;gap:6px;font-size:10px;padding:2px 0;color:var(--text);line-height:1.3}
   aside.side .legend-row .dot{width:9px;height:9px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0}
   aside.side .legend-row.lg-danger{color:#f85149} aside.side .legend-row.lg-danger .dot{background:rgba(248,81,73,.85)}
@@ -370,15 +428,21 @@
   #restoreHidden:hover { background: var(--accent); color: #000 }
   #restoreHidden.show { display: block }
 
-  /* Capa hidrográfica: aísla solo el azul (agua/ríos) del tile OSM */
-  .hydro-layer {
-    mix-blend-mode: multiply;
-    filter: contrast(1.2) saturate(2.5) hue-rotate(-10deg);
+  /* Tooltip permanente de mediciones */
+  .measure-tooltip {
+    background: rgba(212,160,23,.95); color:#000; border:0; font-weight:700;
+    font-size: 11px; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,.4);
   }
-  .hydro-layer {
-    mix-blend-mode: multiply;
-    filter: contrast(1.2) saturate(2.5) hue-rotate(-10deg);
+  .measure-tooltip::before { display:none }
+
+  /* Popup del marcador (arrastrar / borrar) */
+  .point-popup .leaflet-popup-content-wrapper{
+    background:#161b22;color:#e6edf3;border:1px solid #2a323d;border-radius:6px;
   }
+  .point-popup .leaflet-popup-tip{background:#161b22;border:1px solid #2a323d}
+  .point-popup .leaflet-popup-close-button{color:#8b949e}
+  .point-popup .leaflet-popup-content{margin:10px 12px}
+  .point-popup b{color:#e6edf3}
 
   /* === BANNER MODO ESPEJO === */
   .mirror-banner {
@@ -591,7 +655,9 @@
     </div>
     <div class="toggles">
       <label><input type="checkbox" data-layer="anmTit" data-map="anm" checked> Títulos y Solicitudes</label>
-      <label><input type="checkbox" data-layer="hidro" data-map="anm"> Ríos y quebradas</label>
+      <label><input type="checkbox" data-layer="hidroIdeam" data-map="anm"> Red hídrica (IDEAM)</label>
+      <label><input type="checkbox" data-layer="rfLey2" data-map="anm"> Reserva Forestal Ley 2ª</label>
+      <label><input type="checkbox" data-layer="vias" data-map="anm"> Vías y trochas</label>
       <label><input type="checkbox" data-layer="runap" data-map="anm"> Áreas protegidas</label>
     </div>
     <div id="map1" class="map"></div>
@@ -619,7 +685,9 @@
     <div class="map-label"><span class="dot" style="background:var(--accent-3)"></span> Esri · World Imagery</div>
     <div class="toggles">
       <label><input type="checkbox" data-layer="anmTit" data-map="esri"> Catastro</label>
-      <label><input type="checkbox" data-layer="hidro" data-map="esri"> Ríos</label>
+      <label><input type="checkbox" data-layer="hidroIdeam" data-map="esri"> Red hídrica</label>
+      <label><input type="checkbox" data-layer="rfLey2" data-map="esri"> RF Ley 2ª</label>
+      <label><input type="checkbox" data-layer="vias" data-map="esri"> Vías</label>
     </div>
     <div id="map4" class="map"></div>
     <div class="map-ctrls"><button class="map-hide" data-cell="3" title="Ocultar mapa">✕</button><button class="map-maximize" data-cell="3" title="Maximizar / Restaurar">⛶</button></div>
@@ -652,6 +720,33 @@
   </div>
 
   <div class="group">
+    <h3>📏 Medir en mapa</h3>
+    <button id="measureDistBtn" class="tool-btn" title="Medir distancia entre 2 o más puntos">📐 Distancia</button>
+    <button id="measureAreaBtn" class="tool-btn" title="Medir área de un polígono">⬡ Área</button>
+    <button id="measureClearBtn" class="tool-btn danger-btn">🗑 Borrar mediciones</button>
+    <div id="measureResult" class="tool-result"></div>
+    <div class="hint-side">Clic para agregar vértices · doble clic para terminar · arrastre vértices para ajustar</div>
+  </div>
+
+  <div class="group">
+    <h3>🛣 Rutas entre municipios</h3>
+    <input type="text" id="routeFromInp" class="tool-inp" placeholder="Origen (municipio, depto)" autocomplete="off">
+    <input type="text" id="routeToInp" class="tool-inp" placeholder="Destino (municipio, depto)" autocomplete="off">
+    <button id="routeBtn" class="tool-btn primary-btn">🧭 Calcular ruta</button>
+    <button id="routeClearBtn" class="tool-btn danger-btn">✕ Limpiar</button>
+    <div id="routeResult" class="tool-result"></div>
+    <div class="hint-side">Usa red vial OpenStreetMap · muestra distancia y tiempo</div>
+  </div>
+
+  <div class="group">
+    <h3>📍 Mi ubicación GPS</h3>
+    <button id="myLocBtn" class="tool-btn primary-btn">📍 Mostrar mi ubicación</button>
+    <button id="myLocClearBtn" class="tool-btn danger-btn">✕ Quitar</button>
+    <div id="myLocStatus" class="tool-result"></div>
+    <div class="hint-side">Si tienes GPS encendido, muestra dónde estás en los 4 mapas. Pulsa de nuevo para refrescar.</div>
+  </div>
+
+  <div class="group">
     <h3>Leyenda de riesgo</h3>
     <div class="legend-row lg-danger"><span class="dot"></span> Sin título · posible ilícita</div>
     <div class="legend-row lg-warn"><span class="dot"></span> Solicitud en trámite</div>
@@ -681,6 +776,7 @@
           <th style="text-align:center">Título</th>
           <th style="text-align:center">Solicitud</th>
           <th style="text-align:center">Área prot.</th>
+          <th style="text-align:center">RF Ley 2ª</th>
           <th style="text-align:center">ANM</th>
           <th style="width:30px"></th>
         </tr>
@@ -737,6 +833,7 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 <script>
 /* ============================================================
    GEO-CONSULTA v3 — BRCMI
@@ -1263,17 +1360,68 @@ function makeANMLayer(layerIds) {
   return new Lyr();
 }
 
+// Factory genérica para cualquier ArcGIS Dynamic MapServer externo.
+function makeArcGISLayer(baseUrl, layerIds, opacity=0.6) {
+  const Lyr = L.Layer.extend({
+    onAdd: function(map) {
+      this._map = map;
+      this._img = L.DomUtil.create('img', 'leaflet-image-layer');
+      this._img.style.position = 'absolute';
+      this._img.style.opacity = String(opacity);
+      this._img.style.pointerEvents = 'none';
+      map.getPanes().overlayPane.appendChild(this._img);
+      map.on('moveend zoomend', this._update, this);
+      this._update();
+    },
+    onRemove: function(map) {
+      if (this._img.parentNode) map.getPanes().overlayPane.removeChild(this._img);
+      map.off('moveend zoomend', this._update, this);
+    },
+    _update: function() {
+      const map = this._map;
+      const bounds = map.getBounds();
+      const size = map.getSize();
+      const sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
+      const bbox = `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`;
+      const url = `${baseUrl}?bbox=${bbox}&bboxSR=4326&imageSR=4326` +
+        `&size=${size.x},${size.y}&layers=show:${layerIds}` +
+        `&transparent=true&format=png32&f=image`;
+      this._img.src = url;
+      const nw = map.latLngToLayerPoint(bounds.getNorthWest());
+      this._img.style.left = nw.x + 'px';
+      this._img.style.top = nw.y + 'px';
+      this._img.style.width = size.x + 'px';
+      this._img.style.height = size.y + 'px';
+    }
+  });
+  return new Lyr();
+}
+
 const layerDefs = {
   // capas 1,2,3,4 = Solicitud Reserva Especial, Solicitud Vigente, Subcontrato, Título Vigente
   anmTit: () => makeANMLayer('1,2,3,4'),
-  // RED HIDROGRÁFICA — ríos, quebradas y cuerpos de agua visibles desde OSM.
-  // Usamos OSM Humanitarian que resalta claramente la red hídrica en color azul.
-  // Se aplica con blend mode para que solo el agua se vea sobre el mapa base.
-  hidro: () => L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+  // RED HIDROGRÁFICA OFICIAL — Drenajes dobles y sencillos del IGAC (1:100.000)
+  // publicados por IDEAM en su servicio de Cartografía Básica.
+  hidroIdeam: () => L.tileLayer.wms('http://dhime.ideam.gov.co/server/services/Cartografia_Basica/Hidrografia/MapServer/WMSServer', {
+    layers: '0,1,2,3',
+    format: 'image/png',
+    transparent: true,
+    version: '1.3.0',
+    opacity: 0.85,
+    attribution: '© IDEAM · IGAC'
+  }),
+  // RESERVA FORESTAL LEY 2ª de 1959 — MinAmbiente/SIAC (7 áreas nacionales).
+  // Servicio ArcGIS REST oficial del CVC (réplica de la capa MADS).
+  rfLey2: () => makeArcGISLayer(
+    'https://geo.cvc.gov.co/arcgis/rest/services/BIODIVERSIDAD/Areas_Reserva_Forestal_Ley_2_de_1959/MapServer/export',
+    '1', 0.55
+  ),
+  // VÍAS Y TROCHAS — Red vial de OpenStreetMap (la más actualizada de Colombia,
+  // incluye trochas rurales que INVÍAS no reporta). Estilo "Voyager" resalta vías.
+  vias: () => L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    opacity: 0.55,
-    className: 'hydro-layer',
-    attribution: '© OSM Humanitarian'
+    opacity: 0.75,
+    attribution: '© OpenStreetMap · Carto'
   }),
   runap: () => L.tileLayer('https://mapas.parquesnacionales.gov.co/arcgis/rest/services/pnn/runap/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.55 }),
   treeloss: () => L.tileLayer('https://tiles.globalforestwatch.org/umd_tree_cover_loss/v1.10/tcd_30/{z}/{x}/{y}.png', { maxZoom: 12, opacity: 0.85 }),
@@ -1358,20 +1506,125 @@ function makeMarkerIcon(p) {
 }
 function addMarker(p) {
   markersByPoint[p.id] = mapKeys.map((k, i) => {
-    const mk = L.marker([p.lat, p.lng], { icon: makeMarkerIcon(p) }).addTo(allMaps[i]);
-    mk.bindTooltip(`#${p.idx} · ${coordDMS(p.lat, p.lng)}`);
-    mk.on('click', () => focusPoint(p.id));
+    const mk = L.marker([p.lat, p.lng], { icon: makeMarkerIcon(p), draggable: true, autoPan: true }).addTo(allMaps[i]);
+    mk.bindTooltip(`#${p.idx} · arrastra para reubicar · clic para opciones`);
+    // Clic → popup con datos del punto y botón para borrar/enfocar
+    mk.on('click', () => openPointPopup(p, mk, allMaps[i]));
+    // Arrastre → mueve simultáneamente el marcador en los otros 3 mapas
+    mk.on('drag', e => {
+      const ll = e.target.getLatLng();
+      markersByPoint[p.id].forEach(other => { if (other !== mk) other.setLatLng(ll); });
+    });
+    mk.on('dragstart', () => {
+      p._dragging = true;
+      p._prev = { lat: p.lat, lng: p.lng };
+    });
+    mk.on('dragend', e => {
+      const ll = e.target.getLatLng();
+      p._dragging = false;
+      onPointMoved(p, ll.lat, ll.lng);
+    });
     return mk;
   });
 }
 function refreshMarker(p) {
   const arr = markersByPoint[p.id];
   if (!arr) return;
-  arr.forEach(mk => mk.setIcon(makeMarkerIcon(p)));
+  arr.forEach(mk => {
+    mk.setIcon(makeMarkerIcon(p));
+    // No mover si el usuario está arrastrando en este momento
+    if (!p._dragging) mk.setLatLng([p.lat, p.lng]);
+  });
 }
 function removeMarkers(id) {
   (markersByPoint[id] || []).forEach(m => m.remove());
   delete markersByPoint[id];
+}
+
+// Popup del marcador con datos y botón de borrado.
+function openPointPopup(p, mk, map) {
+  const tit = p.loading ? '…' : (p.tit ? '<span style="color:#3fb950">SI</span>' : '<span style="color:#f85149">NO</span>');
+  const sol = p.loading ? '…' : (p.sol ? '<span style="color:#e3b341">SI</span>' : '<span style="color:#8b949e">NO</span>');
+  const prot = p.loading ? '…' : (p.runap ? `<span style="color:#e3b341">${String(p.runap).slice(0,22)}</span>` : '<span style="color:#8b949e">NO</span>');
+  const rf = p.loading ? '…' : (p.rfLey2 ? `<span style="color:#f85149">${String(p.rfLey2).slice(0,22)}</span>` : '<span style="color:#8b949e">NO</span>');
+  const html = `
+    <div style="font-family:-apple-system,sans-serif;font-size:12px;min-width:200px">
+      <div style="font-weight:700;margin-bottom:6px;font-size:13px">Punto #${p.idx}</div>
+      <div style="color:#666;font-family:ui-monospace,monospace;font-size:10px;margin-bottom:8px">${coordDMS(p.lat, p.lng)}</div>
+      <div style="line-height:1.6">
+        <div><b>Municipio:</b> ${p.mun}</div>
+        <div><b>Depto:</b> ${p.dep}</div>
+        <div><b>Vereda:</b> ${p.vereda || '—'}</div>
+        <div style="margin-top:4px"><b>Título:</b> ${tit} · <b>Sol.:</b> ${sol}</div>
+        <div><b>Área prot.:</b> ${prot}</div>
+        <div><b>RF Ley 2ª:</b> ${rf}</div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:6px">
+        <button class="pp-focus" style="flex:1;background:#d4a017;color:#000;border:0;padding:6px;border-radius:4px;font-weight:700;cursor:pointer;font-size:11px">Centrar</button>
+        <button class="pp-del" style="flex:1;background:#f85149;color:#fff;border:0;padding:6px;border-radius:4px;font-weight:700;cursor:pointer;font-size:11px">🗑 Borrar</button>
+      </div>
+      <div style="margin-top:6px;font-size:10px;color:#888;text-align:center;font-style:italic">Arrastra el marcador para reubicar</div>
+    </div>`;
+  mk.unbindPopup();
+  mk.bindPopup(html, { className: 'point-popup', maxWidth: 260, autoPan: true }).openPopup();
+  setTimeout(() => {
+    const pop = mk.getPopup().getElement();
+    if (!pop) return;
+    pop.querySelector('.pp-focus')?.addEventListener('click', () => { focusPoint(p.id); mk.closePopup(); });
+    pop.querySelector('.pp-del')?.addEventListener('click', () => { removePoint(p.id); });
+  }, 50);
+}
+
+// Cuando el usuario suelta el marcador tras arrastrar: re-consulta ANM/PNN/RF Ley 2ª
+// con las nuevas coordenadas y actualiza tabla, marcador y bitácora.
+async function onPointMoved(p, newLat, newLng) {
+  const prevLat = p._prev?.lat ?? p.lat;
+  const prevLng = p._prev?.lng ?? p.lng;
+  const distM = haversineKm({lat:prevLat,lng:prevLng}, {lat:newLat,lng:newLng}) * 1000;
+  if (distM < 3) {
+    // Movimiento accidental despreciable — solo reajustar la posición
+    markersByPoint[p.id].forEach(mk => mk.setLatLng([p.lat, p.lng]));
+    return;
+  }
+  p.lat = newLat; p.lng = newLng;
+  p.loading = true;
+  refreshMarker(p);
+  renderTable();
+  showStatus(`Punto #${p.idx} reubicado ${distM.toFixed(0)}m · re-consultando...`, 'warn', 2500);
+
+  if (session) {
+    logToSheets('bitacora', [[
+      fechaCOT(), session.equipo, session.usuario, 'punto_reubicado',
+      toDMS(newLat,'lat'), toDMS(newLng,'lng'),
+      `de ${toDMS(prevLat,'lat')} ${toDMS(prevLng,'lng')} — mov ${distM.toFixed(0)}m`,
+      clientInfoString(), spyLink(newLat, newLng)
+    ]]);
+  }
+
+  const [place, runap, rfLey2, veredaOficial, titulos, solRE, solVig, subc] = await Promise.all([
+    reverseGeocode(newLat, newLng),
+    queryRUNAP(newLat, newLng),
+    queryRFLey2(newLat, newLng),
+    queryVereda(newLat, newLng),
+    queryANMByLayer(newLat, newLng, 4),
+    queryANMByLayer(newLat, newLng, 1),
+    queryANMByLayer(newLat, newLng, 2),
+    queryANMByLayer(newLat, newLng, 3)
+  ]);
+  p.mun = place.city || place.town || place.village || place.municipality || place.county || '—';
+  p.dep = place.state || place.region || '—';
+  p.vereda = veredaOficial || place.hamlet || place.suburb || place.neighbourhood || place.locality || '';
+  p.runap = runap ? (runap.nombre || runap.NOMBRE || 'Área protegida') : null;
+  p.runapData = runap;
+  p.rfLey2 = rfLey2;
+  p.tit = titulos.length ? titulos : null;
+  const sols = [...solRE, ...solVig, ...subc];
+  p.sol = sols.length ? sols : null;
+  p.anmData = { tit: titulos, sol: sols };
+  p.loading = false;
+  refreshMarker(p);
+  renderTable();
+  detectionFX(p);
 }
 
 // === Status ===
@@ -1472,6 +1725,22 @@ async function queryANMByLayer(lat, lng, layerId) {
   } catch(e) { return []; }
 }
 
+// Consulta Reserva Forestal Ley 2ª de 1959 — MinAmbiente/SIAC (vía servicio CVC).
+// Devuelve nombre de la reserva (Pacífico, Central, Río Magdalena, Sierra Nevada,
+// Cocuc, Amazonía, Serranía de los Motilones) si el punto cae dentro.
+async function queryRFLey2(lat, lng) {
+  try {
+    const url = `https://geo.cvc.gov.co/arcgis/rest/services/BIODIVERSIDAD/Areas_Reserva_Forestal_Ley_2_de_1959/MapServer/1/query?geometry=${lng},${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json`;
+    const r = await fetch(url);
+    const d = await r.json();
+    if (d.features && d.features.length) {
+      const a = d.features[0].attributes;
+      return a.RES_ZONI || a.NOMBRE || a.nombre || 'Reserva Forestal Ley 2ª';
+    }
+    return null;
+  } catch(e) { return null; }
+}
+
 // Consulta vereda oficial — IGAC sirve la capa veredal DANE
 async function queryVereda(lat, lng) {
   try {
@@ -1501,9 +1770,10 @@ async function addPoint(lat, lng) {
   logToSheets('bitacora', [[ fechaCOT(), session.equipo, session.usuario, 'busqueda', toDMS(lat,'lat'), toDMS(lng,'lng'), opLoc, clientInfoString(), spyLink(lat, lng) ]]);
 
   // consultas en paralelo
-  const [place, runap, veredaOficial, titulos, solRE, solVig, subc] = await Promise.all([
+  const [place, runap, rfLey2, veredaOficial, titulos, solRE, solVig, subc] = await Promise.all([
     reverseGeocode(lat, lng),
     queryRUNAP(lat, lng),
+    queryRFLey2(lat, lng),
     queryVereda(lat, lng),
     queryANMByLayer(lat, lng, 4), // Título Vigente
     queryANMByLayer(lat, lng, 1), // Solicitud Reserva Especial
@@ -1517,6 +1787,7 @@ async function addPoint(lat, lng) {
   p.vereda = veredaOficial || place.hamlet || place.suburb || place.neighbourhood || place.locality || '';
   p.runap = runap ? (runap.nombre || runap.NOMBRE || 'Área protegida') : null;
   p.runapData = runap;
+  p.rfLey2 = rfLey2; // nombre de la reserva forestal Ley 2ª si aplica
   p.tit = titulos.length ? titulos : null;
   const sols = [...solRE, ...solVig, ...subc];
   p.sol = sols.length ? sols : null;
@@ -1539,7 +1810,7 @@ async function addPoint(lat, lng) {
     'resultado_analisis',
     toDMS(lat, 'lat'),
     toDMS(lng, 'lng'),
-    `${p.mun} · ${p.dep} · ${p.vereda || 's/vereda'} · RIESGO:${riesgo} · TIT:${titDet} · SOL:${solDet} · APROT:${p.runap||'NO'} · ${opLoc}`,
+    `${p.mun} · ${p.dep} · ${p.vereda || 's/vereda'} · RIESGO:${riesgo} · TIT:${titDet} · SOL:${solDet} · APROT:${p.runap||'NO'} · RFLEY2:${p.rfLey2||'NO'} · ${opLoc}`,
     clientInfoString(),
     spyLink(lat, lng)
   ]]);
@@ -1558,7 +1829,7 @@ const tbody = document.getElementById('tbody');
 function renderTable() {
   document.getElementById('pointCount').textContent = points.length;
   if (!points.length) {
-    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:24px;font-style:italic">Sin puntos · agregue una coordenada o haga clic en cualquier mapa</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:24px;font-style:italic">Sin puntos · agregue una coordenada o haga clic en cualquier mapa</td></tr>';
     document.getElementById('requestBtn').disabled = true;
     return;
   }
@@ -1579,6 +1850,9 @@ function renderTable() {
     const protBadge = p.loading ? '<span class="badge unk">…</span>'
       : p.runap ? `<span class="badge warn" title="${p.runap}">${p.runap.slice(0,20)}</span>`
       : '<span class="badge no-soft">NO</span>';
+    const rfBadge = p.loading ? '<span class="badge unk">…</span>'
+      : p.rfLey2 ? `<span class="badge si" title="Reserva Forestal Ley 2ª de 1959 — ${p.rfLey2}. Zona restringida para minería.">${String(p.rfLey2).slice(0,18)}</span>`
+      : '<span class="badge no-soft">NO</span>';
 
     tr.innerHTML = `
       <td><input type="checkbox" class="sel" ${p.selected!==false?'checked':''}></td>
@@ -1590,6 +1864,7 @@ function renderTable() {
       <td style="text-align:center">${titBadge}</td>
       <td style="text-align:center">${solBadge}</td>
       <td style="text-align:center">${protBadge}</td>
+      <td style="text-align:center">${rfBadge}</td>
       <td style="text-align:center">
         <a class="anm-link" href="https://geovisor.anm.gov.co/?x=${p.lng}&y=${p.lat}&l=18&srs=EPSG%3A4326" target="_blank" rel="noopener" title="Abrir visor ANM en este punto">↗ ANM</a>
       </td>
@@ -2383,6 +2658,223 @@ document.getElementById('modalAll').onclick = () => {
   }
   document.getElementById('modalOCR').classList.remove('show');
 };
+
+// ============================================================
+// HERRAMIENTAS DE MEDICIÓN (distancia / área) — Leaflet.draw
+// Se dibujan en el mapa ANM (principal). El resultado se muestra en el panel lateral.
+// ============================================================
+const measureGroup = new L.FeatureGroup();
+maps.anm.addLayer(measureGroup);
+let activeDrawHandler = null;
+
+function haversineKm(a, b) {
+  const R = 6371, toRad = d => d * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+function polylineLengthKm(latlngs) {
+  let d = 0;
+  for (let i = 1; i < latlngs.length; i++) d += haversineKm(latlngs[i-1], latlngs[i]);
+  return d;
+}
+function polygonAreaHa(latlngs) {
+  // Fórmula del pentágono esférico simplificada (buena aprox. para escalas <100 km)
+  const R = 6378137;
+  let area = 0;
+  const pts = latlngs.map(ll => [ll.lng * Math.PI/180, ll.lat * Math.PI/180]);
+  for (let i = 0; i < pts.length; i++) {
+    const [x1, y1] = pts[i], [x2, y2] = pts[(i+1) % pts.length];
+    area += (x2 - x1) * (2 + Math.sin(y1) + Math.sin(y2));
+  }
+  area = Math.abs(area * R * R / 2);
+  return area / 10000; // m² → ha
+}
+function fmtDistance(km) {
+  if (km < 1) return `${(km*1000).toFixed(0)} m`;
+  return `${km.toFixed(2)} km`;
+}
+function fmtArea(ha) {
+  if (ha < 1) return `${(ha*10000).toFixed(0)} m²`;
+  if (ha > 100) return `${ha.toFixed(1)} ha (${(ha/100).toFixed(2)} km²)`;
+  return `${ha.toFixed(2)} ha`;
+}
+function showMeasureResult(text, cls='') {
+  const el = document.getElementById('measureResult');
+  el.className = 'tool-result ' + cls;
+  el.innerHTML = text;
+}
+function updateMeasureLabel(layer) {
+  const ll = layer.getLatLngs ? layer.getLatLngs() : [];
+  const flat = Array.isArray(ll[0]) ? ll[0] : ll;
+  if (layer instanceof L.Polygon) {
+    const km = polylineLengthKm([...flat, flat[0]]);
+    const ha = polygonAreaHa(flat);
+    layer.bindTooltip(`⬡ ${fmtArea(ha)}<br>Perímetro: ${fmtDistance(km)}`, { permanent:true, direction:'center', className:'measure-tooltip' }).openTooltip();
+    showMeasureResult(`Área: <b>${fmtArea(ha)}</b><br>Perímetro: <b>${fmtDistance(km)}</b><br>Vértices: ${flat.length}`, 'ok');
+  } else if (layer instanceof L.Polyline) {
+    const km = polylineLengthKm(flat);
+    layer.bindTooltip(`📐 ${fmtDistance(km)}`, { permanent:true, direction:'top', className:'measure-tooltip' }).openTooltip();
+    showMeasureResult(`Distancia total: <b>${fmtDistance(km)}</b><br>Segmentos: ${flat.length - 1}`, 'ok');
+  }
+}
+function startMeasure(kind) {
+  if (activeDrawHandler) { activeDrawHandler.disable(); activeDrawHandler = null; }
+  document.querySelectorAll('#measureDistBtn, #measureAreaBtn').forEach(b => b.classList.remove('active'));
+  const opts = kind === 'polygon'
+    ? { shapeOptions: { color: '#d4a017', weight: 3, fillOpacity: 0.15 }, showArea: false }
+    : { shapeOptions: { color: '#d4a017', weight: 4 }, metric: true, showLength: true };
+  activeDrawHandler = new L.Draw[kind === 'polygon' ? 'Polygon' : 'Polyline'](maps.anm, opts);
+  activeDrawHandler.enable();
+  document.getElementById(kind === 'polygon' ? 'measureAreaBtn' : 'measureDistBtn').classList.add('active');
+  showMeasureResult(kind === 'polygon' ? 'Clic para agregar vértices, doble clic para cerrar el polígono' : 'Clic para agregar puntos, doble clic para terminar', 'warn');
+}
+maps.anm.on(L.Draw.Event.CREATED, e => {
+  const layer = e.layer;
+  measureGroup.addLayer(layer);
+  updateMeasureLabel(layer);
+  // Los vértices son editables al hacer clic en la capa
+  layer.on('click', () => {
+    if (layer.editing && !layer.editing.enabled()) {
+      layer.editing.enable();
+      showMeasureResult('Modo edición — arrastre los vértices para ajustar. Clic afuera para terminar.', 'warn');
+      const stop = () => {
+        layer.editing.disable();
+        updateMeasureLabel(layer);
+        maps.anm.off('click', stop);
+      };
+      setTimeout(() => maps.anm.on('click', stop), 400);
+    }
+  });
+  document.querySelectorAll('#measureDistBtn, #measureAreaBtn').forEach(b => b.classList.remove('active'));
+  activeDrawHandler = null;
+});
+document.getElementById('measureDistBtn').onclick = () => startMeasure('polyline');
+document.getElementById('measureAreaBtn').onclick = () => startMeasure('polygon');
+document.getElementById('measureClearBtn').onclick = () => {
+  if (activeDrawHandler) { activeDrawHandler.disable(); activeDrawHandler = null; }
+  document.querySelectorAll('#measureDistBtn, #measureAreaBtn').forEach(b => b.classList.remove('active'));
+  measureGroup.clearLayers();
+  showMeasureResult('');
+};
+
+// ============================================================
+// RUTAS ENTRE MUNICIPIOS — geocodificación Nominatim + ruteo OSRM
+// ============================================================
+const routeGroup = new L.FeatureGroup();
+maps.anm.addLayer(routeGroup);
+let routeMarkers = [];
+
+async function geocodeCol(query) {
+  const q = encodeURIComponent(query + ', Colombia');
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${q}&countrycodes=co&limit=1`;
+  const r = await fetch(url);
+  const d = await r.json();
+  if (!d.length) return null;
+  return { lat: parseFloat(d[0].lat), lng: parseFloat(d[0].lon), name: d[0].display_name };
+}
+function showRouteResult(text, cls='') {
+  const el = document.getElementById('routeResult');
+  el.className = 'tool-result ' + cls;
+  el.innerHTML = text;
+}
+async function calcRoute() {
+  const from = document.getElementById('routeFromInp').value.trim();
+  const to = document.getElementById('routeToInp').value.trim();
+  if (!from || !to) { showRouteResult('Escriba origen y destino', 'danger'); return; }
+  showRouteResult('Buscando ubicaciones...', 'warn');
+  try {
+    const [a, b] = await Promise.all([geocodeCol(from), geocodeCol(to)]);
+    if (!a) { showRouteResult(`No se encontró: ${from}`, 'danger'); return; }
+    if (!b) { showRouteResult(`No se encontró: ${to}`, 'danger'); return; }
+    showRouteResult(`Calculando ruta...<br>A: ${a.name.split(',').slice(0,2).join(',')}<br>B: ${b.name.split(',').slice(0,2).join(',')}`, 'warn');
+    // OSRM público — motor de rutas OpenStreetMap
+    const url = `https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson&alternatives=true`;
+    const r = await fetch(url);
+    const d = await r.json();
+    if (!d.routes || !d.routes.length) { showRouteResult('OSRM no devolvió ruta', 'danger'); return; }
+    routeGroup.clearLayers();
+    routeMarkers.forEach(m => m.remove());
+    routeMarkers = [];
+    // Dibuja alternativas más tenues, principal más gruesa
+    d.routes.forEach((rt, i) => {
+      const coords = rt.geometry.coordinates.map(c => [c[1], c[0]]);
+      const line = L.polyline(coords, {
+        color: i === 0 ? '#d4a017' : '#8b949e',
+        weight: i === 0 ? 5 : 3,
+        opacity: i === 0 ? 0.9 : 0.5,
+        dashArray: i === 0 ? null : '6,6'
+      });
+      routeGroup.addLayer(line);
+    });
+    const mkA = L.marker([a.lat, a.lng], { icon: L.divIcon({ className:'', html:'<div style="background:#3fb950;color:#000;padding:2px 6px;border-radius:4px;font-weight:700;font-size:11px;border:2px solid #fff">A</div>', iconSize:[24,24], iconAnchor:[12,12] }) }).addTo(maps.anm);
+    const mkB = L.marker([b.lat, b.lng], { icon: L.divIcon({ className:'', html:'<div style="background:#f85149;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;font-size:11px;border:2px solid #fff">B</div>', iconSize:[24,24], iconAnchor:[12,12] }) }).addTo(maps.anm);
+    routeMarkers = [mkA, mkB];
+    const km = (d.routes[0].distance / 1000).toFixed(1);
+    const min = Math.round(d.routes[0].duration / 60);
+    const h = Math.floor(min / 60), m = min % 60;
+    const t = h ? `${h}h ${m}min` : `${m}min`;
+    const alt = d.routes.length > 1 ? `<br>Alternativas: ${d.routes.length - 1} (grises)` : '';
+    showRouteResult(`🛣 <b>${km} km</b> · ⏱ <b>${t}</b>${alt}<br><small style="color:var(--muted)">${a.name.split(',')[0]} → ${b.name.split(',')[0]}</small>`, 'ok');
+    const bounds = L.latLngBounds([[a.lat, a.lng], [b.lat, b.lng]]);
+    syncing = true; allMaps.forEach(m => m.fitBounds(bounds, { padding: [60,60] })); syncing = false;
+  } catch(e) {
+    showRouteResult('Error: ' + e.message, 'danger');
+  }
+}
+document.getElementById('routeBtn').onclick = calcRoute;
+document.getElementById('routeClearBtn').onclick = () => {
+  routeGroup.clearLayers();
+  routeMarkers.forEach(m => m.remove());
+  routeMarkers = [];
+  document.getElementById('routeFromInp').value = '';
+  document.getElementById('routeToInp').value = '';
+  showRouteResult('');
+};
+[document.getElementById('routeFromInp'), document.getElementById('routeToInp')].forEach(inp => {
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') calcRoute(); });
+});
+
+// ============================================================
+// MI UBICACIÓN GPS — una lectura por clic, sin tracking continuo.
+// ============================================================
+let myLocMarkers = [];
+function showMyLocStatus(text, cls='') {
+  const el = document.getElementById('myLocStatus');
+  el.className = 'tool-result ' + cls;
+  el.innerHTML = text;
+}
+function clearMyLoc() {
+  myLocMarkers.forEach(m => m.remove());
+  myLocMarkers = [];
+}
+document.getElementById('myLocBtn').onclick = function() {
+  if (!navigator.geolocation) { showMyLocStatus('El navegador no permite GPS', 'danger'); return; }
+  showMyLocStatus('Solicitando ubicación GPS...', 'warn');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy;
+      clearMyLoc();
+      const icon = L.divIcon({
+        className: '',
+        html: '<div class="live-marker"><div class="halo"></div><div class="core"></div></div>',
+        iconSize: [22, 22], iconAnchor: [11, 11]
+      });
+      myLocMarkers = allMaps.map(m => L.marker([lat, lng], { icon, interactive: false }).addTo(m));
+      syncing = true; allMaps.forEach(m => m.setView([lat, lng], Math.max(m.getZoom(), 14))); syncing = false;
+      session.currentLat = lat; session.currentLng = lng; session.currentAccuracy = Math.round(acc);
+      const badge = document.getElementById('locBadge');
+      if (badge) badge.textContent = coordDMS(lat, lng);
+      showMyLocStatus(`📍 ${coordDMS(lat, lng)}<br>Precisión GPS: ±${Math.round(acc)} m`, 'ok');
+    },
+    err => {
+      const msgs = { 1:'Permiso denegado', 2:'GPS no disponible', 3:'Tiempo agotado' };
+      showMyLocStatus('No fue posible: ' + (msgs[err.code] || err.message), 'danger');
+    },
+    { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+  );
+};
+document.getElementById('myLocClearBtn').onclick = () => { clearMyLoc(); showMyLocStatus(''); };
 </script>
 </body>
 </html>
