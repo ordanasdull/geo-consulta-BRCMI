@@ -827,7 +827,7 @@
     <div class="map-ctrls"><button class="map-hide" data-cell="0" title="Ocultar mapa">✕</button><button class="map-maximize" data-cell="0" title="Maximizar / Restaurar">⛶</button></div>
   </div>
   <div class="map-cell">
-    <div class="map-label"><span class="dot" style="background:#4285f4"></span> Satélite (Esri)</div>
+    <div class="map-label"><span class="dot" style="background:#4285f4"></span> Google · Satélite</div>
     <div class="toggles">
       <label><input type="checkbox" data-layer="labels" data-map="google" checked> Etiquetas</label>
       <label><input type="checkbox" data-layer="runap" data-map="google"> Áreas protegidas</label>
@@ -839,11 +839,9 @@
   <div class="map-cell">
     <div class="map-label"><span class="dot" style="background:var(--accent-2)"></span> Deforestación · GFW</div>
     <div class="toggles">
-      <label><input type="checkbox" data-layer="treeloss" data-map="gfw" checked> Pérdida cobertura</label>
-      <label><input type="checkbox" data-layer="viasInvias" data-map="gfw"> Vías INVIAS</label>
+      <label><input type="checkbox" data-layer="vias" data-map="gfw" checked> Vías + terreno</label>
+      <label><input type="checkbox" data-layer="treeloss" data-map="gfw"> Pérdida cobertura</label>
       <label><input type="checkbox" data-layer="viasAni" data-map="gfw"> Concesiones ANI</label>
-      <label><input type="checkbox" data-layer="vias" data-map="gfw"> Vías + terreno</label>
-      <label><input type="checkbox" data-layer="trochas" data-map="gfw"> Trochas</label>
     </div>
     <div id="map3" class="map"></div>
     <div class="map-ctrls"><button class="map-hide" data-cell="2" title="Ocultar mapa">✕</button><button class="map-maximize" data-cell="2" title="Maximizar / Restaurar">⛶</button></div>
@@ -1658,16 +1656,16 @@ function makeMap(id, withZoom=false) {
 }
 
 maps.anm = makeMap('map1', true);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 16, maxZoom: 19 }).addTo(maps.anm);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 16, maxZoom: 19, attribution: 'Esri' }).addTo(maps.anm);
 layers.anm = { anmTit: layerDefs.anmTit().addTo(maps.anm) };
 
 maps.google = makeMap('map2');
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(maps.google);
+L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20 }).addTo(maps.google);
 layers.google = { labels: layerDefs.labels().addTo(maps.google) };
 
 maps.gfw = makeMap('map3');
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 16, maxZoom: 19 }).addTo(maps.gfw);
-layers.gfw = { treeloss: layerDefs.treeloss().addTo(maps.gfw) };
+layers.gfw = { vias: layerDefs.vias().addTo(maps.gfw) };
 
 maps.esri = makeMap('map4');
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(maps.esri);
@@ -3796,6 +3794,84 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
 /* Rosa de vientos a la esquina inferior derecha (no choca con las leyendas top-right) */
 .north{top:auto!important;bottom:12px!important;right:12px!important}
 
+/* ===== Impresión: maximizar mapa + panel de convenciones/puntos ===== */
+.psheet{height:auto;min-height:196mm}
+.psheet .ph{padding:6px 12px}
+.psheet .pmapwrap{margin:3px 4px}
+.psheet .pf{font-size:9.5px}
+.psheet .pf .col{padding:5px 10px}
+.psheet .pf-points{border-top:1px solid #ccc;padding:4px 10px;font-size:9px;color:#111;max-height:26mm;overflow:hidden}
+.psheet .pf-points > b{color:#9A0000;text-transform:uppercase;font-size:8.5px;letter-spacing:.4px;display:block;margin-bottom:3px}
+.psheet .pf-points .pts{columns:3;column-gap:14px;line-height:1.5}
+.psheet .pf-points .pts .p{break-inside:avoid;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psheet .pf-points .pts .sw{display:inline-block;width:8px;height:8px;margin-right:4px;vertical-align:middle}
+.psheet .pf-points .pts .sw.cir{border-radius:50%}
+.psheet .pf-points .pts .sw.dia{transform:rotate(45deg)}
+@media print{
+  @page{size:A4 landscape;margin:6mm}
+  html,body{height:auto!important;overflow:visible!important}
+  .psheet{min-height:196mm;height:196mm}
+  #opsPrintMap{background:#fff!important}
+  .psheet .pmapwrap{min-height:90mm}
+  .psheet .pf-points{max-height:24mm}
+}
+
+/* === Impresión FINAL: mapa grande pegado arriba, sin franjas blancas === */
+@media print{
+  @page{size:A4 landscape;margin:5mm}
+  html,body{height:auto!important}
+  #opsPrintSheet{position:absolute!important;inset:0!important;padding:0!important;background:#fff!important}
+  .psheet{display:block!important;width:100%!important;height:auto!important;min-height:0!important;border:0!important;box-shadow:none!important}
+  .psheet .ph{padding:3px 8px!important}
+  .psheet .pmapwrap{flex:none!important;display:block!important;position:relative!important;height:158mm!important;min-height:0!important;margin:2mm 0!important;border:1px solid #999!important;overflow:hidden!important}
+  #opsPrintMap{position:absolute!important;inset:0!important;display:flex!important;align-items:center;justify-content:center;background:#fff!important}
+  #opsPrintMap canvas{max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;margin:0!important}
+  .psheet .pf{display:flex!important}
+  .psheet .pf-points{max-height:none!important;overflow:visible!important}
+}
+
+/* === Impresión DEFINITIVA: el pantallazo llena el ancho, alto natural, pegado arriba === */
+.psheet .pmapwrap{flex:0 0 auto!important;height:auto!important;min-height:0!important;overflow:visible!important}
+#opsPrintMap{position:relative!important;inset:auto!important;display:block!important;width:100%!important;height:auto!important}
+#opsPrintMap canvas{width:100%!important;height:auto!important;max-width:100%!important;max-height:none!important;display:block!important;margin:0!important}
+@media print{
+  @page{size:A4 landscape;margin:5mm}
+  html,body{height:auto!important}
+  #opsPrintSheet{position:absolute!important;inset:0!important;padding:0!important;background:#fff!important}
+  .psheet{display:block!important;width:100%!important;height:auto!important;min-height:0!important;border:0!important;box-shadow:none!important}
+  .psheet .ph{padding:3px 8px!important}
+  .psheet .pmapwrap{height:auto!important;margin:2mm 0!important;border:1px solid #999!important;background:#fff!important}
+  #opsPrintMap{background:#fff!important}
+  .psheet .pf-points{max-height:none!important;overflow:visible!important}
+}
+
+/* ===== Tabla de detalle de puntos de consulta en la lámina PDF ===== */
+.psheet .pf-consulta{padding:6px 10px;border-top:2px solid #9A0000}
+.psheet .pf-consulta > b{color:#9A0000;text-transform:uppercase;font-size:9px;letter-spacing:.4px;display:block;margin-bottom:4px}
+.psheet .pc{width:100%;border-collapse:collapse;font-size:8.5px;color:#111}
+.psheet .pc th,.psheet .pc td{border:1px solid #bbb;padding:2px 4px;text-align:left;vertical-align:top;word-break:break-word}
+.psheet .pc th{background:#f2e7e7;color:#7a0000;font-size:8px;text-transform:uppercase;letter-spacing:.2px}
+@media print{
+  .psheet .pf-consulta{break-inside:auto}
+  .psheet .pc{font-size:8px}
+  .psheet .pc tr{break-inside:avoid}
+}
+
+/* === Impresión: fondo blanco en TODAS las páginas + paginación natural === */
+@media print{
+  @page{size:A4 landscape;margin:5mm}
+  html,body{background:#fff!important;height:auto!important;overflow:visible!important}
+  body{display:block!important}
+  body>*:not(#opsPrintSheet){display:none!important}
+  #opsPrintSheet{position:static!important;inset:auto!important;display:block!important;background:#fff!important;padding:0!important}
+  .psheet{display:block!important;width:100%!important;height:auto!important;min-height:0!important;color:#111!important;border:0!important;box-shadow:none!important}
+  .psheet .pmapwrap{height:auto!important;overflow:visible!important}
+  #opsPrintMap{position:relative!important;inset:auto!important;display:block!important;width:100%!important;height:auto!important;background:#fff!important;text-align:center}
+  #opsPrintMap canvas{max-width:100%!important;max-height:165mm!important;width:auto!important;height:auto!important;display:inline-block!important;margin:0 auto!important}
+  .psheet .pf,.psheet .pf .col,.psheet .pf-points,.psheet .pf-consulta{color:#111!important}
+  .psheet .pf-points{max-height:none!important;overflow:visible!important}
+}
+
 </style>
 <script>
 /* ===== MÓDULO ANÁLISIS OPERACIONAL — aditivo, no toca la lógica existente ===== */
@@ -4390,6 +4466,24 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
   function toDMSs(v,type){ var h=type==='lat'?(v>=0?'N':'S'):(v>=0?'E':'W'); v=Math.abs(v); var d=Math.floor(v),mm=Math.floor((v-d)*60),s=Math.round(((v-d)*60-mm)*60); if(s===60){s=0;mm++;} if(mm===60){mm=0;d++;} return d+'°'+two(mm)+"'"+two(s)+'" '+h; }
   function filtersSummary(){ var p=[]; if(FS.deptos.size)p.push(FS.deptos.size+' dpto(s)'); if(FS.munis.size)p.push(FS.munis.size+' municipio(s)'); if(FS.tipo!=='all')p.push(FS.tipo==='inc'?'solo incautación':'solo destrucción'); if(FS.from)p.push('desde '+fdate(FS.from)); if(FS.to)p.push('hasta '+fdate(FS.to)); return p.length?p.join(' · '):'sin filtros (todo)'; }
 
+  function getConsultaPoints(){ try{ if(typeof points!=='undefined' && Array.isArray(points)) return points; }catch(e){} return []; }
+  function safeCoord(p){ try{ if(typeof coordDMS==='function') return coordDMS(p.lat,p.lng); }catch(e){} return (p.lat!=null?p.lat.toFixed(5):'')+', '+(p.lng!=null?p.lng.toFixed(5):''); }
+  function safeANM(a){ try{ if(typeof formatANMDetail==='function') return formatANMDetail(a)||''; }catch(e){} return ''; }
+  function fillConsulta(){
+    var wrap=document.getElementById('psConsultaWrap'); if(!wrap) return;
+    var pts=getConsultaPoints(), body=document.getElementById('psConsulta'), nc=document.getElementById('psNcons');
+    if(!pts.length){ wrap.style.display='none'; return; }
+    wrap.style.display='block'; if(nc) nc.textContent=pts.length;
+    body.innerHTML=pts.map(function(p,i){
+      var estado=p.loading?'…':(p.tit?'Legal (título)':(p.sol?'En trámite (solicitud)':'Posible ilícita'));
+      var ec=p.loading?'#777':(p.tit?'#2e7d32':(p.sol?'#b8860b':'#c62828'));
+      var tit=p.tit?('SÍ · '+esc(safeANM(p.tit))):'NO';
+      var sol=p.sol?('SÍ · '+esc(safeANM(p.sol))):'NO';
+      return '<tr><td>'+(p.idx||i+1)+'</td><td>'+esc(safeCoord(p))+'</td><td>'+esc(p.mun||'—')+'</td><td>'+esc(p.dep||'—')+'</td><td>'+esc(p.vereda||'—')+'</td>'+
+        '<td>'+tit+'</td><td>'+sol+'</td><td>'+esc(p.runap||'NO')+'</td><td>'+esc(p.rfLey2||'NO')+'</td>'+
+        '<td style="color:'+ec+';font-weight:700;white-space:nowrap">'+esc(estado)+'</td></tr>';
+    }).join('');
+  }
   function SHEET_HTML(){ return ''+
     '<div class="sheet-tools"><button class="go" id="psPrint">🖨 Imprimir / Guardar PDF</button><button class="cl" id="psClose">Cerrar vista previa</button></div>'+
     '<div class="psheet">'+
@@ -4400,6 +4494,10 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
         '<div class="col"><b>Fecha y hora de captura</b><span id="psFecha"></span> · <span id="psHora"></span> (local)<br><b style="margin-top:5px">Filtros aplicados</b><span id="psFiltros"></span></div>'+
         '<div class="col"><b>Centro del mapa</b><span id="psCentro"></span><br><span id="psZoom"></span> · <span id="psEsc"></span></div>'+
         '<div class="col"><b>Comentario</b><span id="psComent"></span></div>'+
+      '</div>'+
+      '<div class="pf-points"><b>Operaciones visualizadas (<span id="psNpts">0</span>)</b><div class="pts" id="psPuntos"></div></div>'+
+      '<div class="pf-consulta" id="psConsultaWrap" style="display:none"><b>Puntos de consulta — detalle (<span id="psNcons">0</span>)</b>'+
+        '<table class="pc"><thead><tr><th>#</th><th>Coordenadas</th><th>Municipio</th><th>Depto</th><th>Vereda</th><th>Título</th><th>Solicitud</th><th>Á. protegida</th><th>RF Ley 2ª</th><th>Estado</th></tr></thead><tbody id="psConsulta"></tbody></table>'+
       '</div>'+
     '</div>'; }
   function MODAL_HTML(){ return ''+
@@ -4447,6 +4545,20 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
     document.getElementById('psLeg').innerHTML= showLeg ?
       ('<span><span class="sw cir" style="background:'+OTR+'"></span> Destrucción/otros ('+otr+')</span><span><span class="sw dia" style="background:'+INC+'"></span> Incautación ('+inc+')</span>')
       : '<span style="color:#555">Según capas visibles en el mapa</span>';
+    // Lista de puntos visualizados
+    var vis=(showOps?mapped:[]), npts=document.getElementById('psNpts'), pl=document.getElementById('psPuntos');
+    if(npts) npts.textContent=vis.length;
+    if(pl){
+      var CAP=27;
+      var html=vis.slice(0,CAP).map(function(o){
+        var sw=o.tipo_op==='Incautación'?'<span class="sw dia" style="background:'+INC+'"></span>':'<span class="sw cir" style="background:'+OTR+'"></span>';
+        var r=resumen(o); return '<div class="p">'+sw+esc(o.muni)+' · '+esc(o.dia)+(r&&r!=='—'?(' · '+esc(r)):'')+'</div>';
+      }).join('');
+      if(vis.length>CAP) html+='<div class="p" style="color:#666">… y '+(vis.length-CAP)+' más</div>';
+      pl.innerHTML=html||'<div class="p" style="color:#777">Sin operaciones visibles</div>';
+    }
+    // Detalle de los PUNTOS DE CONSULTA (los numerados que ubicó el usuario: título/solicitud, vereda, depto…)
+    fillConsulta();
     // --- capturar la vista actual (pantallazo) ---
     var host=document.getElementById('opsPrintMap'); host.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#333;font-size:13px">Capturando la vista…</div>';
     var sheet=document.getElementById('opsPrintSheet'); sheet.classList.add('active');
@@ -4458,7 +4570,7 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
         ignoreElements:function(el){ return el.classList && (el.classList.contains('map-ctrls')||el.classList.contains('leaflet-control-zoom')); }});
       restore();
       host.innerHTML='';
-      canvas.style.maxWidth='100%'; canvas.style.maxHeight='100%'; canvas.style.width='auto'; canvas.style.height='auto'; canvas.style.display='block'; canvas.style.margin='0 auto';
+      canvas.style.width='100%'; canvas.style.height='auto'; canvas.style.maxWidth='100%'; canvas.style.maxHeight='none'; canvas.style.display='block'; canvas.style.margin='0';
       host.appendChild(canvas);
       setTimeout(function(){ try{window.print();}catch(e){} },400);
     }catch(e){ restore(); console.error(e); status('No se pudo capturar la vista: '+e.message,'err'); host.innerHTML='<div style="padding:20px;color:#900">Error al capturar: '+esc(e.message)+'</div>'; }
