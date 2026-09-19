@@ -827,7 +827,7 @@
     <div class="map-ctrls"><button class="map-hide" data-cell="0" title="Ocultar mapa">✕</button><button class="map-maximize" data-cell="0" title="Maximizar / Restaurar">⛶</button></div>
   </div>
   <div class="map-cell">
-    <div class="map-label"><span class="dot" style="background:#4285f4"></span> Google · Satélite</div>
+    <div class="map-label"><span class="dot" style="background:#4285f4"></span> Satélite (Esri)</div>
     <div class="toggles">
       <label><input type="checkbox" data-layer="labels" data-map="google" checked> Etiquetas</label>
       <label><input type="checkbox" data-layer="runap" data-map="google"> Áreas protegidas</label>
@@ -1662,7 +1662,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.p
 layers.anm = { anmTit: layerDefs.anmTit().addTo(maps.anm) };
 
 maps.google = makeMap('map2');
-L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20 }).addTo(maps.google);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(maps.google);
 layers.google = { labels: layerDefs.labels().addTo(maps.google) };
 
 maps.gfw = makeMap('map3');
@@ -4003,15 +4003,20 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
   }
 
   // ---------- filtros ----------
-  function passes(o){
+  function passGeo(o){ // filtro geográfico (departamentos / municipios seleccionados)
     if(FS.deptos.size && !FS.deptos.has(o.deptN)) return false;
     if(FS.munis.size && !FS.munis.has(o.muniN)) return false;
+    return true;
+  }
+  function passTipoDate(o){ // filtro por tipo y rango de fechas
     if(FS.tipo==='inc' && o.tipo_op!=='Incautación') return false;
     if(FS.tipo==='otr' && o.tipo_op==='Incautación') return false;
     if(FS.from && o.date && o.date < FS.from) return false;
     if(FS.to && o.date && o.date > FS.to) return false;
     return true;
   }
+  function passes(o){ return passGeo(o) && passTipoDate(o); }
+  function geoActive(){ return (FS.deptos.size>0 || FS.munis.size>0); }
   function applyAndRender(resetTime){
     FILTERED=ALL.filter(passes);
     FILTERED.sort(function(a,b){ return (a.date?a.date.getTime():0)-(b.date?b.date.getTime():0); });
@@ -4026,27 +4031,36 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
   }
 
   // ---------- mapa ----------
-  function iconFor(o){
-    var c=o.tipo_op==='Incautación'?INC:OTR, sel=(o.id===selId), h=SIZE/2, pad=7, W=SIZE+pad*2, C=W/2;
-    var st=sel?'#fff':'rgba(255,255,255,.9)', sw=sel?2.6:1.5, shape;
-    if(o.tipo_op==='Incautación'){ var r=h; shape='<path d="M '+C+' '+(C-r)+' L '+(C+r)+' '+C+' L '+C+' '+(C+r)+' L '+(C-r)+' '+C+' Z" fill="'+c+'" stroke="'+st+'" stroke-width="'+sw+'"/>'; }
-    else shape='<circle cx="'+C+'" cy="'+C+'" r="'+h+'" fill="'+c+'" stroke="'+st+'" stroke-width="'+sw+'"/>';
-    var ring=sel?'<circle cx="'+C+'" cy="'+C+'" r="'+(h+3.5)+'" fill="none" stroke="'+c+'" stroke-width="1.6" opacity=".55"/>':'';
-    return L.divIcon({className:'ops-marker',html:'<svg width="'+W+'" height="'+W+'" viewBox="0 0 '+W+' '+W+'">'+ring+shape+'</svg>',iconSize:[W,W],iconAnchor:[C,C]});
+  function iconFor(o,dim){
+    var base=o.tipo_op==='Incautación'?INC:OTR;
+    var c=dim?'#93a1ad':base, sel=(!dim && o.id===selId);
+    var sz=dim?Math.max(5,SIZE-3):SIZE, h=sz/2, pad=7, W=sz+pad*2, C=W/2;
+    var st=dim?'rgba(255,255,255,.45)':(sel?'#fff':'rgba(255,255,255,.9)'), sw=dim?1:(sel?2.6:1.5), op=dim?0.5:1, shape;
+    if(o.tipo_op==='Incautación'){ var r=h; shape='<path d="M '+C+' '+(C-r)+' L '+(C+r)+' '+C+' L '+C+' '+(C+r)+' L '+(C-r)+' '+C+' Z" fill="'+c+'" fill-opacity="'+op+'" stroke="'+st+'" stroke-width="'+sw+'"/>'; }
+    else shape='<circle cx="'+C+'" cy="'+C+'" r="'+h+'" fill="'+c+'" fill-opacity="'+op+'" stroke="'+st+'" stroke-width="'+sw+'"/>';
+    var ring=sel?'<circle cx="'+C+'" cy="'+C+'" r="'+(h+3.5)+'" fill="none" stroke="'+base+'" stroke-width="1.6" opacity=".55"/>':'';
+    return L.divIcon({className:'ops-marker'+(dim?' dim':''),html:'<svg width="'+W+'" height="'+W+'" viewBox="0 0 '+W+' '+W+'">'+ring+shape+'</svg>',iconSize:[W,W],iconAnchor:[C,C]});
   }
   function renderMap(){
     if(typeof L==='undefined'){ updateTimeInfo(); return; }
     initLayers();
     var M=getMaps();
     opsGroups.forEach(function(g){g.clearLayers();});
-    // heat
     heatLayers.forEach(function(h){ if(h&&h._map) h._map.removeLayer(h); }); heatLayers=[];
-    var data=currentMapped();
+    var sel=currentMapped();                 // seleccionadas (según filtros) + ventana temporal
     if(showOps){
-      data.forEach(function(o){
+      // Contexto atenuado: si hay selección geográfica, los NO seleccionados se ven tenues
+      if(geoActive()){
+        ALL.forEach(function(o){
+          if(o.lat==null || passGeo(o) || !passTipoDate(o)) return; // solo los no-seleccionados
+          M.forEach(function(m,i){ if(!opsGroups[i])return; L.marker([o.lat,o.lon],{icon:iconFor(o,true),interactive:false,keyboard:false}).addTo(opsGroups[i]); });
+        });
+      }
+      // Seleccionados: resaltados y clicables
+      sel.forEach(function(o){
         M.forEach(function(m,i){
           if(!opsGroups[i])return;
-          var mk=L.marker([o.lat,o.lon],{icon:iconFor(o)});
+          var mk=L.marker([o.lat,o.lon],{icon:iconFor(o,false)});
           mk.bindTooltip(o.muni+' · '+o.dia,{direction:'top',offset:[0,-6]});
           mk.on('click',function(){ selId=o.id; showDetail(o); renderMap(); switchTab('mapa'); if(typeof flyTo==='function') flyTo(o.lat,o.lon,Math.max(11,m.getZoom())); });
           mk.addTo(opsGroups[i]);
@@ -4054,7 +4068,7 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
       });
     }
     if(showHeat && L.heatLayer){
-      var pts=data.map(function(o){return [o.lat,o.lon,0.6];});
+      var pts=sel.map(function(o){return [o.lat,o.lon,0.6];});
       M.forEach(function(m){ var h=L.heatLayer(pts,{radius:22,blur:18,maxZoom:12}); h.addTo(m); heatLayers.push(h); });
     }
   }
@@ -4370,13 +4384,6 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
     '<text x="55" y="32" text-anchor="middle" font-family="Arial" font-size="8.5" font-weight="bold" fill="#333">E</text>'+
     '<text x="3.5" y="32" text-anchor="middle" font-family="Arial" font-size="8.5" font-weight="bold" fill="#333">O</text>'+
     '</svg>';
-  var BASEMAPS_PRINT={
-    ghyb:function(){return L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20});},
-    gsat:function(){return L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20});},
-    esri:function(){return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});},
-    calles:function(){return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:19});}
-  };
-  function baseName(b){return {ghyb:'Satélite + etiquetas (Google)',gsat:'Satélite (Google)',esri:'Satélite (Esri)',calles:'Calles (OSM/CARTO)'}[b]||b;}
   function two(n){return String(n).padStart(2,'0');}
   function fdate(d){return two(d.getDate())+'/'+two(d.getMonth()+1)+'/'+d.getFullYear();}
   function ftime(d){return two(d.getHours())+':'+two(d.getMinutes())+':'+two(d.getSeconds());}
