@@ -3872,6 +3872,26 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
   .psheet .pf-points{max-height:none!important;overflow:visible!important}
 }
 
+/* ===== Menú lateral: cuerpo con padding (ya sin pestañas) ===== */
+#opsPanel .ops-body{padding:10px 12px;display:flex;flex-direction:column;gap:11px}
+
+/* ===== Panel INFERIOR de estadísticas y gráficas (debajo de los mapas) ===== */
+#opsBottom{position:fixed;left:0;right:0;bottom:0;z-index:3400;background:var(--panel);border-top:2px solid var(--accent-2);
+  box-shadow:0 -10px 30px rgba(0,0,0,.45);display:none;flex-direction:column;max-height:54vh}
+body.ops-analysis-mode #opsBottom{display:flex;right:372px}
+#opsBottom .bh{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;background:var(--panel-2);border-bottom:1px solid var(--border);flex:0 0 auto;user-select:none}
+#opsBottom .bh h3{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--text);font-weight:700}
+#opsBottom .bh .bmeta{font-size:10.5px;color:var(--muted)}
+#opsBottom .bh .chev{margin-left:auto;color:var(--muted);transition:transform .2s;font-size:14px}
+#opsBottom.collapsed .bbody{display:none}
+#opsBottom.collapsed .chev{transform:rotate(180deg)}
+#opsBottom .bbody{overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+#opsBottom .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+#opsBottom .ops-chart .cwrap{height:175px}
+#opsBottom .ops-kpis{grid-template-columns:repeat(6,1fr)}
+@media(max-width:900px){#opsBottom .ops-kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){body.ops-analysis-mode #opsBottom{right:0}}
+
 </style>
 <script>
 /* ===== MÓDULO ANÁLISIS OPERACIONAL — aditivo, no toca la lógica existente ===== */
@@ -3928,6 +3948,11 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
   function addScales(){ // escala gráfica permanente en cada mapa
     if(typeof L==='undefined') return;
     getMaps().forEach(function(m){ if(m&&!m.__opsScale){ try{ m.__opsScale=L.control.scale({imperial:false,metric:true,maxWidth:130,position:'bottomleft'}); m.__opsScale.addTo(m); }catch(e){} } });
+  }
+  // Atenúa el mapa de fondo (tiles) cuando hay un filtro geográfico activo, para resaltar lo seleccionado
+  function dimBasemaps(on){
+    if(typeof L==='undefined') return;
+    getMaps().forEach(function(m){ try{ m.eachLayer(function(l){ if(l instanceof L.TileLayer){ l.setOpacity(on?0.45:1); } }); }catch(e){} });
   }
   var opsGroups=[], heatLayers=[];
   function initLayers(){
@@ -4123,22 +4148,16 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
     var M=getMaps();
     opsGroups.forEach(function(g){g.clearLayers();});
     heatLayers.forEach(function(h){ if(h&&h._map) h._map.removeLayer(h); }); heatLayers=[];
+    var ga=geoActive();
+    dimBasemaps(ga);                         // con filtro activo, el mapa de fondo se atenúa
     var sel=currentMapped();                 // seleccionadas (según filtros) + ventana temporal
     if(showOps){
-      // Contexto atenuado: si hay selección geográfica, los NO seleccionados se ven tenues
-      if(geoActive()){
-        ALL.forEach(function(o){
-          if(o.lat==null || passGeo(o) || !passTipoDate(o)) return; // solo los no-seleccionados
-          M.forEach(function(m,i){ if(!opsGroups[i])return; L.marker([o.lat,o.lon],{icon:iconFor(o,true),interactive:false,keyboard:false}).addTo(opsGroups[i]); });
-        });
-      }
-      // Seleccionados: resaltados y clicables
-      sel.forEach(function(o){
+      sel.forEach(function(o){               // solo se muestran (y resaltan) las seleccionadas
         M.forEach(function(m,i){
           if(!opsGroups[i])return;
           var mk=L.marker([o.lat,o.lon],{icon:iconFor(o,false)});
           mk.bindTooltip(o.muni+' · '+o.dia,{direction:'top',offset:[0,-6]});
-          mk.on('click',function(){ selId=o.id; showDetail(o); renderMap(); switchTab('mapa'); if(typeof flyTo==='function') flyTo(o.lat,o.lon,Math.max(11,m.getZoom())); });
+          mk.on('click',function(){ selId=o.id; showDetail(o); renderMap(); if(typeof flyTo==='function') flyTo(o.lat,o.lon,Math.max(11,m.getZoom())); });
           mk.addTo(opsGroups[i]);
         });
       });
@@ -4171,6 +4190,8 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
 
   function renderCharts(){
     if(typeof Chart==='undefined') return;
+    var bt=document.getElementById('opsBottom');
+    if(!bt || bt.classList.contains('collapsed') || !document.body.classList.contains('ops-analysis-mode')) return; // solo cuando el panel inferior está visible
     // por municipio
     var byMun=sortEntries(countBy(FILTERED,function(o){return o.muni;}),12);
     mkChart('chMun',{type:'bar',data:{labels:byMun.map(function(e){return e[0];}),datasets:[{data:byMun.map(function(e){return e[1];}),backgroundColor:'#d4a017'}]},
@@ -4220,7 +4241,6 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
 
   // ---------- ficha ----------
   function showDetail(o){
-    switchTab('mapa');
     var box=document.getElementById('opsDetail'); if(!box)return;
     var chip=o.tipo_op==='Incautación'?'<span class="ops-chip inc">◆ Incautación</span>':'<span class="ops-chip otr">● Destrucción/otros</span>';
     var facts=[['Fecha y hora',o.dia+(o.hora?(' · '+esc(o.hora.slice(0,5))):'')],['Operación',esc(o.operacion||'—')],['Orden/escuadra',esc(o.ordesc||'—')],
@@ -4295,6 +4315,7 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
       var p=document.createElement('aside'); p.id='opsPanel'; p.innerHTML=PANEL_HTML(); document.body.appendChild(p);
       wire(p);
     }
+    if(!document.getElementById('opsBottom')){ var bt=document.createElement('div'); bt.id='opsBottom'; bt.innerHTML=BOTTOM_HTML(); document.body.appendChild(bt); wireBottom(); }
     if(!document.getElementById('opsPrintSheet')){ var ps=document.createElement('div'); ps.id='opsPrintSheet'; ps.innerHTML=SHEET_HTML(); document.body.appendChild(ps); }
     if(!document.getElementById('opsPrintModal')){ var pmod=document.createElement('div'); pmod.id='opsPrintModal'; pmod.innerHTML=MODAL_HTML(); document.body.appendChild(pmod); wirePrint(); }
     addScales();
@@ -4311,7 +4332,9 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
     if(an){
       if(!ALL.length) tryRestore();
       applyAndRender(false);                 // mapa + filtros + tabla no dependen de librerías externas
-      ensureLibs().then(function(){ if(curTab==='analisis') renderCharts(); }).catch(function(){});
+      ensureLibs().then(function(){ renderCharts(); }).catch(function(){});
+    } else {
+      dimBasemaps(false);                    // al salir de análisis, restaura el mapa
     }
   }
   function PANEL_HTML(){ return ''+
@@ -4321,14 +4344,12 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
      '<div class="row" id="opsSheetWrap" style="display:none"><label style="font-size:10.5px;color:var(--muted)">Hoja:</label><select id="opsSheet" class="sheetsel"></select></div>'+
      '<div class="meta" id="opsMeta">Sube el archivo SICOE (siempre con el mismo formato). Se procesa aquí en tu navegador; nada se envía a internet.</div>'+
    '</div>'+
-   '<div class="ops-tabs"><button data-tab="mapa" class="on">🗺 Mapa</button><button data-tab="analisis">📊 Análisis</button></div>'+
    '<div class="ops-filters">'+
      '<div class="frow"><span class="flbl">Filtrar</span><div id="msDep"></div><div id="msMun"></div></div>'+
      '<div class="frow"><div class="chipset"><button class="chip-btn on" data-tipo="all">Todas</button><button class="chip-btn otr" data-tipo="otr">Destrucción</button><button class="chip-btn inc" data-tipo="inc">Incautación</button></div></div>'+
      '<div class="frow"><span class="flbl">Rango de fechas</span><input type="date" id="opsFrom" style="flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px"><input type="date" id="opsTo" style="flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px"><button id="opsClearF" class="chip-btn">Limpiar</button></div>'+
    '</div>'+
    '<div class="ops-body">'+
-     '<div class="ops-pane on" data-pane="mapa">'+
        '<div class="ops-sect"><div class="ops-toggle"><input type="checkbox" id="opsShow" checked> Mostrar operaciones</div>'+
          '<div class="ops-toggle"><input type="checkbox" id="opsHeat"> Mapa de calor (intensidad)</div></div>'+
        '<div class="ops-sect ops-slider"><label>Tamaño de puntos <b id="opsSizeVal">9</b></label><input type="range" id="opsSize" min="5" max="24" value="9"></div>'+
@@ -4341,27 +4362,29 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
        '<div class="ops-sect"><div class="lbl">Exportar</div><button id="opsPrintBtn" class="ops-file" style="font-size:12px;flex:none">🖨 Imprimir mapa (PDF)</button></div>'+
        '<div class="ops-detail" id="opsDetail" style="display:none"></div>'+
        '<div class="ops-empty" id="opsEmptyMap">Sube un Excel para graficar las operaciones. Haz clic en un punto para ver su ficha aquí.</div>'+
-     '</div>'+
-     '<div class="ops-pane" data-pane="analisis">'+
-       '<div class="ops-kpis" id="opsKpis"></div>'+
-       '<div class="ops-chart"><h4>Operaciones por municipio</h4><div class="cwrap"><canvas id="chMun"></canvas></div><div class="ops-hint">Clic en una barra para filtrar por ese municipio.</div></div>'+
-       '<div class="ops-chart"><h4>Operaciones por departamento</h4><div class="cwrap"><canvas id="chDep"></canvas></div><div class="ops-hint">Clic en una barra para filtrar por ese departamento.</div></div>'+
-       '<div class="ops-chart"><h4>Evolución por mes</h4><div class="cwrap"><canvas id="chMes"></canvas></div></div>'+
-       '<div class="ops-chart tall"><h4>Maquinaria/resultados por tipo</h4><div class="cwrap"><canvas id="chMaq"></canvas></div></div>'+
-       '<div class="ops-chart"><h4>Operaciones por unidad</h4><div class="cwrap"><canvas id="chBat"></canvas></div></div>'+
-       '<div class="ops-chart"><h4>Incautación vs destrucción</h4><div class="cwrap"><canvas id="chTipo"></canvas></div></div>'+
-       '<div class="ops-sect"><div class="lbl">Operaciones (tabla)</div><div class="ops-tablewrap"><table class="ops-table"><thead><tr><th data-k="date">Fecha</th><th data-k="muni">Municipio</th><th data-k="dept">Depto</th><th>Resultados</th></tr></thead><tbody id="opsTableBody"></tbody></table></div></div>'+
-       '<div class="ops-btnrow"><button id="opsExpCsv">⬇ Exportar CSV</button><button id="opsExpKml">⬇ Exportar KML</button></div>'+
-     '</div>'+
    '</div>';
+  }
+  function BOTTOM_HTML(){ return ''+
+    '<div class="bh" id="opsBottomHd"><h3>📊 Estadísticas y gráficas</h3><span class="bmeta" id="opsBottomMeta"></span><span class="chev">▾</span></div>'+
+    '<div class="bbody">'+
+      '<div class="ops-kpis" id="opsKpis"></div>'+
+      '<div class="charts-grid">'+
+        '<div class="ops-chart"><h4>Operaciones por municipio</h4><div class="cwrap"><canvas id="chMun"></canvas></div><div class="ops-hint">Clic en una barra para filtrar por ese municipio.</div></div>'+
+        '<div class="ops-chart"><h4>Operaciones por departamento</h4><div class="cwrap"><canvas id="chDep"></canvas></div><div class="ops-hint">Clic en una barra para filtrar por ese departamento.</div></div>'+
+        '<div class="ops-chart"><h4>Evolución por mes</h4><div class="cwrap"><canvas id="chMes"></canvas></div></div>'+
+        '<div class="ops-chart"><h4>Maquinaria/resultados por tipo</h4><div class="cwrap"><canvas id="chMaq"></canvas></div></div>'+
+        '<div class="ops-chart"><h4>Operaciones por unidad</h4><div class="cwrap"><canvas id="chBat"></canvas></div></div>'+
+        '<div class="ops-chart"><h4>Incautación vs destrucción</h4><div class="cwrap"><canvas id="chTipo"></canvas></div></div>'+
+      '</div>'+
+      '<div class="ops-sect"><div class="lbl">Operaciones (tabla)</div><div class="ops-tablewrap"><table class="ops-table"><thead><tr><th data-k="date">Fecha</th><th data-k="muni">Municipio</th><th data-k="dept">Depto</th><th>Resultados</th></tr></thead><tbody id="opsTableBody"></tbody></table></div></div>'+
+      '<div class="ops-btnrow"><button id="opsExpCsv">⬇ Exportar CSV</button><button id="opsExpKml">⬇ Exportar KML</button></div>'+
+    '</div>';
   }
 
   function wire(p){
     document.getElementById('opsClose').addEventListener('click',function(){setMode('consulta');});
     document.getElementById('opsFileInput').addEventListener('change',function(e){ handleFile(e.target.files[0]); });
     document.getElementById('opsSheet').addEventListener('change',function(e){ loadSheet(e.target.value); });
-    // tabs
-    p.querySelectorAll('.ops-tabs button').forEach(function(b){ b.addEventListener('click',function(){switchTab(b.dataset.tab);}); });
     // tipo chips
     p.querySelectorAll('.chip-btn[data-tipo]').forEach(function(b){ b.addEventListener('click',function(){ FS.tipo=b.dataset.tipo; p.querySelectorAll('.chip-btn[data-tipo]').forEach(function(x){x.classList.toggle('on',x===b);}); applyAndRender(true); }); });
     // fechas
@@ -4377,11 +4400,6 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
     function onRng(){ timeLo=Math.min(+A.value,+B.value); timeHi=Math.max(+A.value,+B.value); updateFill(); updateTimeInfo(); renderMap(); }
     A.addEventListener('input',onRng); B.addEventListener('input',onRng);
     document.getElementById('opsPlay').addEventListener('click',playTime);
-    // tabla sort
-    p.querySelectorAll('.ops-table th[data-k]').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.k; if(tableSort.k===k)tableSort.dir*=-1; else{tableSort.k=k;tableSort.dir=1;} renderTable(); }); });
-    // export
-    document.getElementById('opsExpCsv').addEventListener('click',exportCSV);
-    document.getElementById('opsExpKml').addEventListener('click',exportKML);
     // multiselects
     msDep=makeMS(document.getElementById('msDep'),'Departamentos',{ set:FS.deptos,
       getOptions:function(){ var m={}; ALL.forEach(function(o){ if(o.deptN){ if(!m[o.deptN])m[o.deptN]={label:o.dept,val:o.deptN,n:0}; m[o.deptN].n++; } }); return Object.values(m).sort(function(a,b){return a.label.localeCompare(b.label);}); },
@@ -4414,11 +4432,12 @@ body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
     playT=setInterval(function(){ if(timeHi>=n){clearInterval(playT);playT=null;btn.textContent='▶';return;} timeHi++; B.value=timeHi; updateFill(); updateTimeInfo(); renderMap(); },420);
   }
 
-  var curTab='mapa';
-  function switchTab(t){ curTab=t; var p=document.getElementById('opsPanel'); if(!p)return;
-    p.querySelectorAll('.ops-tabs button').forEach(function(b){b.classList.toggle('on',b.dataset.tab===t);});
-    p.querySelectorAll('.ops-pane').forEach(function(pane){pane.classList.toggle('on',pane.dataset.pane===t);});
-    if(t==='analisis') setTimeout(renderCharts,30);
+  function wireBottom(){
+    var hd=document.getElementById('opsBottomHd');
+    if(hd) hd.addEventListener('click',function(){ var bt=document.getElementById('opsBottom'); bt.classList.toggle('collapsed'); if(!bt.classList.contains('collapsed')) setTimeout(renderCharts,60); });
+    var csv=document.getElementById('opsExpCsv'); if(csv) csv.addEventListener('click',exportCSV);
+    var kml=document.getElementById('opsExpKml'); if(kml) kml.addEventListener('click',exportKML);
+    document.querySelectorAll('#opsBottom .ops-table th[data-k]').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.k; if(tableSort.k===k)tableSort.dir*=-1; else{tableSort.k=k;tableSort.dir=1;} renderTable(); }); });
   }
   function tryRestore(){
     try{ var raw=localStorage.getItem('opsData'); if(!raw)return; var d=JSON.parse(raw); if(d&&d.ops&&d.ops.length){
