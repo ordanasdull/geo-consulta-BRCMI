@@ -3536,5 +3536,951 @@ document.getElementById('myLocBtn').onclick = function() {
 };
 document.getElementById('myLocClearBtn').onclick = () => { clearMyLoc(); showMyLocStatus(''); };
 </script>
+
+<!-- ===== MÓDULO ANÁLISIS OPERACIONAL (aditivo — generado) ===== -->
+<style>
+/* ===== MÓDULO ANÁLISIS OPERACIONAL (aditivo, namespaced) ===== */
+/* Conmutador de modo (dos "vistas": Consulta / Análisis) */
+#opsModeSw{display:inline-flex;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+#opsModeSw button{background:var(--bg);color:var(--muted);border:0;padding:6px 13px;font-weight:700;font-size:11.5px;
+  cursor:pointer;letter-spacing:.4px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+#opsModeSw button+button{border-left:1px solid var(--border)}
+#opsModeSw button .ic{font-size:12px}
+#opsModeSw button[data-mode="consulta"].on{background:var(--accent);color:#000}
+#opsModeSw button[data-mode="analisis"].on{background:var(--accent-2);color:#04140a}
+#opsModeSw button:not(.on):hover{color:var(--text)}
+
+/* En modo análisis se ensancha la columna derecha */
+body.ops-analysis-mode{grid-template-columns:1fr 372px!important}
+body.ops-analysis-mode aside.side{display:none!important}
+
+/* Panel acoplado en la columna derecha (reemplaza el menú original) */
+#opsPanel{grid-row:3;grid-column:2;background:var(--panel);border-left:2px solid var(--accent-2);
+  display:none;flex-direction:column;overflow:hidden;min-width:0;height:100%;font-size:13px}
+#opsPanel.open{display:flex}
+#opsPanel .ops-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--panel-2);flex:0 0 auto}
+#opsPanel .ops-hd .mk{width:8px;height:26px;background:var(--accent);border-radius:3px}
+#opsPanel .ops-hd h2{margin:0;font-size:14px;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
+#opsPanel .ops-hd p{margin:2px 0 0;font-size:10.5px;color:var(--muted)}
+#opsPanel .ops-hd .x{margin-left:auto;width:30px;height:30px;border-radius:6px;border:1px solid var(--border);
+  background:var(--bg);color:var(--text);cursor:pointer;font-size:15px}
+
+.ops-upload{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+.ops-upload .row{display:flex;gap:8px;align-items:center}
+.ops-file{background:var(--accent);color:#000;border:0;padding:9px 12px;border-radius:6px;font-weight:700;cursor:pointer;font-size:12.5px;flex:1;text-align:center}
+.ops-file:hover{filter:brightness(1.08)}
+.ops-upload .meta{font-size:10.5px;color:var(--muted);font-family:var(--mono);line-height:1.4}
+.ops-upload .meta b{color:var(--accent-2)}
+.ops-upload select.sheetsel{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:6px 8px;font-size:11.5px;max-width:180px}
+
+.ops-tabs{display:flex;border-bottom:1px solid var(--border);flex:0 0 auto}
+.ops-tabs button{flex:1;background:transparent;border:0;color:var(--muted);padding:10px;font-weight:700;cursor:pointer;
+  font-size:12px;letter-spacing:.5px;border-bottom:2px solid transparent}
+.ops-tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
+
+.ops-filters{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:9px;flex:0 0 auto;background:var(--panel-2)}
+.ops-filters .frow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.ops-filters .flbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;width:100%;margin-bottom:-3px}
+.chipset{display:flex;gap:6px;flex-wrap:wrap}
+.chip-btn{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:11.5px;cursor:pointer}
+.chip-btn.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+.chip-btn.inc.on{background:var(--ops-inc);border-color:var(--ops-inc);color:#04252b}
+.chip-btn.otr.on{background:var(--ops-otr);border-color:var(--ops-otr);color:#2a1002}
+
+.ms{position:relative;flex:1;min-width:150px}
+.ms>.msbtn{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;
+  padding:7px 10px;font-size:12px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:6px}
+.ms>.msbtn .cnt{margin-left:auto;background:var(--accent);color:#000;border-radius:10px;padding:0 7px;font-size:10px;font-weight:700}
+.ms>.msbtn:hover{border-color:var(--accent)}
+.ms .mspop{position:absolute;z-index:50;top:calc(100% + 4px);left:0;right:0;background:var(--panel);border:1px solid var(--border);
+  border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);max-height:260px;display:none;flex-direction:column;overflow:hidden}
+.ms.open .mspop{display:flex}
+.ms .mspop .search{padding:8px;border-bottom:1px solid var(--border)}
+.ms .mspop .search input{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:6px 8px;font-size:12px}
+.ms .mspop .acts{display:flex;gap:6px;padding:6px 8px;border-bottom:1px solid var(--border)}
+.ms .mspop .acts button{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px;font-size:10.5px;cursor:pointer}
+.ms .mspop .list{overflow-y:auto;padding:4px}
+.ms .mspop .opt{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:5px;cursor:pointer;font-size:12px}
+.ms .mspop .opt:hover{background:var(--panel-2)}
+.ms .mspop .opt input{accent-color:var(--accent)}
+.ms .mspop .opt .n{margin-left:auto;font-size:10px;color:var(--muted);font-family:var(--mono)}
+
+.ops-body{flex:1 1 auto;overflow-y:auto;overflow-x:hidden}
+.ops-body::-webkit-scrollbar{width:9px}.ops-body::-webkit-scrollbar-thumb{background:var(--panel-2);border-radius:6px}
+.ops-pane{display:none;padding:12px 14px;flex-direction:column;gap:14px}
+.ops-pane.on{display:flex}
+
+.ops-sect{display:flex;flex-direction:column;gap:8px}
+.ops-sect .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700}
+.ops-toggle{display:flex;align-items:center;gap:9px;font-size:12.5px;cursor:pointer}
+.ops-toggle input{accent-color:var(--accent);width:16px;height:16px}
+.ops-slider label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.ops-slider label b{font-family:var(--mono);color:var(--accent)}
+.ops-slider input[type=range]{width:100%;accent-color:var(--accent)}
+.ops-timerow{display:flex;gap:9px;align-items:center}
+.ops-play{width:34px;height:32px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer}
+.ops-tinfo{font-size:10.5px;color:var(--muted);font-family:var(--mono);display:flex;justify-content:space-between}
+.ops-tinfo b{color:var(--text)}
+
+.ops-legend{display:flex;flex-direction:column;gap:6px;font-size:12px}
+.ops-legend .r{display:flex;align-items:center;gap:8px}
+.ops-legend .sw{width:14px;height:14px}
+.ops-legend .sw.cir{border-radius:50%}
+.ops-legend .sw.dia{border-radius:2px;transform:rotate(45deg)}
+
+.ops-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ops-kpi{background:var(--panel-2);border:1px solid var(--border);border-radius:9px;padding:9px 8px}
+.ops-kpi b{font-size:19px;display:block;line-height:1;font-family:var(--mono)}
+.ops-kpi span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.ops-kpi.inc b{color:var(--ops-inc)} .ops-kpi.otr b{color:var(--ops-otr)} .ops-kpi.a b{color:var(--accent)}
+
+.ops-chart{background:var(--panel-2);border:1px solid var(--border);border-radius:9px;padding:10px}
+.ops-chart h4{margin:0 0 8px;font-size:11.5px;letter-spacing:.4px;color:var(--text);font-weight:600;text-transform:uppercase}
+.ops-chart .cwrap{position:relative;height:180px}
+.ops-chart.tall .cwrap{height:230px}
+.ops-hint{font-size:10px;color:var(--muted);font-style:italic}
+
+.ops-detail{background:var(--panel-2);border:1px solid var(--border);border-radius:9px;overflow:hidden}
+.ops-detail .dh{padding:11px 12px;border-bottom:1px solid var(--border);position:relative}
+.ops-detail .dh .cl{position:absolute;top:9px;right:9px;width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;font-size:12px}
+.ops-detail h3{margin:6px 0 2px;font-size:18px}
+.ops-detail .sub{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.ops-chip{display:inline-flex;gap:5px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+.ops-chip.inc{background:color-mix(in srgb,var(--ops-inc) 24%,transparent);color:var(--ops-inc)}
+.ops-chip.otr{background:color-mix(in srgb,var(--ops-otr) 24%,transparent);color:var(--ops-otr)}
+.ops-detail .db{padding:11px 12px;display:flex;flex-direction:column;gap:12px}
+.ops-facts{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.ops-facts .k{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.ops-facts .v{font-size:12px;line-height:1.3}
+.ops-res{width:100%;border-collapse:collapse;font-size:11.5px}
+.ops-res th,.ops-res td{text-align:left;padding:4px 5px;border-bottom:1px solid var(--border);vertical-align:top}
+.ops-res th{font-size:9px;text-transform:uppercase;color:var(--muted)}
+.ops-res td.q{font-family:var(--mono);font-weight:700;white-space:nowrap}
+.ops-desc{font-size:11.5px;line-height:1.45;color:var(--text)}
+.ops-rad{font-family:var(--mono);font-size:9.5px;color:var(--muted);word-break:break-all;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px}
+
+.ops-tablewrap{max-height:280px;overflow:auto;border:1px solid var(--border);border-radius:8px}
+.ops-table{width:100%;border-collapse:collapse;font-size:11px}
+.ops-table th{position:sticky;top:0;background:var(--panel-2);text-align:left;padding:6px;font-size:9px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:1px solid var(--border)}
+.ops-table td{padding:5px 6px;border-bottom:1px solid var(--border)}
+.ops-table tr:hover td{background:var(--panel-2)}
+.ops-table .tt{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.ops-btnrow{display:flex;gap:8px}
+.ops-btnrow button{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px;font-size:11.5px;cursor:pointer;font-weight:600}
+.ops-btnrow button:hover{border-color:var(--accent);color:var(--accent)}
+
+.ops-empty{padding:26px 16px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.5}
+.ops-marker{background:none;border:none}
+.ops-marker svg{display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+
+@media (max-width:640px){ #opsPanel{width:100vw} .ops-kpis{grid-template-columns:repeat(2,1fr)} }
+
+/* ===== Impresión / Exportar a PDF (lámina cartográfica) ===== */
+#opsPrintModal{position:fixed;inset:0;z-index:6000;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px}
+#opsPrintModal.open{display:flex}
+#opsPrintModal .pm-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;width:420px;max-width:96vw;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#opsPrintModal .pm-hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:8px}
+#opsPrintModal .pm-bd{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+#opsPrintModal label.f{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;display:block;margin-bottom:5px}
+#opsPrintModal input[type=text],#opsPrintModal textarea,#opsPrintModal select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit}
+#opsPrintModal textarea{min-height:64px;resize:vertical}
+#opsPrintModal .pm-chk{display:flex;align-items:center;gap:8px;font-size:12.5px}
+#opsPrintModal .pm-ft{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border)}
+#opsPrintModal .pm-ft button{flex:1;border-radius:6px;padding:10px;font-weight:700;cursor:pointer;font-size:12.5px;border:1px solid var(--border);background:var(--bg);color:var(--text)}
+#opsPrintModal .pm-ft .go{background:var(--accent);color:#000;border-color:var(--accent)}
+
+#opsPrintSheet{position:fixed;inset:0;z-index:5900;background:#5a5a5a;display:none;overflow:auto;padding:14px}
+#opsPrintSheet.active{display:block}
+#opsPrintSheet .sheet-tools{position:fixed;top:10px;right:14px;z-index:6100;display:flex;gap:8px}
+#opsPrintSheet .sheet-tools button{border:0;border-radius:6px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:12.5px}
+#opsPrintSheet .sheet-tools .go{background:#d4a017;color:#000}
+#opsPrintSheet .sheet-tools .cl{background:#333;color:#fff}
+.psheet{width:277mm;max-width:100%;height:190mm;margin:0 auto;background:#fff;color:#111;border:1px solid #999;
+  display:flex;flex-direction:column;box-shadow:0 6px 30px rgba(0,0,0,.5);font-family:Arial,Helvetica,sans-serif}
+.psheet .ph{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:3px solid #9A0000}
+.psheet .ph .bar{width:7px;height:34px;background:#9A0000;border-radius:2px}
+.psheet .ph h2{margin:0;font-size:17px;color:#111;letter-spacing:.3px}
+.psheet .ph .org{margin-left:auto;text-align:right;font-size:10px;color:#555;line-height:1.3}
+.psheet .pmapwrap{flex:1;position:relative;margin:6px 8px;border:1px solid #888;overflow:hidden}
+#opsPrintMap{position:absolute;inset:0}
+.north{position:absolute;top:8px;right:8px;z-index:500;background:rgba(255,255,255,.9);border:1px solid #666;border-radius:6px;padding:4px 6px;text-align:center;font-size:9px;color:#111;font-weight:700}
+.north svg{display:block;margin:0 auto}
+.psheet .pf{display:flex;border-top:2px solid #9A0000;font-size:10px;color:#111}
+.psheet .pf .col{flex:1;padding:6px 12px;border-right:1px solid #ccc;line-height:1.5}
+.psheet .pf .col:last-child{border-right:0}
+.psheet .pf b{color:#9A0000;text-transform:uppercase;font-size:8.5px;letter-spacing:.4px;display:block}
+.psheet .pf .legend span{display:inline-flex;align-items:center;gap:4px;margin-right:10px}
+.psheet .pf .sw{width:10px;height:10px;display:inline-block}
+.psheet .pf .sw.cir{border-radius:50%}.psheet .pf .sw.dia{transform:rotate(45deg)}
+.leaflet-control-scale-line{background:rgba(255,255,255,.85)!important;color:#111!important;border-color:#333!important}
+
+@media print{
+  body *{visibility:hidden!important}
+  #opsPrintSheet, #opsPrintSheet *{visibility:visible!important}
+  #opsPrintSheet{position:absolute!important;inset:0!important;display:block!important;background:#fff!important;padding:0!important;overflow:visible!important}
+  #opsPrintSheet .sheet-tools{display:none!important}
+  .psheet{width:100%!important;height:auto!important;min-height:190mm;border:0!important;box-shadow:none!important}
+  .psheet .pmapwrap{min-height:150mm}
+  @page{size:A4 landscape;margin:8mm}
+}
+
+/* ===== Barra de tiempo de doble extremo (ventana) ===== */
+.rng{position:relative;flex:1;height:16px;margin:5px 0}
+.rng .rtrack{position:absolute;left:0;right:0;top:6px;height:4px;background:var(--border);border-radius:3px}
+.rng .rfill{position:absolute;top:6px;height:4px;background:var(--accent);border-radius:3px}
+.rng input[type=range]{position:absolute;left:0;top:0;width:100%;height:16px;margin:0;-webkit-appearance:none;appearance:none;background:none;pointer-events:none}
+.rng input[type=range]:focus{outline:none}
+.rng input[type=range]::-webkit-slider-runnable-track{-webkit-appearance:none;height:16px;background:none}
+.rng input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:pointer;margin-top:1px;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.rng input[type=range]::-moz-range-track{height:16px;background:none}
+.rng input[type=range]::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+
+/* ===== Menú compacto (más fino) ===== */
+#opsPanel{font-size:12px}
+body.ops-analysis-mode{grid-template-columns:1fr 342px!important}
+#opsPanel .ops-hd{padding:8px 11px;gap:8px}
+#opsPanel .ops-hd .mk{height:20px;width:6px}
+#opsPanel .ops-hd h2{font-size:12.5px}
+#opsPanel .ops-hd p{font-size:9.5px}
+#opsPanel .ops-hd .x{width:26px;height:26px;font-size:13px}
+.ops-upload{padding:8px 11px;gap:6px}
+.ops-file{padding:7px 9px;font-size:11.5px}
+.ops-upload .meta{font-size:9.5px}
+.ops-tabs button{padding:7px;font-size:11px}
+.ops-filters{padding:7px 11px;gap:6px}
+.ops-filters .flbl{font-size:9px}
+.ops-filters input[type=date]{padding:4px 6px!important;font-size:11px}
+.ms>.msbtn{padding:5px 8px;font-size:11px}
+.chip-btn{padding:3px 8px;font-size:10.5px}
+.ops-pane{padding:9px 11px;gap:9px}
+.ops-sect{gap:6px}
+.ops-sect .lbl{font-size:9px}
+.ops-toggle{font-size:11.5px;gap:8px}
+.ops-toggle input{width:14px;height:14px}
+.ops-slider label{font-size:11px}
+.ops-kpis{gap:6px}
+.ops-kpi{padding:6px}
+.ops-kpi b{font-size:16px}
+.ops-kpi span{font-size:8px}
+.ops-chart{padding:8px}
+.ops-chart h4{font-size:10px;margin-bottom:6px}
+.ops-chart .cwrap{height:150px}
+.ops-chart.tall .cwrap{height:195px}
+.ops-hint{font-size:9px}
+.ops-legend{font-size:11px;gap:5px}
+.ops-tinfo{font-size:10px}
+.ops-play{width:30px;height:28px}
+.ops-detail h3{font-size:16px}
+
+/* Botón de impresión siempre visible en la barra superior */
+#opsPrintTop{background:var(--accent);color:#000;border:0;border-radius:7px;padding:6px 12px;font-weight:700;
+  font-size:11.5px;cursor:pointer;letter-spacing:.4px;white-space:nowrap;margin-left:8px;display:inline-flex;align-items:center;gap:6px}
+#opsPrintTop:hover{filter:brightness(1.08)}
+
+/* Centrar el pantallazo capturado dentro de la lámina */
+#opsPrintMap{display:flex;align-items:center;justify-content:center;background:#0b0f14}
+
+/* Rosa de los vientos (contenedor transparente; el SVG ya trae su círculo) */
+.north{background:none!important;border:0!important;padding:0!important}
+.north svg{display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+
+/* Leyenda pequeña de capas activas dentro de cada mapa (en el pantallazo) */
+.ops-caplegend{position:absolute;top:6px;right:6px;z-index:600;background:rgba(255,255,255,.92);color:#111;
+  font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:1.4;padding:4px 8px;border-radius:5px;border:1px solid #7a7a7a;max-width:150px}
+.ops-caplegend b{display:block;color:#9A0000;font-size:8px;text-transform:uppercase;letter-spacing:.3px;margin-bottom:1px}
+
+/* Escala gráfica de Leaflet visible y legible (en pantalla y en el pantallazo) */
+.leaflet-control-scale{margin-bottom:6px!important;margin-left:6px!important}
+.leaflet-control-scale-line{background:rgba(255,255,255,.88)!important;color:#111!important;border:1px solid #333!important;border-top:none!important;font-size:9px!important;padding:1px 5px!important;font-family:Arial,sans-serif!important}
+
+/* Rosa de vientos a la esquina inferior derecha (no choca con las leyendas top-right) */
+.north{top:auto!important;bottom:12px!important;right:12px!important}
+
+</style>
+<script>
+/* ===== MÓDULO ANÁLISIS OPERACIONAL — aditivo, no toca la lógica existente ===== */
+(function(){
+  "use strict";
+  if(window.__opsModuleLoaded) return; window.__opsModuleLoaded=true;
+
+  // paleta del módulo (respeta el tema existente)
+  var OTR='#F26B3A', INC='#37C7DE';
+  document.documentElement.style.setProperty('--ops-otr',OTR);
+  document.documentElement.style.setProperty('--ops-inc',INC);
+  var PALETTE=['#d4a017','#3fb950','#a371f7','#37C7DE','#F26B3A','#e3b341','#4285f4','#f85149','#00b4a6','#c586c0','#7aa2f7','#bb9af7'];
+
+  // ---------- utilidades ----------
+  function norm(s){ if(s==null) return ''; return String(s).trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+  function titleCase(s){ s=String(s==null?'':s).trim(); return s? s.charAt(0).toUpperCase()+s.slice(1).toLowerCase() : s; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function numf(n){ return (Math.round((+n||0)*100)/100).toLocaleString('es-CO'); }
+  function status(msg,type){ if(typeof showStatus==='function') showStatus(msg,type||''); }
+  function toNum(v){ if(v==null||v==='') return null; if(typeof v==='number') return v; var x=parseFloat(String(v).replace(',','.').replace(/[^0-9.\-]/g,'')); return isNaN(x)?null:x; }
+  function toDate(v){
+    if(v==null||v==='') return null;
+    if(v instanceof Date && !isNaN(v)) return v;
+    if(typeof v==='number'){ var d=new Date(Date.UTC(1899,11,30)+v*86400000); return isNaN(d)?null:d; }
+    var s=String(v).trim();
+    var m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/); if(m){ var yy=+m[3]; if(yy<100)yy+=2000; return new Date(yy,(+m[2])-1,+m[1]); }
+    m=s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/); if(m){ return new Date(+m[1],(+m[2])-1,+m[3]); }
+    var d2=new Date(s); return isNaN(d2)?null:d2;
+  }
+  function dmy(d){ if(!d) return '—'; return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
+  function ym(d){ return d? d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') : '—'; }
+
+  function loadScript(src){ return new Promise(function(res,rej){
+    if(document.querySelector('script[data-ops="'+src+'"]')){ res(); return; }
+    var s=document.createElement('script'); s.src=src; s.dataset.ops=src; s.onload=res; s.onerror=function(){rej(new Error('No se pudo cargar '+src));}; document.body.appendChild(s);
+  });}
+  var LIB={
+    xlsx:'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+    chart:'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
+    heat:'https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js',
+    h2c:'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
+  };
+  var libsReady=false;
+  async function ensureLibs(){ if(libsReady) return; await Promise.allSettled([loadScript(LIB.xlsx),loadScript(LIB.chart),loadScript(LIB.heat),loadScript(LIB.h2c)]); libsReady=true; }
+
+  // ---------- referencias a los mapas existentes (diferida y tolerante) ----------
+  var _maps=null;
+  function getMaps(){
+    if(_maps && _maps.length) return _maps;
+    try{ if(typeof allMaps!=='undefined' && allMaps && allMaps.length){ _maps=allMaps; return _maps; } }catch(e){}
+    try{ if(typeof maps!=='undefined' && maps){ _maps=Object.values(maps); return _maps; } }catch(e){}
+    _maps=[]; return _maps;
+  }
+  function addScales(){ // escala gráfica permanente en cada mapa
+    if(typeof L==='undefined') return;
+    getMaps().forEach(function(m){ if(m&&!m.__opsScale){ try{ m.__opsScale=L.control.scale({imperial:false,metric:true,maxWidth:130,position:'bottomleft'}); m.__opsScale.addTo(m); }catch(e){} } });
+  }
+  var opsGroups=[], heatLayers=[];
+  function initLayers(){
+    var M=getMaps();
+    if(opsGroups.length===M.length && opsGroups.length) return;
+    opsGroups=[]; if(typeof L==='undefined') return;
+    opsGroups = M.map(function(m){ var g=L.layerGroup(); g.addTo(m); return g; });
+  }
+
+  // ---------- estado ----------
+  var ALL=[];            // todas las operaciones
+  var FILTERED=[];       // tras filtros
+  var META={file:'',rows:0,skipped:0};
+  var FS={deptos:new Set(),munis:new Set(),tipo:'all',from:null,to:null};
+  var SIZE=9, timeLo=1, timeHi=1e9, selId=null;
+  var showOps=true, showHeat=false;
+  var charts={};
+
+  // ---------- parseo del Excel ----------
+  var CURWB=null, CURCANDS=[], CURFILE='';
+  function sheetRows(wb,name){ return XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:null,blankrows:false}); }
+  function detectCandidates(wb){
+    var out=[]; wb.SheetNames.forEach(function(name){ if(!wb.Sheets[name])return; var rows=sheetRows(wb,name); var hr=findHeaderRow(rows); if(hr>=0) out.push({name:name,rows:rows,hr:hr,n:rows.length-hr-1}); });
+    return out;
+  }
+  function pickDefault(cands){
+    var w=cands.map(function(c){ var m=c.name.match(/(20\d{2})/); return {c:c,y:m?+m[1]:0}; });
+    w.sort(function(a,b){ if(b.y!==a.y)return b.y-a.y; return b.c.n-a.c.n; });
+    return w.length?w[0].c:null;
+  }
+  function findHeaderRow(rows){
+    for(var r=0;r<Math.min(rows.length,8);r++){
+      var set=(rows[r]||[]).map(norm);
+      if(set.indexOf('MUNICIPIO')>=0 && set.some(function(h){return h.indexOf('LATITUD')>=0||h==='LAT';}) && set.some(function(h){return h.indexOf('LONGITUD')>=0||h==='LON'||h==='LNG';})) return r;
+    }
+    return -1;
+  }
+  function buildOps(sheet){
+    var rows=sheet.rows, hr=sheet.hr, header=rows[hr].map(norm);
+    function idx(){ for(var i=0;i<arguments.length;i++){ var k=norm(arguments[i]); var p=header.indexOf(k); if(p>=0) return p; } return -1; }
+    var iMun=idx('Municipio'), iDep=idx('Dprtmnto','Departamento','Dpto'),
+        iLat=idx('Latitud','Lat'), iLon=idx('Longitud','Lon','Lng'),
+        iHR=idx('Radiograma'), iId=idx('Idestad01','Orden'),
+        iFec=idx('Fecha Hecho','Fecha'), iHora=idx('Hora'),
+        iAcc=idx('Accion','Acción'), iTipo=idx('Tipo'), iClase=idx('Clase'),
+        iCant=idx('Cantidad'), iUni=idx('Descripcion','Descripción','Unidad'),
+        iObs=idx('Obs. Detal. Opera.','Obs Detal Opera','Observacion Operacion'),
+        iObsH=idx('Observaciones Hecho'), iOper=idx('Operación','Operacion'),
+        iOrd=idx('Ord. Esc. Batallon','Orden Esc Batallon'), iCmd=idx('Com_Pel','Comandante'),
+        iBat=idx('Batallon','Batallón'), iHecho=idx('Hecho');
+    // columna "lugar" (texto) suele tener encabezado vacío justo antes de "LUGAR"(zona)
+    var iZona=idx('Lugar'), iLugar=-1;
+    for(var c=0;c<header.length;c++){ if((header[c]===''||header[c]==='0'||header[c]==null) && norm(rows[hr][c+1])==='LUGAR'){ iLugar=c; break; } }
+
+    var groups={}, order=[], skipped=0;
+    for(var r=hr+1;r<rows.length;r++){
+      var row=rows[r]; if(!row) continue;
+      var mun=row[iMun]; if(mun==null||String(mun).trim()==='') continue;
+      var key=(iHR>=0 && row[iHR]!=null && String(row[iHR]).trim()!=='') ? 'HR:'+String(row[iHR]).trim()
+              : (iId>=0 && row[iId]!=null ? 'ID:'+String(row[iId]).trim() : 'ROW:'+r);
+      if(!groups[key]){ groups[key]={rows:[],key:key}; order.push(key); }
+      groups[key].rows.push(row);
+    }
+    var ops=[];
+    order.forEach(function(key){
+      var rr=groups[key].rows, r0=rr[0];
+      var lat=null,lon=null;
+      for(var i=0;i<rr.length;i++){ var la=toNum(rr[i][iLat]), lo=toNum(rr[i][iLon]); if(la!=null&&lo!=null){ lat=la;lon=lo;break; } }
+      var d=toDate(r0[iFec]);
+      var items=[], hasInc=false, maq=0, fuel=0, cap=0, upm=0, destr=0;
+      rr.forEach(function(row){
+        var acc=String(row[iAcc]||'').trim(), tipo=String(row[iTipo]||'').trim(), clase=String(row[iClase]||'').trim(),
+            cant=toNum(row[iCant])||0, uni=String(row[iUni]||'').trim();
+        items.push({accion:acc,tipo:tipo,clase:clase,cantidad:cant,unidad:uni});
+        var nAcc=norm(acc), nTipo=norm(tipo), nClase=norm(clase), nUni=norm(uni);
+        if(nAcc.indexOf('INCAUTAD')>=0) hasInc=true;
+        if(nAcc.indexOf('DESTRUID')>=0) destr+=cant;
+        if(nTipo==='MAQUINARIA Y EQUIPO' && nClase!=='MANGUERA(S)') maq+=cant;
+        if(nTipo==='COMBUSTIBLES' && nUni.indexOf('GAL')>=0) fuel+=cant;
+        if(nTipo==='PERSONAS' && nAcc.indexOf('CAPTURAD')>=0) cap+=cant;
+        if(nClase.indexOf('UPM')>=0) upm+=cant;
+      });
+      ops.push({
+        id:key, muni:titleCase(mun_of(r0,iMun)), muniN:norm(mun_of(r0,iMun)),
+        dept:titleCase(iDep>=0?r0[iDep]:'') , deptN:norm(iDep>=0?r0[iDep]:''),
+        lat:lat, lon:lon, date:d, ym:d?ym(d):'', dia:dmy(d),
+        hora:iHora>=0?String(r0[iHora]||'').slice(0,8):'',
+        hr:iHR>=0?String(r0[iHR]||'').trim():'',
+        operacion:iOper>=0?String(r0[iOper]||'').trim():'',
+        ordesc:iOrd>=0?String(r0[iOrd]||'').trim():'',
+        batallon:iBat>=0?String(r0[iBat]||'').trim():'',
+        cmd:iCmd>=0?String(r0[iCmd]||'').trim():'',
+        hecho:iHecho>=0?String(r0[iHecho]||'').trim():'',
+        lugar:iLugar>=0?String(r0[iLugar]||'').trim():'',
+        zona:iZona>=0?String(r0[iZona]||'').trim():'',
+        obs:iObs>=0?String(r0[iObs]||'').trim():'',
+        obsH:iObsH>=0?String(r0[iObsH]||'').trim():'',
+        tipo_op:hasInc?'Incautación':'Destrucción/Otros',
+        items:items, nItems:rr.length, maq:Math.round(maq), fuel:Math.round(fuel), cap:Math.round(cap), upm:Math.round(upm), destr:Math.round(destr)
+      });
+    });
+    var mapped=ops.filter(function(o){return o.lat!=null&&o.lon!=null;});
+    skipped=ops.length-mapped.length;
+    // orden cronológico
+    ops.sort(function(a,b){ return (a.date?a.date.getTime():0)-(b.date?b.date.getTime():0); });
+    ops.forEach(function(o,i){o.orden=i+1;});
+    return {ops:ops, total:ops.length, skipped:skipped};
+  }
+  function mun_of(r0,iMun){ return iMun>=0? r0[iMun] : ''; }
+
+  function ingest(ops,total,skipped,fname){
+    ALL=ops; META={file:fname||'',rows:total,skipped:skipped};
+    FS={deptos:new Set(),munis:new Set(),tipo:'all',from:null,to:null};
+    try{ localStorage.setItem('opsData',JSON.stringify({ops:ops,meta:META,ts:Date.now()})); }catch(e){}
+    rebuildFilterUIs(); applyAndRender(true);
+    status('Cargadas '+total+' operaciones'+(skipped?(' · '+skipped+' sin coordenadas'):''),'ok');
+  }
+
+  async function handleFile(file){
+    if(!file) return;
+    try{
+      await ensureLibs();
+      if(typeof XLSX==='undefined'){ status('No se pudo cargar el lector de Excel (¿sin conexión a internet?). Reintenta con conexión.','err'); return; }
+      status('Procesando '+file.name+'…');
+      var buf=await file.arrayBuffer();
+      CURWB=XLSX.read(new Uint8Array(buf),{type:'array',cellDates:true});
+      CURFILE=file.name;
+      CURCANDS=detectCandidates(CURWB);
+      if(!CURCANDS.length){ status('No encontré una hoja con columnas Municipio/Latitud/Longitud.','err'); return; }
+      renderSheetSelector();
+      var def=pickDefault(CURCANDS);
+      loadSheet(def.name);
+    }catch(e){ console.error(e); status('Error leyendo el Excel: '+e.message,'err'); }
+  }
+  function renderSheetSelector(){
+    var wrap=document.getElementById('opsSheetWrap'), sel=document.getElementById('opsSheet'); if(!wrap||!sel) return;
+    if(CURCANDS.length<=1){ wrap.style.display='none'; return; }
+    var def=pickDefault(CURCANDS);
+    wrap.style.display='flex';
+    sel.innerHTML=CURCANDS.map(function(c){ return '<option value="'+esc(c.name)+'"'+(c.name===def.name?' selected':'')+'>'+esc(c.name)+' ('+c.n+' filas)</option>'; }).join('');
+  }
+  function loadSheet(name){
+    var c=CURCANDS.find(function(x){return x.name===name;}); if(!c){ return; }
+    var res=buildOps(c);
+    if(!res.ops.length){ status('La hoja "'+name+'" no tiene operaciones válidas.','err'); return; }
+    ingest(res.ops,res.total,res.skipped,CURFILE+' · hoja "'+name+'"');
+    var meta=document.getElementById('opsMeta');
+    if(meta) meta.innerHTML='Archivo: <b>'+esc(CURFILE)+'</b> · hoja <b>'+esc(name)+'</b><br>'+res.total+' operaciones ('+res.ops.filter(function(o){return o.lat!=null;}).length+' con mapa'+(res.skipped?(' · '+res.skipped+' sin coord.'):'')+')';
+  }
+
+  // ---------- filtros ----------
+  function passes(o){
+    if(FS.deptos.size && !FS.deptos.has(o.deptN)) return false;
+    if(FS.munis.size && !FS.munis.has(o.muniN)) return false;
+    if(FS.tipo==='inc' && o.tipo_op!=='Incautación') return false;
+    if(FS.tipo==='otr' && o.tipo_op==='Incautación') return false;
+    if(FS.from && o.date && o.date < FS.from) return false;
+    if(FS.to && o.date && o.date > FS.to) return false;
+    return true;
+  }
+  function applyAndRender(resetTime){
+    FILTERED=ALL.filter(passes);
+    FILTERED.sort(function(a,b){ return (a.date?a.date.getTime():0)-(b.date?b.date.getTime():0); });
+    FILTERED.forEach(function(o,i){o.tIdx=i+1;});
+    var n=Math.max(1,FILTERED.length), A=document.getElementById('opsTimeA'), B=document.getElementById('opsTimeB');
+    if(A&&B){ A.max=B.max=n; if(resetTime||timeHi>FILTERED.length||timeLo<1){ timeLo=1; timeHi=FILTERED.length||1; A.value=timeLo; B.value=timeHi; } updateFill(); }
+    renderMap(); renderKPIs(); renderCharts(); renderTable();
+  }
+
+  function currentMapped(){ // filtradas + ventana temporal [lo,hi] + con coords
+    return FILTERED.filter(function(o){ return o.lat!=null && o.tIdx>=timeLo && o.tIdx<=timeHi; });
+  }
+
+  // ---------- mapa ----------
+  function iconFor(o){
+    var c=o.tipo_op==='Incautación'?INC:OTR, sel=(o.id===selId), h=SIZE/2, pad=7, W=SIZE+pad*2, C=W/2;
+    var st=sel?'#fff':'rgba(255,255,255,.9)', sw=sel?2.6:1.5, shape;
+    if(o.tipo_op==='Incautación'){ var r=h; shape='<path d="M '+C+' '+(C-r)+' L '+(C+r)+' '+C+' L '+C+' '+(C+r)+' L '+(C-r)+' '+C+' Z" fill="'+c+'" stroke="'+st+'" stroke-width="'+sw+'"/>'; }
+    else shape='<circle cx="'+C+'" cy="'+C+'" r="'+h+'" fill="'+c+'" stroke="'+st+'" stroke-width="'+sw+'"/>';
+    var ring=sel?'<circle cx="'+C+'" cy="'+C+'" r="'+(h+3.5)+'" fill="none" stroke="'+c+'" stroke-width="1.6" opacity=".55"/>':'';
+    return L.divIcon({className:'ops-marker',html:'<svg width="'+W+'" height="'+W+'" viewBox="0 0 '+W+' '+W+'">'+ring+shape+'</svg>',iconSize:[W,W],iconAnchor:[C,C]});
+  }
+  function renderMap(){
+    if(typeof L==='undefined'){ updateTimeInfo(); return; }
+    initLayers();
+    var M=getMaps();
+    opsGroups.forEach(function(g){g.clearLayers();});
+    // heat
+    heatLayers.forEach(function(h){ if(h&&h._map) h._map.removeLayer(h); }); heatLayers=[];
+    var data=currentMapped();
+    if(showOps){
+      data.forEach(function(o){
+        M.forEach(function(m,i){
+          if(!opsGroups[i])return;
+          var mk=L.marker([o.lat,o.lon],{icon:iconFor(o)});
+          mk.bindTooltip(o.muni+' · '+o.dia,{direction:'top',offset:[0,-6]});
+          mk.on('click',function(){ selId=o.id; showDetail(o); renderMap(); switchTab('mapa'); if(typeof flyTo==='function') flyTo(o.lat,o.lon,Math.max(11,m.getZoom())); });
+          mk.addTo(opsGroups[i]);
+        });
+      });
+    }
+    if(showHeat && L.heatLayer){
+      var pts=data.map(function(o){return [o.lat,o.lon,0.6];});
+      M.forEach(function(m){ var h=L.heatLayer(pts,{radius:22,blur:18,maxZoom:12}); h.addTo(m); heatLayers.push(h); });
+    }
+  }
+
+  // ---------- KPIs ----------
+  function agg(list){
+    var k={ops:list.length,inc:0,maq:0,fuel:0,cap:0,upm:0,destr:0};
+    list.forEach(function(o){ if(o.tipo_op==='Incautación')k.inc++; k.maq+=o.maq;k.fuel+=o.fuel;k.cap+=o.cap;k.upm+=o.upm;k.destr+=o.destr; });
+    return k;
+  }
+  function renderKPIs(){
+    var k=agg(FILTERED), el=document.getElementById('opsKpis'); if(!el)return;
+    var cells=[['ops',k.ops,'Operaciones','a'],['inc',k.inc,'Incautaciones','inc'],['otr',k.ops-k.inc,'Destrucción/otros','otr'],
+      ['maq',numf(k.maq),'Unid. maquinaria','a'],['fuel',numf(k.fuel),'Gal combustible','a'],['cap',numf(k.cap),'Capturas','a']];
+    el.innerHTML=cells.map(function(c){return '<div class="ops-kpi '+c[3]+'"><b>'+c[1]+'</b><span>'+c[2]+'</span></div>';}).join('');
+  }
+
+  // ---------- gráficas ----------
+  function countBy(list,keyfn){ var m={}; list.forEach(function(o){ var k=keyfn(o); if(k==null||k==='')return; m[k]=(m[k]||0)+1; }); return m; }
+  function sortEntries(obj,limit){ var e=Object.keys(obj).map(function(k){return [k,obj[k]];}); e.sort(function(a,b){return b[1]-a[1];}); return limit?e.slice(0,limit):e; }
+  function baseOpts(onClick){ return {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    onClick:onClick, scales:{x:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'rgba(255,255,255,.06)'}},y:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:'rgba(255,255,255,.06)'}}}}; }
+  function mkChart(id,cfg){ if(charts[id]){charts[id].destroy();} var cv=document.getElementById(id); if(!cv)return; charts[id]=new Chart(cv.getContext('2d'),cfg); }
+
+  function renderCharts(){
+    if(typeof Chart==='undefined') return;
+    // por municipio
+    var byMun=sortEntries(countBy(FILTERED,function(o){return o.muni;}),12);
+    mkChart('chMun',{type:'bar',data:{labels:byMun.map(function(e){return e[0];}),datasets:[{data:byMun.map(function(e){return e[1];}),backgroundColor:'#d4a017'}]},
+      options:Object.assign(baseOpts(function(ev,els){ if(els.length){ var lab=byMun[els[0].index][0]; toggleSetFromLabel(FS.munis,ALL,'muni','muniN',lab); }}),{indexAxis:'y'})});
+    // por departamento
+    var byDep=sortEntries(countBy(FILTERED,function(o){return o.dept;}),12);
+    mkChart('chDep',{type:'bar',data:{labels:byDep.map(function(e){return e[0];}),datasets:[{data:byDep.map(function(e){return e[1];}),backgroundColor:'#a371f7'}]},
+      options:Object.assign(baseOpts(function(ev,els){ if(els.length){ var lab=byDep[els[0].index][0]; toggleSetFromLabel(FS.deptos,ALL,'dept','deptN',lab); }}),{indexAxis:'y'})});
+    // por unidad
+    var byBat=sortEntries(countBy(FILTERED,function(o){return o.batallon;}),12);
+    mkChart('chBat',{type:'bar',data:{labels:byBat.map(function(e){return e[0];}),datasets:[{data:byBat.map(function(e){return e[1];}),backgroundColor:'#3fb950'}]},
+      options:Object.assign(baseOpts(null),{indexAxis:'y'})});
+    // evolución por mes
+    var byMes={}; FILTERED.forEach(function(o){ if(o.ym){byMes[o.ym]=(byMes[o.ym]||0)+1;} });
+    var meses=Object.keys(byMes).sort();
+    mkChart('chMes',{type:'line',data:{labels:meses,datasets:[{data:meses.map(function(m){return byMes[m];}),borderColor:'#d4a017',backgroundColor:'rgba(212,160,23,.15)',fill:true,tension:.25,pointRadius:3}]},options:baseOpts(null)});
+    // maquinaria por tipo
+    var maqByClase={}; FILTERED.forEach(function(o){ o.items.forEach(function(it){ if(norm(it.tipo)==='MAQUINARIA Y EQUIPO'&&norm(it.clase)!=='MANGUERA(S)'){ var c=titleCase(it.clase); maqByClase[c]=(maqByClase[c]||0)+it.cantidad; } }); });
+    var maqE=sortEntries(maqByClase,12);
+    mkChart('chMaq',{type:'bar',data:{labels:maqE.map(function(e){return e[0];}),datasets:[{data:maqE.map(function(e){return Math.round(e[1]);}),backgroundColor:'#F26B3A'}]},options:Object.assign(baseOpts(null),{indexAxis:'y'})});
+    // dona incautación vs destrucción
+    var k=agg(FILTERED);
+    mkChart('chTipo',{type:'doughnut',data:{labels:['Destrucción/otros','Incautación'],datasets:[{data:[k.ops-k.inc,k.inc],backgroundColor:[OTR,INC],borderColor:'#161b22',borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:11}}}}}});
+  }
+  function toggleSetFromLabel(set,list,titleKey,normKey,label){
+    var o=list.find(function(x){return x[titleKey]===label;}); if(!o)return; var v=o[normKey];
+    if(set.has(v))set.delete(v); else set.add(v);
+    rebuildFilterUIs(); applyAndRender(true);
+  }
+
+  // ---------- tabla ----------
+  var tableSort={k:'date',dir:1};
+  function resumen(o){ var p=[]; if(o.maq)p.push(o.maq+' maq'); if(o.fuel)p.push(numf(o.fuel)+' gal'); if(o.cap)p.push(o.cap+' capt'); if(o.upm)p.push(o.upm+' UPM'); return p.join(' · ')||'—'; }
+  function renderTable(){
+    var wrap=document.getElementById('opsTableBody'); if(!wrap)return;
+    var list=FILTERED.slice();
+    var k=tableSort.k,dir=tableSort.dir;
+    list.sort(function(a,b){ var va=a[k],vb=b[k]; if(k==='date'){va=a.date?a.date.getTime():0;vb=b.date?b.date.getTime():0;} if(va<vb)return -1*dir; if(va>vb)return 1*dir; return 0; });
+    wrap.innerHTML=list.map(function(o){
+      return '<tr data-id="'+esc(o.id)+'"><td>'+o.dia+'</td><td><span class="tt" style="background:'+(o.tipo_op==='Incautación'?INC:OTR)+'"></span>'+esc(o.muni)+'</td><td>'+esc(o.dept)+'</td><td>'+esc(resumen(o))+'</td></tr>';
+    }).join('');
+    Array.prototype.forEach.call(wrap.querySelectorAll('tr'),function(tr){
+      tr.addEventListener('click',function(){ var o=FILTERED.find(function(x){return x.id===tr.dataset.id;}); if(o){ selId=o.id; showDetail(o); renderMap(); if(o.lat!=null&&typeof flyTo==='function')flyTo(o.lat,o.lon,12);} });
+    });
+  }
+
+  // ---------- ficha ----------
+  function showDetail(o){
+    switchTab('mapa');
+    var box=document.getElementById('opsDetail'); if(!box)return;
+    var chip=o.tipo_op==='Incautación'?'<span class="ops-chip inc">◆ Incautación</span>':'<span class="ops-chip otr">● Destrucción/otros</span>';
+    var facts=[['Fecha y hora',o.dia+(o.hora?(' · '+esc(o.hora.slice(0,5))):'')],['Operación',esc(o.operacion||'—')],['Orden/escuadra',esc(o.ordesc||'—')],
+      ['Batallón',esc(o.batallon||'—')],['Lugar',titleCase(o.lugar||'—')+(o.zona?(' ('+esc(o.zona)+')'):'')],['Hecho',titleCase(o.hecho||'—')],
+      ['Comandante',esc(o.cmd||'—')],['Coordenadas',o.lat!=null?(o.lat.toFixed(4)+', '+o.lon.toFixed(4)):'sin coord.']]
+      .map(function(f){return '<div><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>';}).join('');
+    var rows=o.items.map(function(it){return '<tr><td class="q">'+esc(String(it.cantidad))+' '+esc(it.unidad||'')+'</td><td>'+titleCase(it.clase||'—')+'<div style="font-size:9px;color:var(--muted)">'+titleCase(it.tipo)+' · '+titleCase(it.accion)+'</div></td></tr>';}).join('');
+    var desc=o.obs?'<div><div class="k" style="margin-bottom:4px">Descripción</div><div class="ops-desc">'+esc(o.obs)+'</div></div>':'';
+    box.innerHTML='<div class="dh"><button class="cl" title="Cerrar">✕</button>'+chip+'<h3>'+esc(o.muni)+'</h3><div class="sub">'+esc(o.dept)+' · HR '+esc(o.hr||o.id)+' · Op '+o.orden+'/'+ALL.length+'</div></div>'+
+      '<div class="db"><div class="ops-facts">'+facts+'</div>'+
+      '<div><div class="k" style="font-size:9px;text-transform:uppercase;color:var(--muted);margin-bottom:5px">Resultados ('+o.items.length+')</div><table class="ops-res"><tbody>'+rows+'</tbody></table></div>'+
+      desc+(o.hr?'<div><div class="k" style="font-size:9px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Radiograma</div><div class="ops-rad">'+esc(o.hr)+'</div></div>':'')+'</div>';
+    box.style.display='block';
+    box.querySelector('.cl').addEventListener('click',function(){ box.style.display='none'; selId=null; renderMap(); });
+  }
+
+  // ---------- multiselect ----------
+  function makeMS(host,label,provider){
+    host.className='ms'; host.innerHTML='<button class="msbtn" type="button"><span class="t">'+label+'</span> <span class="cnt" style="display:none">0</span></button>'+
+      '<div class="mspop"><div class="search"><input type="text" placeholder="Buscar…"></div><div class="acts"><button type="button" class="all">Todos</button><button type="button" class="none">Ninguno</button></div><div class="list"></div></div>';
+    var btn=host.querySelector('.msbtn'), pop=host.querySelector('.mspop'), listEl=host.querySelector('.list'),
+        search=host.querySelector('.search input'), cnt=host.querySelector('.cnt');
+    var api={set:new Set(), label:label};
+    function draw(filter){
+      var opts=provider.getOptions();
+      listEl.innerHTML='';
+      opts.filter(function(op){return !filter||op.label.toLowerCase().indexOf(filter.toLowerCase())>=0;}).forEach(function(op){
+        var row=document.createElement('label'); row.className='opt';
+        var checked=provider.set.has(op.val)?'checked':'';
+        row.innerHTML='<input type="checkbox" '+checked+'><span>'+esc(op.label)+'</span><span class="n">'+op.n+'</span>';
+        row.querySelector('input').addEventListener('change',function(e){ if(e.target.checked)provider.set.add(op.val); else provider.set.delete(op.val); updateCnt(); provider.onChange(); });
+        listEl.appendChild(row);
+      });
+    }
+    function updateCnt(){ var n=provider.set.size; cnt.style.display=n?'inline-block':'none'; cnt.textContent=n; btn.querySelector('.t').textContent=label+(n?(' ('+n+')'):' (todos)'); }
+    btn.addEventListener('click',function(e){ e.stopPropagation(); var open=host.classList.contains('open'); document.querySelectorAll('.ms.open').forEach(function(m){m.classList.remove('open');}); if(!open){host.classList.add('open');draw('');search.focus();} });
+    search.addEventListener('input',function(){draw(search.value);});
+    host.querySelector('.all').addEventListener('click',function(){ provider.getOptions().forEach(function(op){provider.set.add(op.val);}); draw(search.value); updateCnt(); provider.onChange(); });
+    host.querySelector('.none').addEventListener('click',function(){ provider.set.clear(); draw(search.value); updateCnt(); provider.onChange(); });
+    host._api={draw:draw,updateCnt:updateCnt};
+    updateCnt();
+    return host;
+  }
+  document.addEventListener('click',function(){ document.querySelectorAll('.ms.open').forEach(function(m){m.classList.remove('open');}); });
+
+  var msDep,msMun;
+  function rebuildFilterUIs(){
+    if(msDep&&msDep._api){msDep._api.draw(''); msDep._api.updateCnt();}
+    if(msMun&&msMun._api){msMun._api.draw(''); msMun._api.updateCnt();}
+    var tsel=document.getElementById('opsFrom'), tsel2=document.getElementById('opsTo');
+  }
+
+  // ---------- construir UI ----------
+  function build(){
+    var header=document.querySelector('header');
+    if(header && !document.getElementById('opsModeSw')){
+      var sw=document.createElement('div'); sw.id='opsModeSw';
+      sw.innerHTML='<button data-mode="consulta" class="on"><span class="ic">🛰</span> CONSULTA</button>'+
+                   '<button data-mode="analisis"><span class="ic">📊</span> ANÁLISIS OPERACIONAL</button>';
+      var spacer=header.querySelector('.spacer');
+      if(spacer&&spacer.nextSibling) header.insertBefore(sw,spacer.nextSibling); else header.appendChild(sw);
+      sw.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){ setMode(b.dataset.mode); }); });
+    }
+    if(header && !document.getElementById('opsPrintTop')){
+      var pbtn=document.createElement('button'); pbtn.id='opsPrintTop'; pbtn.title='Imprimir / guardar el mapa como PDF';
+      pbtn.innerHTML='🖨 PDF';
+      var sw2=document.getElementById('opsModeSw');
+      if(sw2&&sw2.nextSibling) header.insertBefore(pbtn,sw2.nextSibling); else header.appendChild(pbtn);
+      pbtn.addEventListener('click',openPrintModal);
+    }
+    if(!document.getElementById('opsPanel')){
+      var p=document.createElement('aside'); p.id='opsPanel'; p.innerHTML=PANEL_HTML(); document.body.appendChild(p);
+      wire(p);
+    }
+    if(!document.getElementById('opsPrintSheet')){ var ps=document.createElement('div'); ps.id='opsPrintSheet'; ps.innerHTML=SHEET_HTML(); document.body.appendChild(ps); }
+    if(!document.getElementById('opsPrintModal')){ var pmod=document.createElement('div'); pmod.id='opsPrintModal'; pmod.innerHTML=MODAL_HTML(); document.body.appendChild(pmod); wirePrint(); }
+    addScales();
+  }
+  var curMode='consulta';
+  function setMode(mode){
+    curMode=mode; var an=(mode==='analisis');
+    var panel=document.getElementById('opsPanel');
+    document.body.classList.toggle('ops-analysis-mode',an);
+    if(panel) panel.classList.toggle('open',an);
+    var sw=document.getElementById('opsModeSw'); if(sw) sw.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.mode===mode);});
+    addScales();
+    setTimeout(function(){ getMaps().forEach(function(m){ try{m.invalidateSize();}catch(e){} }); },70);
+    if(an){
+      if(!ALL.length) tryRestore();
+      applyAndRender(false);                 // mapa + filtros + tabla no dependen de librerías externas
+      ensureLibs().then(function(){ if(curTab==='analisis') renderCharts(); }).catch(function(){});
+    }
+  }
+  function PANEL_HTML(){ return ''+
+   '<div class="ops-hd"><div class="mk" style="background:var(--accent-2)"></div><div><h2>Análisis operacional</h2><p>Base de datos SICOE · agrupado por HR</p></div><button class="x" id="opsClose" title="Volver a Consulta">✕</button></div>'+
+   '<div class="ops-upload">'+
+     '<div class="row"><label class="ops-file">📄 Subir / actualizar Excel<input type="file" id="opsFileInput" accept=".xlsx,.xls,.csv" style="display:none"></label></div>'+
+     '<div class="row" id="opsSheetWrap" style="display:none"><label style="font-size:10.5px;color:var(--muted)">Hoja:</label><select id="opsSheet" class="sheetsel"></select></div>'+
+     '<div class="meta" id="opsMeta">Sube el archivo SICOE (siempre con el mismo formato). Se procesa aquí en tu navegador; nada se envía a internet.</div>'+
+   '</div>'+
+   '<div class="ops-tabs"><button data-tab="mapa" class="on">🗺 Mapa</button><button data-tab="analisis">📊 Análisis</button></div>'+
+   '<div class="ops-filters">'+
+     '<div class="frow"><span class="flbl">Filtrar</span><div id="msDep"></div><div id="msMun"></div></div>'+
+     '<div class="frow"><div class="chipset"><button class="chip-btn on" data-tipo="all">Todas</button><button class="chip-btn otr" data-tipo="otr">Destrucción</button><button class="chip-btn inc" data-tipo="inc">Incautación</button></div></div>'+
+     '<div class="frow"><span class="flbl">Rango de fechas</span><input type="date" id="opsFrom" style="flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px"><input type="date" id="opsTo" style="flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px"><button id="opsClearF" class="chip-btn">Limpiar</button></div>'+
+   '</div>'+
+   '<div class="ops-body">'+
+     '<div class="ops-pane on" data-pane="mapa">'+
+       '<div class="ops-sect"><div class="ops-toggle"><input type="checkbox" id="opsShow" checked> Mostrar operaciones</div>'+
+         '<div class="ops-toggle"><input type="checkbox" id="opsHeat"> Mapa de calor (intensidad)</div></div>'+
+       '<div class="ops-sect ops-slider"><label>Tamaño de puntos <b id="opsSizeVal">9</b></label><input type="range" id="opsSize" min="5" max="24" value="9"></div>'+
+       '<div class="ops-sect"><div class="lbl">Ventana de tiempo — desliza los dos extremos</div>'+
+         '<div class="ops-timerow"><button class="ops-play" id="opsPlay" title="Reproducir">▶</button>'+
+           '<div class="rng" id="opsRng"><div class="rtrack"></div><div class="rfill" id="opsFill"></div>'+
+           '<input type="range" id="opsTimeA" min="1" max="1" value="1"><input type="range" id="opsTimeB" min="1" max="1" value="1"></div></div>'+
+         '<div class="ops-tinfo"><span id="opsTRange">—</span><span><b id="opsTCount">0</b> op</span></div></div>'+
+       '<div class="ops-sect"><div class="lbl">Convención</div><div class="ops-legend"><div class="r"><span class="sw cir" style="background:'+OTR+'"></span> Destrucción / otros</div><div class="r"><span class="sw dia" style="background:'+INC+'"></span> Incautación</div></div></div>'+
+       '<div class="ops-sect"><div class="lbl">Exportar</div><button id="opsPrintBtn" class="ops-file" style="font-size:12px;flex:none">🖨 Imprimir mapa (PDF)</button></div>'+
+       '<div class="ops-detail" id="opsDetail" style="display:none"></div>'+
+       '<div class="ops-empty" id="opsEmptyMap">Sube un Excel para graficar las operaciones. Haz clic en un punto para ver su ficha aquí.</div>'+
+     '</div>'+
+     '<div class="ops-pane" data-pane="analisis">'+
+       '<div class="ops-kpis" id="opsKpis"></div>'+
+       '<div class="ops-chart"><h4>Operaciones por municipio</h4><div class="cwrap"><canvas id="chMun"></canvas></div><div class="ops-hint">Clic en una barra para filtrar por ese municipio.</div></div>'+
+       '<div class="ops-chart"><h4>Operaciones por departamento</h4><div class="cwrap"><canvas id="chDep"></canvas></div><div class="ops-hint">Clic en una barra para filtrar por ese departamento.</div></div>'+
+       '<div class="ops-chart"><h4>Evolución por mes</h4><div class="cwrap"><canvas id="chMes"></canvas></div></div>'+
+       '<div class="ops-chart tall"><h4>Maquinaria/resultados por tipo</h4><div class="cwrap"><canvas id="chMaq"></canvas></div></div>'+
+       '<div class="ops-chart"><h4>Operaciones por unidad</h4><div class="cwrap"><canvas id="chBat"></canvas></div></div>'+
+       '<div class="ops-chart"><h4>Incautación vs destrucción</h4><div class="cwrap"><canvas id="chTipo"></canvas></div></div>'+
+       '<div class="ops-sect"><div class="lbl">Operaciones (tabla)</div><div class="ops-tablewrap"><table class="ops-table"><thead><tr><th data-k="date">Fecha</th><th data-k="muni">Municipio</th><th data-k="dept">Depto</th><th>Resultados</th></tr></thead><tbody id="opsTableBody"></tbody></table></div></div>'+
+       '<div class="ops-btnrow"><button id="opsExpCsv">⬇ Exportar CSV</button><button id="opsExpKml">⬇ Exportar KML</button></div>'+
+     '</div>'+
+   '</div>';
+  }
+
+  function wire(p){
+    document.getElementById('opsClose').addEventListener('click',function(){setMode('consulta');});
+    document.getElementById('opsFileInput').addEventListener('change',function(e){ handleFile(e.target.files[0]); });
+    document.getElementById('opsSheet').addEventListener('change',function(e){ loadSheet(e.target.value); });
+    // tabs
+    p.querySelectorAll('.ops-tabs button').forEach(function(b){ b.addEventListener('click',function(){switchTab(b.dataset.tab);}); });
+    // tipo chips
+    p.querySelectorAll('.chip-btn[data-tipo]').forEach(function(b){ b.addEventListener('click',function(){ FS.tipo=b.dataset.tipo; p.querySelectorAll('.chip-btn[data-tipo]').forEach(function(x){x.classList.toggle('on',x===b);}); applyAndRender(true); }); });
+    // fechas
+    document.getElementById('opsFrom').addEventListener('change',function(e){ FS.from=e.target.value?new Date(e.target.value+'T00:00:00'):null; applyAndRender(true); });
+    document.getElementById('opsTo').addEventListener('change',function(e){ FS.to=e.target.value?new Date(e.target.value+'T23:59:59'):null; applyAndRender(true); });
+    document.getElementById('opsClearF').addEventListener('click',function(){ FS={deptos:new Set(),munis:new Set(),tipo:'all',from:null,to:null}; document.getElementById('opsFrom').value='';document.getElementById('opsTo').value=''; p.querySelectorAll('.chip-btn[data-tipo]').forEach(function(x){x.classList.toggle('on',x.dataset.tipo==='all');}); rebuildFilterUIs(); applyAndRender(true); });
+    // toggles
+    document.getElementById('opsShow').addEventListener('change',function(e){showOps=e.target.checked;renderMap();});
+    document.getElementById('opsHeat').addEventListener('change',function(e){showHeat=e.target.checked;renderMap();});
+    document.getElementById('opsSize').addEventListener('input',function(e){SIZE=+e.target.value;document.getElementById('opsSizeVal').textContent=SIZE;renderMap();});
+    // tiempo
+    var A=document.getElementById('opsTimeA'), B=document.getElementById('opsTimeB');
+    function onRng(){ timeLo=Math.min(+A.value,+B.value); timeHi=Math.max(+A.value,+B.value); updateFill(); updateTimeInfo(); renderMap(); }
+    A.addEventListener('input',onRng); B.addEventListener('input',onRng);
+    document.getElementById('opsPlay').addEventListener('click',playTime);
+    // tabla sort
+    p.querySelectorAll('.ops-table th[data-k]').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.k; if(tableSort.k===k)tableSort.dir*=-1; else{tableSort.k=k;tableSort.dir=1;} renderTable(); }); });
+    // export
+    document.getElementById('opsExpCsv').addEventListener('click',exportCSV);
+    document.getElementById('opsExpKml').addEventListener('click',exportKML);
+    // multiselects
+    msDep=makeMS(document.getElementById('msDep'),'Departamentos',{ set:FS.deptos,
+      getOptions:function(){ var m={}; ALL.forEach(function(o){ if(o.deptN){ if(!m[o.deptN])m[o.deptN]={label:o.dept,val:o.deptN,n:0}; m[o.deptN].n++; } }); return Object.values(m).sort(function(a,b){return a.label.localeCompare(b.label);}); },
+      onChange:function(){ applyAndRender(true); } });
+    msMun=makeMS(document.getElementById('msMun'),'Municipios',{ set:FS.munis,
+      getOptions:function(){ var m={}; ALL.forEach(function(o){ if(FS.deptos.size && !FS.deptos.has(o.deptN))return; if(o.muniN){ if(!m[o.muniN])m[o.muniN]={label:o.muni,val:o.muniN,n:0}; m[o.muniN].n++; } }); return Object.values(m).sort(function(a,b){return a.label.localeCompare(b.label);}); },
+      onChange:function(){ applyAndRender(true); } });
+  }
+
+  function updateTimeInfo(){
+    var c=document.getElementById('opsTCount'), rg=document.getElementById('opsTRange'); if(!c) return;
+    c.textContent=currentMapped().length;
+    if(rg){ var lo=FILTERED[timeLo-1], hi=FILTERED[timeHi-1];
+      rg.textContent=(FILTERED.length&&lo&&hi)?(lo.dia+'  →  '+hi.dia):'—'; }
+    var em=document.getElementById('opsEmptyMap'); if(em) em.style.display=ALL.length?'none':'block';
+  }
+  function updateFill(){
+    var A=document.getElementById('opsTimeA'),B=document.getElementById('opsTimeB'),f=document.getElementById('opsFill'); if(!A||!B||!f)return;
+    var n=Math.max(1,+A.max||1), lo=Math.min(+A.value,+B.value), hi=Math.max(+A.value,+B.value), d=(n-1)||1;
+    var p1=(lo-1)/d*100, p2=(hi-1)/d*100;
+    f.style.left=p1+'%'; f.style.width=Math.max(0,p2-p1)+'%';
+  }
+  var playT=null;
+  function playTime(){
+    var A=document.getElementById('opsTimeA'),B=document.getElementById('opsTimeB'),btn=document.getElementById('opsPlay');
+    if(playT){clearInterval(playT);playT=null;btn.textContent='▶';return;}
+    var n=FILTERED.length; if(!n)return;
+    btn.textContent='❚❚';
+    timeLo=1; timeHi=1; A.value=1; B.value=1; updateFill(); updateTimeInfo(); renderMap();
+    playT=setInterval(function(){ if(timeHi>=n){clearInterval(playT);playT=null;btn.textContent='▶';return;} timeHi++; B.value=timeHi; updateFill(); updateTimeInfo(); renderMap(); },420);
+  }
+
+  var curTab='mapa';
+  function switchTab(t){ curTab=t; var p=document.getElementById('opsPanel'); if(!p)return;
+    p.querySelectorAll('.ops-tabs button').forEach(function(b){b.classList.toggle('on',b.dataset.tab===t);});
+    p.querySelectorAll('.ops-pane').forEach(function(pane){pane.classList.toggle('on',pane.dataset.pane===t);});
+    if(t==='analisis') setTimeout(renderCharts,30);
+  }
+  function tryRestore(){
+    try{ var raw=localStorage.getItem('opsData'); if(!raw)return; var d=JSON.parse(raw); if(d&&d.ops&&d.ops.length){
+      d.ops.forEach(function(o){ o.date=o.date?new Date(o.date):null; }); ALL=d.ops; META=d.meta||META;
+      document.getElementById('opsMeta').innerHTML='Restaurado: <b>'+esc((META.file||'último archivo'))+'</b> · '+ALL.length+' operaciones <span style="color:var(--muted)">(sube de nuevo para actualizar)</span>';
+      rebuildFilterUIs();
+    }}catch(e){}
+  }
+
+  // ---------- export ----------
+  function download(name,text,mime){ var blob=new Blob([text],{type:mime||'text/plain;charset=utf-8'}); var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(url);a.remove();},100); }
+  function exportCSV(){
+    var head=['HR','Fecha','Municipio','Departamento','Tipo','Lat','Lon','Unid_maq','Gal_comb','Capturas','UPM','Operacion','Batallon','Resultados'];
+    var lines=[head.join(';')];
+    FILTERED.forEach(function(o){ var res=o.items.map(function(it){return it.cantidad+' '+it.clase;}).join(' | ');
+      lines.push([o.hr||o.id,o.dia,o.muni,o.dept,o.tipo_op,o.lat!=null?o.lat:'',o.lon!=null?o.lon:'',o.maq,o.fuel,o.cap,o.upm,'"'+(o.operacion||'').replace(/"/g,"'")+'"',o.batallon,'"'+res.replace(/"/g,"'")+'"'].join(';')); });
+    download('operaciones_filtradas.csv','﻿'+lines.join('\n'),'text/csv;charset=utf-8');
+  }
+  function exportKML(){
+    var pm=FILTERED.filter(function(o){return o.lat!=null;}).map(function(o){
+      return '<Placemark><name>'+esc(o.muni+' · '+o.dia)+'</name><description>'+esc(o.tipo_op+' | HR '+(o.hr||o.id)+' | '+resumen(o))+'</description><Point><coordinates>'+o.lon+','+o.lat+',0</coordinates></Point></Placemark>';
+    }).join('');
+    download('operaciones_filtradas.kml','<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Operaciones BRCMI</name>'+pm+'</Document></kml>','application/vnd.google-earth.kml+xml');
+  }
+
+  // ---------- Impresión / Exportar a PDF ----------
+  var NORTH_SVG='<svg width="58" height="58" viewBox="0 0 58 58">'+
+    '<circle cx="29" cy="29" r="26" fill="#ffffff" stroke="#444" stroke-width="1.4"/>'+
+    '<circle cx="29" cy="29" r="20" fill="none" stroke="#ddd" stroke-width="1"/>'+
+    '<line x1="29" y1="7" x2="29" y2="51" stroke="#e2e2e2" stroke-width="1"/>'+
+    '<line x1="7" y1="29" x2="51" y2="29" stroke="#e2e2e2" stroke-width="1"/>'+
+    '<polygon points="29,10 34,29 29,25 24,29" fill="#9A0000"/>'+
+    '<polygon points="29,48 24,29 29,33 34,29" fill="#555"/>'+
+    '<polygon points="10,29 29,24 25,29 29,34" fill="#888"/>'+
+    '<polygon points="48,29 29,34 33,29 29,24" fill="#888"/>'+
+    '<circle cx="29" cy="29" r="2.2" fill="#222"/>'+
+    '<text x="29" y="8.6" text-anchor="middle" font-family="Arial" font-size="9" font-weight="bold" fill="#9A0000">N</text>'+
+    '<text x="29" y="56.5" text-anchor="middle" font-family="Arial" font-size="8.5" font-weight="bold" fill="#333">S</text>'+
+    '<text x="55" y="32" text-anchor="middle" font-family="Arial" font-size="8.5" font-weight="bold" fill="#333">E</text>'+
+    '<text x="3.5" y="32" text-anchor="middle" font-family="Arial" font-size="8.5" font-weight="bold" fill="#333">O</text>'+
+    '</svg>';
+  var BASEMAPS_PRINT={
+    ghyb:function(){return L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20});},
+    gsat:function(){return L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20});},
+    esri:function(){return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});},
+    calles:function(){return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{maxZoom:19});}
+  };
+  function baseName(b){return {ghyb:'Satélite + etiquetas (Google)',gsat:'Satélite (Google)',esri:'Satélite (Esri)',calles:'Calles (OSM/CARTO)'}[b]||b;}
+  function two(n){return String(n).padStart(2,'0');}
+  function fdate(d){return two(d.getDate())+'/'+two(d.getMonth()+1)+'/'+d.getFullYear();}
+  function ftime(d){return two(d.getHours())+':'+two(d.getMinutes())+':'+two(d.getSeconds());}
+  function toDMSs(v,type){ var h=type==='lat'?(v>=0?'N':'S'):(v>=0?'E':'W'); v=Math.abs(v); var d=Math.floor(v),mm=Math.floor((v-d)*60),s=Math.round(((v-d)*60-mm)*60); if(s===60){s=0;mm++;} if(mm===60){mm=0;d++;} return d+'°'+two(mm)+"'"+two(s)+'" '+h; }
+  function filtersSummary(){ var p=[]; if(FS.deptos.size)p.push(FS.deptos.size+' dpto(s)'); if(FS.munis.size)p.push(FS.munis.size+' municipio(s)'); if(FS.tipo!=='all')p.push(FS.tipo==='inc'?'solo incautación':'solo destrucción'); if(FS.from)p.push('desde '+fdate(FS.from)); if(FS.to)p.push('hasta '+fdate(FS.to)); return p.length?p.join(' · '):'sin filtros (todo)'; }
+
+  function SHEET_HTML(){ return ''+
+    '<div class="sheet-tools"><button class="go" id="psPrint">🖨 Imprimir / Guardar PDF</button><button class="cl" id="psClose">Cerrar vista previa</button></div>'+
+    '<div class="psheet">'+
+      '<div class="ph"><div class="bar"></div><h2 id="psTitle">Mapa operacional BRCMI</h2><div class="org">EJÉRCITO NACIONAL · BRCMI<br>Séptima División</div></div>'+
+      '<div class="pmapwrap"><div id="opsPrintMap"></div><div class="north">'+NORTH_SVG+'</div></div></div>'+
+      '<div class="pf">'+
+        '<div class="col"><b>Convención</b><div class="legend" id="psLeg"></div><div style="margin-top:5px" id="psCapa"></div></div>'+
+        '<div class="col"><b>Fecha y hora de captura</b><span id="psFecha"></span> · <span id="psHora"></span> (local)<br><b style="margin-top:5px">Filtros aplicados</b><span id="psFiltros"></span></div>'+
+        '<div class="col"><b>Centro del mapa</b><span id="psCentro"></span><br><span id="psZoom"></span> · <span id="psEsc"></span></div>'+
+        '<div class="col"><b>Comentario</b><span id="psComent"></span></div>'+
+      '</div>'+
+    '</div>'; }
+  function MODAL_HTML(){ return ''+
+    '<div class="pm-box"><div class="pm-hd">🖨 Imprimir vista a PDF</div><div class="pm-bd">'+
+      '<div style="font-size:11.5px;color:var(--muted)">Toma un “pantallazo” de <b>lo que estás viendo ahora</b> (los mapas desplegados con sus capas) y lo arma como lámina con norte, fecha/hora, coordenadas y tu comentario.</div>'+
+      '<div><label class="f">Título de la lámina</label><input type="text" id="pmTitle" value="Mapa operacional BRCMI"></div>'+
+      '<div><label class="f">Comentario para esta lámina</label><textarea id="pmComment" placeholder="Ej: Concentración de dragas sobre el río Nechí…"></textarea></div>'+
+      '<div style="font-size:11px;color:var(--muted)">Se abre una vista previa y el diálogo de impresión: elige “Guardar como PDF”.</div>'+
+    '</div><div class="pm-ft"><button id="pmCancel">Cancelar</button><button class="go" id="pmGo">Generar PDF</button></div></div>'; }
+
+  function wirePrint(){
+    var pb=document.getElementById('opsPrintBtn'); if(pb) pb.addEventListener('click',openPrintModal);
+    document.getElementById('pmCancel').addEventListener('click',function(){document.getElementById('opsPrintModal').classList.remove('open');});
+    document.getElementById('pmGo').addEventListener('click',function(){
+      var opts={ title:document.getElementById('pmTitle').value, comment:document.getElementById('pmComment').value };
+      document.getElementById('opsPrintModal').classList.remove('open'); doPrint(opts);
+    });
+    document.getElementById('psClose').addEventListener('click',closeSheet);
+    document.getElementById('psPrint').addEventListener('click',function(){ window.print(); });
+  }
+  function openPrintModal(){ document.getElementById('opsPrintModal').classList.add('open'); }
+  function closeSheet(){ var s=document.getElementById('opsPrintSheet'); if(s)s.classList.remove('active'); if(window.__opsPM){try{window.__opsPM.remove();}catch(e){}window.__opsPM=null;} }
+
+  async function doPrint(opts){
+    var grid=document.querySelector('.grid');
+    if(!grid){ status('No encuentro el área de mapas.','err'); return; }
+    // --- textos de la lámina ---
+    var maps=getMaps(), live=maps&&maps[0];
+    var now=new Date();
+    document.getElementById('psTitle').textContent=opts.title||'Mapa operacional BRCMI';
+    document.getElementById('psFecha').textContent=fdate(now);
+    document.getElementById('psHora').textContent=ftime(now);
+    if(live){ var center=live.getCenter(), zoom=live.getZoom();
+      document.getElementById('psCentro').innerHTML=center.lat.toFixed(5)+', '+center.lng.toFixed(5)+'<br>'+toDMSs(center.lat,'lat')+'  '+toDMSs(center.lng,'lon');
+      var mpp=156543.03392*Math.cos(center.lat*Math.PI/180)/Math.pow(2,zoom);
+      document.getElementById('psZoom').textContent='Zoom '+zoom;
+      document.getElementById('psEsc').textContent='≈ '+Math.round(mpp)+' m/px';
+    } else { document.getElementById('psCentro').textContent='—'; document.getElementById('psZoom').textContent=''; document.getElementById('psEsc').textContent=''; }
+    document.getElementById('psComent').textContent=opts.comment||'—';
+    document.getElementById('psCapa').textContent='Mapas y capas: según lo visualizado en pantalla';
+    document.getElementById('psFiltros').textContent=(curMode==='analisis'?filtersSummary():'vista de consulta');
+    var showLeg=(showOps && ALL.length);
+    var mapped=showLeg?currentMapped():[];
+    var inc=mapped.filter(function(o){return o.tipo_op==='Incautación';}).length, otr=mapped.length-inc;
+    document.getElementById('psLeg').innerHTML= showLeg ?
+      ('<span><span class="sw cir" style="background:'+OTR+'"></span> Destrucción/otros ('+otr+')</span><span><span class="sw dia" style="background:'+INC+'"></span> Incautación ('+inc+')</span>')
+      : '<span style="color:#555">Según capas visibles en el mapa</span>';
+    // --- capturar la vista actual (pantallazo) ---
+    var host=document.getElementById('opsPrintMap'); host.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#333;font-size:13px">Capturando la vista…</div>';
+    var sheet=document.getElementById('opsPrintSheet'); sheet.classList.add('active');
+    try{ await ensureLibs(); }catch(e){}
+    if(typeof html2canvas==='undefined'){ status('No se pudo cargar el capturador (¿sin internet?).','err'); host.innerHTML='<div style="padding:20px;color:#900">No se pudo capturar la vista (sin conexión a la librería).</div>'; return; }
+    var restore=prepareCapture();
+    try{
+      var canvas=await html2canvas(grid,{useCORS:true,allowTaint:true,backgroundColor:'#0b0f14',scale:2,logging:false,
+        ignoreElements:function(el){ return el.classList && (el.classList.contains('map-ctrls')||el.classList.contains('leaflet-control-zoom')); }});
+      restore();
+      host.innerHTML='';
+      canvas.style.maxWidth='100%'; canvas.style.maxHeight='100%'; canvas.style.width='auto'; canvas.style.height='auto'; canvas.style.display='block'; canvas.style.margin='0 auto';
+      host.appendChild(canvas);
+      setTimeout(function(){ try{window.print();}catch(e){} },400);
+    }catch(e){ restore(); console.error(e); status('No se pudo capturar la vista: '+e.message,'err'); host.innerHTML='<div style="padding:20px;color:#900">Error al capturar: '+esc(e.message)+'</div>'; }
+  }
+  // Oculta los cuadros de capas seleccionables y pone una leyenda pequeña de las capas activas
+  function prepareCapture(){
+    var undo=[];
+    var cells=document.querySelectorAll('.grid .map-cell');
+    (cells.length?cells:[document.querySelector('.grid')]).forEach(function(cell){
+      if(!cell)return;
+      var tog=cell.querySelector('.toggles');
+      var checked=[];
+      if(tog){ checked=Array.prototype.map.call(tog.querySelectorAll('input:checked'),function(i){return (i.parentElement.textContent||'').trim();}).filter(Boolean);
+        var prev=tog.style.display; tog.style.display='none'; undo.push(function(){tog.style.display=prev;}); }
+      var lg=document.createElement('div'); lg.className='ops-caplegend';
+      lg.innerHTML='<b>Capas visibles</b>'+(checked.length?('<br>'+checked.map(esc).join('<br>')):'<br>—');
+      cell.appendChild(lg); undo.push(function(){ if(lg.parentNode)lg.parentNode.removeChild(lg); });
+    });
+    return function(){ undo.forEach(function(f){try{f();}catch(e){}}); };
+  }
+
+  // patch: actualizar info de tiempo tras render de mapa
+  var _renderMap=renderMap;
+  renderMap=function(){ _renderMap(); updateTimeInfo(); };
+
+  // ---------- init ----------
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',build); else build();
+})();
+
+</script>
 </body>
 </html>
