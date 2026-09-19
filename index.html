@@ -1649,7 +1649,7 @@ const layerDefs = {
   ),
   runap: () => L.tileLayer('https://mapas.parquesnacionales.gov.co/arcgis/rest/services/pnn/runap/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.6 }),
   treeloss: () => L.tileLayer('https://tiles.globalforestwatch.org/umd_tree_cover_loss/v1.10/tcd_30/{z}/{x}/{y}.png', { maxZoom: 12, opacity: 0.85 }),
-  labels: () => L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png', { maxZoom: 19, opacity: 0.9 })
+  labels: () => L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.9 })
 };
 
 const maps = {}, layers = {};
@@ -1658,7 +1658,7 @@ function makeMap(id, withZoom=false) {
 }
 
 maps.anm = makeMap('map1', true);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png').addTo(maps.anm);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 16, maxZoom: 19 }).addTo(maps.anm);
 layers.anm = { anmTit: layerDefs.anmTit().addTo(maps.anm) };
 
 maps.google = makeMap('map2');
@@ -1666,7 +1666,7 @@ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/
 layers.google = { labels: layerDefs.labels().addTo(maps.google) };
 
 maps.gfw = makeMap('map3');
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png').addTo(maps.gfw);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 16, maxZoom: 19 }).addTo(maps.gfw);
 layers.gfw = { treeloss: layerDefs.treeloss().addTo(maps.gfw) };
 
 maps.esri = makeMap('map4');
