@@ -1085,6 +1085,166 @@ body.fullscreen #opsPanel,body.fullscreen #opsBottom,body.fullscreen #opsModeSw,
 .psheet .ps-chart img{width:100%;height:auto;display:block}
 @media print{ .psheet .ps-chart{break-inside:avoid} .psheet .ps-kpis{break-inside:avoid} }
 
+/* ===== CAPAS KMZ / KML — estilos (namespaced) ===== */
+#kmzBtn{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:7px;
+  padding:6px 12px;font-weight:700;font-size:11.5px;letter-spacing:.4px;cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:6px;margin-left:6px}
+#kmzBtn:hover{border-color:var(--accent);color:var(--accent)}
+#kmzBtn.on{background:var(--accent);color:#000;border-color:var(--accent)}
+
+#kmzPanel{position:fixed;top:52px;right:14px;width:300px;max-height:72vh;z-index:6200;
+  background:var(--panel);border:1px solid var(--border);border-radius:11px;
+  box-shadow:0 12px 34px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;
+  font-family:inherit;color:var(--text)}
+#kmzPanel .kmz-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;
+  background:var(--panel-2);border-bottom:1px solid var(--border)}
+#kmzPanel .kmz-hd b{font-size:13px;letter-spacing:.4px}
+#kmzPanel .kmz-hd button{background:none;border:0;color:var(--muted);font-size:15px;cursor:pointer;line-height:1}
+#kmzPanel .kmz-hd button:hover{color:var(--danger)}
+#kmzPanel .kmz-body{padding:12px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+#kmzPanel .kmz-add{display:block;text-align:center;background:var(--accent);color:#000;font-weight:700;
+  font-size:12.5px;border-radius:7px;padding:9px;cursor:pointer;letter-spacing:.3px}
+#kmzPanel .kmz-add:hover{filter:brightness(1.08)}
+#kmzPanel .kmz-hint{font-size:10.5px;color:var(--muted);line-height:1.45}
+#kmzPanel .kmz-msg{font-size:11px;min-height:0;line-height:1.4;color:var(--muted)}
+#kmzPanel .kmz-msg.ok{color:var(--accent-2)}
+#kmzPanel .kmz-msg.warn{color:var(--warn)}
+#kmzPanel .kmz-empty{font-size:11px;color:var(--muted);text-align:center;padding:12px 4px;line-height:1.5;
+  border:1px dashed var(--border);border-radius:8px}
+#kmzPanel .kmz-list{display:flex;flex-direction:column;gap:6px}
+#kmzPanel .kmz-row{display:flex;flex-direction:column;gap:6px;background:var(--panel-2);
+  border:1px solid var(--border);border-radius:8px;padding:7px 8px}
+#kmzPanel .kmz-r1{display:flex;align-items:center;gap:8px}
+#kmzPanel .kmz-exp{background:none;border:0;color:var(--muted);cursor:pointer;font-size:11px;width:14px;flex:none;padding:0;line-height:1}
+#kmzPanel .kmz-exp.ph{cursor:default}
+#kmzPanel .kmz-exp:hover{color:var(--accent)}
+#kmzPanel .kmz-feats{margin-top:6px;border-top:1px dashed var(--border);padding-top:6px;max-height:180px;overflow:auto;display:flex;flex-direction:column;gap:3px}
+#kmzPanel .kmz-feat{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text);cursor:pointer;padding-left:6px}
+#kmzPanel .kmz-feat input{accent-color:var(--accent);width:13px;height:13px;flex:none;margin:0}
+#kmzPanel .kmz-feat span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#kmzPanel .kmz-fsearch{display:flex;gap:5px;margin-bottom:6px}
+#kmzPanel .kmz-fq{flex:1;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:4px 7px;font-size:11px}
+#kmzPanel .kmz-fall,#kmzPanel .kmz-fnone{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:3px 7px;font-size:10px;cursor:pointer;flex:none}
+#kmzPanel .kmz-fall:hover,#kmzPanel .kmz-fnone:hover{border-color:var(--accent);color:var(--accent)}
+#kmzPanel .kmz-fres{display:flex;flex-direction:column;gap:3px}
+#kmzPanel .kmz-fnote{font-size:9.5px;color:var(--muted);font-style:italic;padding:2px 0 4px}
+#kmzPanel .kmz-r2{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-left:2px}
+#kmzPanel .kmz-conv{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}
+#kmzPanel .kmz-sym{width:14px;height:14px;display:inline-block;flex:none}
+#kmzPanel .kmz-sym.poly{border:1.5px solid #fff;border-radius:2px}
+#kmzPanel .kmz-sym.line{height:3px;border-radius:2px}
+#kmzPanel .kmz-sym.pt{border-radius:50%;border:1.5px solid #fff}
+#kmzPanel .kmz-op-wrap{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);flex:1;justify-content:flex-end}
+#kmzPanel .kmz-op{width:88px;accent-color:var(--accent);height:3px}
+#kmzPanel .kmz-opv{font-family:var(--mono);font-size:9.5px;color:var(--accent);min-width:30px;text-align:right}
+#kmzPanel .kmz-vis{accent-color:var(--accent);width:14px;height:14px;flex:none;cursor:pointer;margin:0}
+#kmzPanel .kmz-sw{width:20px;height:14px;border-radius:3px;flex:none;cursor:pointer;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.35)}
+#kmzPanel .kmz-sw input{position:absolute;inset:0;opacity:0;cursor:pointer;padding:0;border:0}
+#kmzPanel .kmz-nm{flex:1;min-width:0;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#kmzPanel .kmz-ct{font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--bg);
+  border-radius:10px;padding:1px 7px;flex:none}
+#kmzPanel .kmz-zoom,#kmzPanel .kmz-del{background:none;border:1px solid var(--border);border-radius:6px;
+  color:var(--muted);cursor:pointer;font-size:12px;width:24px;height:24px;flex:none;line-height:1;padding:0}
+#kmzPanel .kmz-zoom:hover{border-color:var(--accent);color:var(--accent)}
+#kmzPanel .kmz-del:hover{border-color:var(--danger);color:var(--danger)}
+
+@media (max-width:640px){ #kmzPanel{right:8px;left:8px;width:auto} }
+
+/* info de capas KMZ dentro del popup de un punto de consulta */
+.point-popup .pp-kmz{margin-top:7px;padding-top:6px;border-top:1px solid rgba(255,255,255,.12);font-size:11px;line-height:1.6}
+.point-popup .pp-kmz-t{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:#8b949e;margin-bottom:3px}
+
+/* que las capas KMZ no se oculten en pantalla completa ni impresión */
+body.fullscreen #kmzBtn{display:none}
+@media print{ #kmzBtn,#kmzPanel{display:none!important} }
+
+/* ===== AMPAROS ADMINISTRATIVOS — estilos (namespaced) ===== */
+#ampBtn{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:7px;
+  padding:6px 12px;font-weight:700;font-size:11.5px;letter-spacing:.4px;cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:6px;margin-left:6px}
+#ampBtn:hover{border-color:var(--accent);color:var(--accent)}
+#ampBtn.on{background:var(--accent);color:#000;border-color:var(--accent)}
+
+#ampPanel{position:fixed;top:52px;right:14px;width:308px;max-height:74vh;z-index:6200;
+  background:var(--panel);border:1px solid var(--border);border-radius:11px;
+  box-shadow:0 12px 34px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;color:var(--text)}
+#ampPanel .amp-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:var(--panel-2);border-bottom:1px solid var(--border)}
+#ampPanel .amp-hd b{font-size:13px;letter-spacing:.3px}
+#ampPanel .amp-hd button{background:none;border:0;color:var(--muted);font-size:15px;cursor:pointer;line-height:1}
+#ampPanel .amp-hd button:hover{color:var(--danger)}
+#ampPanel .amp-body{padding:12px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+#ampPanel .amp-add{display:block;text-align:center;background:var(--accent);color:#000;font-weight:700;font-size:12.5px;border-radius:7px;padding:9px;cursor:pointer;letter-spacing:.3px}
+#ampPanel .amp-add:hover{filter:brightness(1.08)}
+#ampPanel .amp-hint{font-size:10.5px;color:var(--muted);line-height:1.45}
+#ampPanel .amp-hint2{font-size:9.5px;color:var(--muted);line-height:1.4;margin-top:3px}
+#ampPanel .amp-msg{font-size:11px;line-height:1.4;color:var(--muted)}
+#ampPanel .amp-msg.ok{color:var(--accent-2)}
+#ampPanel .amp-msg.warn{color:var(--warn)}
+#ampPanel .amp-empty{font-size:11px;color:var(--muted);text-align:center;padding:12px 4px;line-height:1.5;border:1px dashed var(--border);border-radius:8px}
+#ampPanel .amp-dist{background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:8px 9px}
+#ampPanel .amp-dist label{font-size:10.5px;color:var(--muted);display:block;margin-bottom:5px}
+#ampPanel .amp-dist label b{color:var(--accent);font-family:var(--mono)}
+#ampPanel .amp-dist input[type=range]{width:100%;accent-color:var(--accent);height:3px}
+#ampPanel .amp-tools{display:flex;gap:6px}
+#ampPanel .amp-tools button{flex:1;background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px;font-size:10.5px;cursor:pointer}
+#ampPanel .amp-tools button:hover{border-color:var(--accent);color:var(--accent)}
+#ampPanel .amp-list{display:flex;flex-direction:column;gap:6px}
+#ampPanel .amp-row{display:flex;flex-direction:column;gap:6px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:7px 8px}
+#ampPanel .amp-r1{display:flex;align-items:center;gap:8px}
+#ampPanel .amp-r2{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-left:2px}
+#ampPanel .amp-vis{accent-color:var(--accent);width:14px;height:14px;flex:none;cursor:pointer;margin:0}
+#ampPanel .amp-sw{width:20px;height:14px;border-radius:3px;flex:none;cursor:pointer;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.35)}
+#ampPanel .amp-sw input{position:absolute;inset:0;opacity:0;cursor:pointer;padding:0;border:0}
+#ampPanel .amp-nm{flex:1;min-width:0;font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ampPanel .amp-ct{font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--bg);border-radius:10px;padding:1px 7px;flex:none}
+#ampPanel .amp-zoom{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px;width:24px;height:24px;flex:none;line-height:1;padding:0}
+#ampPanel .amp-zoom:hover{border-color:var(--accent);color:var(--accent)}
+#ampPanel .amp-meta{font-size:9.5px;color:var(--muted);font-family:var(--mono)}
+#ampPanel .amp-op-wrap{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);flex:1;justify-content:flex-end}
+#ampPanel .amp-op{width:82px;accent-color:var(--accent);height:3px}
+#ampPanel .amp-opv{font-family:var(--mono);font-size:9.5px;color:var(--accent);min-width:30px;text-align:right}
+@media (max-width:640px){ #ampPanel{right:8px;left:8px;width:auto} }
+body.fullscreen #ampBtn{display:none}
+@media print{ #ampBtn,#ampPanel{display:none!important} }
+
+/* ===== EXPORTAR KMZ PROPIO — estilos ===== */
+#xkzModal{position:fixed;inset:0;z-index:7000;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px}
+#xkzModal.open{display:flex}
+#xkzModal .xkz-box{width:460px;max-width:100%;max-height:86vh;background:var(--panel);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;color:var(--text);box-shadow:0 18px 50px rgba(0,0,0,.6)}
+#xkzModal .xkz-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;background:var(--panel-2);border-bottom:1px solid var(--border)}
+#xkzModal .xkz-hd b{font-size:14px}
+#xkzModal .xkz-hd button{background:none;border:0;color:var(--muted);font-size:16px;cursor:pointer}
+#xkzModal .xkz-hd button:hover{color:var(--danger)}
+#xkzModal .xkz-bd{padding:14px 15px;overflow:auto;display:flex;flex-direction:column;gap:9px}
+#xkzModal .xkz-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+#xkzModal #xkzName{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:13px;width:100%;box-sizing:border-box}
+#xkzModal .xkz-tools{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+#xkzModal .xkz-tools .spacer{flex:1}
+#xkzModal .xkz-tools .gh{background:var(--panel-2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer}
+#xkzModal .xkz-tools .gh:hover{border-color:var(--accent);color:var(--accent)}
+#xkzModal .xkz-list{display:flex;flex-direction:column;gap:6px;max-height:44vh;overflow:auto}
+#xkzModal .xkz-row{display:flex;align-items:center;gap:9px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:6px 9px}
+#xkzModal .xkz-c{accent-color:var(--accent);width:15px;height:15px;flex:none;cursor:pointer;margin:0}
+#xkzModal .xkz-i{font-family:var(--mono);font-size:11px;color:var(--accent);flex:none;min-width:26px}
+#xkzModal .xkz-n{flex:1;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:12px}
+#xkzModal .xkz-co{font-size:10px;color:var(--muted);flex:none;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#xkzModal .xkz-empty{font-size:12px;color:var(--muted);text-align:center;padding:24px 10px;line-height:1.5;border:1px dashed var(--border);border-radius:8px}
+#xkzModal .xkz-empty2{font-size:11px;color:var(--muted);padding:6px 4px;font-style:italic}
+#xkzModal .xkz-grp{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+#xkzModal .xkz-gh{display:flex;align-items:center;gap:7px;background:var(--panel-2);padding:7px 10px;font-size:11.5px;font-weight:700;letter-spacing:.2px;border-bottom:1px solid var(--border)}
+#xkzModal .xkz-grp .xkz-row{border:0;border-radius:0;border-bottom:1px solid var(--border);background:transparent}
+#xkzModal .xkz-grp .xkz-row:last-child{border-bottom:0}
+#xkzModal .xkz-sw{width:11px;height:11px;border-radius:3px;display:inline-block;border:1px solid rgba(255,255,255,.4);flex:none}
+#xkzModal .xkz-msg{font-size:11.5px;color:var(--muted);min-height:14px}
+#xkzModal .xkz-msg.ok{color:var(--accent-2)}
+#xkzModal .xkz-msg.warn{color:var(--warn)}
+#xkzModal .xkz-ft{display:flex;justify-content:flex-end;gap:8px;padding:12px 15px;border-top:1px solid var(--border);background:var(--panel-2)}
+#xkzModal .xkz-ft button{border:0;border-radius:7px;padding:9px 16px;font-weight:700;font-size:12.5px;cursor:pointer}
+#xkzModal .xkz-ft #xkzCancel{background:var(--panel);color:var(--text);border:1px solid var(--border)}
+#xkzModal .xkz-ft .go{background:var(--accent);color:#000}
+#xkzModal .xkz-ft .go:hover{filter:brightness(1.08)}
+@media (max-width:560px){ #xkzModal .xkz-box{width:100%} }
+
 </style>
 </head>
 <body>
@@ -2201,6 +2361,7 @@ function openPointPopup(p, mk, map) {
         <div style="margin-top:3px">Tít: ${titBadge} · Sol: ${solBadge}</div>
         <div>Prot: ${protBadge} · RF2: ${rfBadge}</div>
       </div>
+      ${(function(){try{if(window.KMZ){var kh=window.KMZ.layersAtHTML(p.lat,p.lng);if(kh)return '<div class="pp-kmz"><div class="pp-kmz-t">Capas KMZ en este punto</div>'+kh+'</div>';}}catch(e){}return '';})()}
       ${hasCards ? `
         <div class="pp-anm-title">Expedientes ANM en este punto</div>
         <div class="pp-anm-list">${titCards}${solCards}</div>
@@ -4352,10 +4513,11 @@ window.__GEO_MUNI={"type":"FeatureCollection","features":[{"type":"Feature","pro
       .map(function(f){return '<div><div class="k">'+f[0]+'</div><div class="v">'+f[1]+'</div></div>';}).join('');
     var rows=o.items.map(function(it){return '<tr><td class="q">'+esc(String(it.cantidad))+' '+esc(it.unidad||'')+'</td><td>'+titleCase(it.clase||'—')+'<div style="font-size:9px;color:var(--muted)">'+titleCase(it.tipo)+' · '+titleCase(it.accion)+'</div></td></tr>';}).join('');
     var desc=o.obs?'<div><div class="k" style="margin-bottom:4px">Descripción</div><div class="ops-desc">'+esc(o.obs)+'</div></div>':'';
+    var kmz=''; try{ if(window.KMZ && o.lat!=null){ var kh=window.KMZ.layersAtHTML(o.lat,o.lon); if(kh) kmz='<div><div class="k" style="font-size:9px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Capas KMZ en este punto</div><div class="ops-desc">'+kh+'</div></div>'; } }catch(e){}
     box.innerHTML='<div class="dh"><button class="cl" title="Cerrar">✕</button>'+chip+'<h3>'+esc(o.muni)+'</h3><div class="sub">'+esc(o.dept)+' · HR '+esc(o.hr||o.id)+' · Op '+o.orden+'/'+ALL.length+'</div></div>'+
       '<div class="db"><div class="ops-facts">'+facts+'</div>'+
       '<div><div class="k" style="font-size:9px;text-transform:uppercase;color:var(--muted);margin-bottom:5px">Resultados ('+o.items.length+')</div><table class="ops-res"><tbody>'+rows+'</tbody></table></div>'+
-      desc+(o.hr?'<div><div class="k" style="font-size:9px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Radiograma</div><div class="ops-rad">'+esc(o.hr)+'</div></div>':'')+'</div>';
+      desc+kmz+(o.hr?'<div><div class="k" style="font-size:9px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Radiograma</div><div class="ops-rad">'+esc(o.hr)+'</div></div>':'')+'</div>';
     box.style.display='block';
     box.querySelector('.cl').addEventListener('click',function(){ box.style.display='none'; selId=null; renderMap(); });
   }
@@ -4694,9 +4856,12 @@ window.__GEO_MUNI={"type":"FeatureCollection","features":[{"type":"Feature","pro
     var showLeg=(showOps && ALL.length);
     var mapped=showLeg?currentMapped():[];
     var inc=mapped.filter(function(o){return o.tipo_op==='Incautación';}).length, otr=mapped.length-inc;
-    document.getElementById('psLeg').innerHTML= showLeg ?
+    var opsLeg= showLeg ?
       ('<span><span class="sw cir" style="background:'+OTR+'"></span> Destrucción/otros ('+otr+')</span><span><span class="sw dia" style="background:'+INC+'"></span> Incautación ('+inc+')</span>')
       : '<span style="color:#555">Según capas visibles en el mapa</span>';
+    var kmzLeg=''; try{ if(window.KMZ){ var vl=window.KMZ.visibleLayers(); if(vl.length){ kmzLeg=vl.map(function(x){return '<span><span class="sw" style="background:'+esc(x.color)+'"></span> '+esc(x.name)+' ('+x.n+')</span>';}).join(''); } } }catch(e){}
+    var ampLeg=''; try{ if(window.AMPAROS){ var al=window.AMPAROS.visibleLegend(); if(al.length){ ampLeg=al.map(function(x){return '<span><span class="sw cir" style="background:'+esc(x.color)+'"></span> '+esc(x.name)+' ('+x.n+')</span>';}).join(''); } } }catch(e){}
+    document.getElementById('psLeg').innerHTML= opsLeg + kmzLeg + ampLeg;
     // Lista de puntos visualizados
     var vis=(showOps?mapped:[]), npts=document.getElementById('psNpts'), pl=document.getElementById('psPuntos');
     if(npts) npts.textContent=vis.length;
@@ -4750,6 +4915,619 @@ window.__GEO_MUNI={"type":"FeatureCollection","features":[{"type":"Feature","pro
   renderMap=function(){ _renderMap(); updateTimeInfo(); };
 
   // ---------- init ----------
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',build); else build();
+})();
+
+</script>
+<script>
+/* ===== MÓDULO CAPAS KMZ / KML — aditivo, no toca la lógica existente =====
+   Permite subir archivos .kmz / .kml (veredas, municipios, puntos de interés, etc.)
+   y verlos en los CUATRO mapas, con encendido/apagado, color, zoom y borrar.
+   Se dibujan en canvas (pane propio) para que también salgan en el PDF. */
+(function(){
+  'use strict';
+  var PALETTE=['#00e5ff','#ffd23d','#ff5aa9','#7cff6b','#ff8c42','#b388ff','#ff5252','#40c4ff','#eeff41','#69f0ae'];
+  var LAYERS=[], idc=1, _maps=null, _paneZ=500;
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function getMaps(){
+    if(_maps&&_maps.length) return _maps;
+    try{ if(typeof allMaps!=='undefined'&&allMaps&&allMaps.length){_maps=allMaps;return _maps;} }catch(e){}
+    try{ if(typeof maps!=='undefined'&&maps){_maps=Object.values(maps);return _maps;} }catch(e){}
+    _maps=[]; return _maps;
+  }
+  function status(msg,cls){ var el=document.getElementById('kmzMsg'); if(!el)return; el.textContent=msg||''; el.className='kmz-msg'+(cls?(' '+cls):''); }
+
+  // ---------- carga de JSZip (para descomprimir KMZ) ----------
+  function ensureJSZip(){
+    return new Promise(function(res,rej){
+      if(window.JSZip) return res(window.JSZip);
+      var s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload=function(){ res(window.JSZip); };
+      s.onerror=function(){ rej(new Error('No se pudo cargar el lector de KMZ (¿sin internet?). Puedes subir el .kml descomprimido.')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  // ---------- KML -> GeoJSON ----------
+  function kmlColor(k){ // KML usa aabbggrr
+    if(!k) return null; k=k.replace('#','').trim(); if(k.length===6) k='ff'+k; if(k.length!==8) return null;
+    var a=parseInt(k.slice(0,2),16)/255, b=parseInt(k.slice(2,4),16), g=parseInt(k.slice(4,6),16), r=parseInt(k.slice(6,8),16);
+    if([a,b,g,r].some(function(x){return isNaN(x);})) return null;
+    return {hex:'#'+[r,g,b].map(function(x){return('0'+x.toString(16)).slice(-2);}).join(''),op:a};
+  }
+  function coords(txt){
+    if(!txt) return [];
+    return txt.replace(/\s+/g,' ').trim().split(' ').map(function(t){var p=t.split(','),lo=parseFloat(p[0]),la=parseFloat(p[1]);return(isFinite(lo)&&isFinite(la))?[lo,la]:null;}).filter(Boolean);
+  }
+  function firstText(el,tag){ var e=el.getElementsByTagName(tag)[0]; return e?e.textContent:''; }
+  function kmlToGeoJSON(text){
+    var dom=new DOMParser().parseFromString(text,'text/xml');
+    if(dom.getElementsByTagName('parsererror').length) throw new Error('El archivo KML no es válido.');
+    var styles={};
+    Array.prototype.forEach.call(dom.getElementsByTagName('Style'),function(st){ if(!st.id)return; var col=null;
+      ['LineStyle','PolyStyle','IconStyle'].some(function(tag){var e=st.getElementsByTagName(tag)[0]; if(e){var c=e.getElementsByTagName('color')[0]; if(c){col=kmlColor(c.textContent); return !!col;}} return false;});
+      if(col) styles['#'+st.id]=col;
+    });
+    Array.prototype.forEach.call(dom.getElementsByTagName('StyleMap'),function(sm){ if(!sm.id)return; var pairs=sm.getElementsByTagName('Pair');
+      for(var i=0;i<pairs.length;i++){ var k=pairs[i].getElementsByTagName('key')[0], u=pairs[i].getElementsByTagName('styleUrl')[0];
+        if(k&&/normal/i.test(k.textContent)&&u){ styles['#'+sm.id]=styles[u.textContent.trim()]; } }
+    });
+    var feats=[];
+    Array.prototype.forEach.call(dom.getElementsByTagName('Placemark'),function(pm){
+      var name=(firstText(pm,'name')||'').trim(), desc=(firstText(pm,'description')||'').trim();
+      var col=null, su=pm.getElementsByTagName('styleUrl')[0]; if(su) col=styles[su.textContent.trim()];
+      if(!col){ var inl=pm.getElementsByTagName('Style')[0]; if(inl){ ['LineStyle','PolyStyle','IconStyle'].some(function(tag){var e=inl.getElementsByTagName(tag)[0]; if(e){var c=e.getElementsByTagName('color')[0]; if(c){col=kmlColor(c.textContent); return !!col;}} return false;}); } }
+      var geoms=[];
+      (function collect(el){
+        Array.prototype.forEach.call(el.children,function(ch){
+          var tag=ch.tagName;
+          if(tag==='Point'){ var c=coords(firstText(ch,'coordinates')); if(c.length) geoms.push({type:'Point',coordinates:c[0]}); }
+          else if(tag==='LineString'||tag==='LinearRing'){ var c=coords(firstText(ch,'coordinates')); if(c.length>=2) geoms.push({type:'LineString',coordinates:c}); }
+          else if(tag==='Polygon'){ var rings=[], ob=ch.getElementsByTagName('outerBoundaryIs')[0];
+            if(ob){ var oc=coords(firstText(ob,'coordinates')); if(oc.length>=3) rings.push(oc); }
+            Array.prototype.forEach.call(ch.getElementsByTagName('innerBoundaryIs'),function(ib){ var ic=coords(firstText(ib,'coordinates')); if(ic.length>=3) rings.push(ic); });
+            if(rings.length) geoms.push({type:'Polygon',coordinates:rings}); }
+          else if(tag==='MultiGeometry') collect(ch);
+        });
+      })(pm);
+      geoms.forEach(function(g){ feats.push({type:'Feature',properties:{name:name,description:desc,__col:col?col.hex:null,__op:col?col.op:null},geometry:g}); });
+    });
+    return {type:'FeatureCollection',features:feats};
+  }
+
+  // ---------- lectura de archivo ----------
+  function readFile(file){
+    var nm=(file.name||'').toLowerCase();
+    if(/\.kmz$/.test(nm)){
+      return ensureJSZip().then(function(JSZip){ return file.arrayBuffer(); }).then(function(buf){
+        return window.JSZip.loadAsync(buf);
+      }).then(function(zip){
+        var kmlName=null;
+        zip.forEach(function(p,e){ if(!kmlName && /\.kml$/i.test(p) && !e.dir) kmlName=p; });
+        if(!kmlName){ zip.forEach(function(p,e){ if(!kmlName && /doc\.kml$/i.test(p)) kmlName=p; }); }
+        if(!kmlName) throw new Error('El KMZ no contiene un archivo KML.');
+        return zip.file(kmlName).async('string');
+      }).then(function(txt){ return kmlToGeoJSON(txt); });
+    }
+    // KML plano
+    return file.text().then(function(txt){ return kmlToGeoJSON(txt); });
+  }
+
+  // ---------- render en los mapas ----------
+  function ensurePane(m){
+    if(typeof L==='undefined') return null;
+    if(!m.getPane('kmzPane')){ var p=m.createPane('kmzPane'); p.style.zIndex=_paneZ; }
+    if(!m.__kmzRenderer){ try{ m.__kmzRenderer=L.canvas({pane:'kmzPane',padding:0.8}); }catch(e){ m.__kmzRenderer=null; } }
+    return m.__kmzRenderer;
+  }
+  function op01(layer){ return (layer.opacity==null?0.8:layer.opacity); }
+  function styleFor(layer,f){
+    var c=f.properties.__col||layer.color, t=f.geometry.type, op=op01(layer);
+    if(t==='Point') return {color:'#fff',weight:1.4,opacity:Math.min(1,op+0.15),fillColor:c,fillOpacity:op};
+    return {color:c,weight:t==='LineString'?3:2,opacity:op,fillColor:c,fillOpacity:t==='Polygon'?(0.4*op):(0.5*op)};
+  }
+  function applyOpacity(layer){ (layer.groups||[]).forEach(function(gj){ try{ gj.setStyle(function(f){return styleFor(layer,f);}); }catch(e){} }); }
+  function annotate(geo){ (geo.features||[]).forEach(function(f,i){ f.__i=i; }); return geo; }
+  function featName(f,i){ return (f&&f.properties&&(f.properties.name||'').trim())||('Elemento '+(i+1)); }
+  function redrawLayer(layer){ removeFromMaps(layer); addToMaps(layer); }
+  var FEAT_DISPLAY_CAP=300;
+  function buildFeatsResults(layer,term){
+    var t=(term||'').toLowerCase(), feats=layer.geo.features||[], rows=[], shown=0, matched=0;
+    for(var i=0;i<feats.length;i++){ var nm=featName(feats[i],i); if(t && nm.toLowerCase().indexOf(t)<0) continue; matched++;
+      if(shown<FEAT_DISPLAY_CAP){ var on=!(layer.hidden&&layer.hidden.has(i));
+        rows.push('<label class="kmz-feat"><input type="checkbox" class="kmz-fc" data-i="'+i+'" '+(on?'checked':'')+'><span>'+esc(nm)+'</span></label>'); shown++; } }
+    var note='';
+    if(matched>FEAT_DISPLAY_CAP) note='<div class="kmz-fnote">Mostrando '+FEAT_DISPLAY_CAP+' de '+matched+' — escribe para filtrar.</div>';
+    else if(t) note='<div class="kmz-fnote">'+matched+' coincidencia(s).</div>';
+    return note+(rows.join('')||'<div class="kmz-fnote">Sin coincidencias.</div>');
+  }
+  function bindFeatChecks(row,layer){ row.querySelectorAll('.kmz-fc').forEach(function(fc){ fc.addEventListener('change',function(e){
+    var i=+e.target.dataset.i; if(!layer.hidden)layer.hidden=new Set(); if(e.target.checked)layer.hidden.delete(i); else layer.hidden.add(i); redrawLayer(layer); persist(); }); }); }
+  function applyBulkFeats(layer,term,show){ var t=(term||'').toLowerCase(), feats=layer.geo.features||[]; if(!layer.hidden)layer.hidden=new Set();
+    for(var i=0;i<feats.length;i++){ var nm=featName(feats[i],i); if(t && nm.toLowerCase().indexOf(t)<0) continue; if(show)layer.hidden.delete(i); else layer.hidden.add(i); }
+    redrawLayer(layer); persist(); }
+  function buildGJ(layer,m){
+    var rend=ensurePane(m), op=op01(layer);
+    return L.geoJSON(layer.geo,{pane:'kmzPane',renderer:rend,
+      filter:function(f){ return !(layer.hidden && f && layer.hidden.has(f.__i)); },
+      style:function(f){return styleFor(layer,f);},
+      pointToLayer:function(f,ll){ var c=f.properties.__col||layer.color; return L.circleMarker(ll,{pane:'kmzPane',renderer:rend,radius:6,color:'#fff',weight:1.4,fillColor:c,fillOpacity:op}); },
+      onEachFeature:function(f,lyr){ var n=(f.properties.name||'').trim()||layer.name, d=(f.properties.description||'').trim();
+        if(n) lyr.bindTooltip(n,{sticky:true,direction:'top'});
+        lyr.bindPopup('<b>'+esc(n)+'</b>'+(d?('<br>'+esc(d)):'')+'<br><span style="color:#8b949e;font-size:11px">Capa: '+esc(layer.name)+'</span>');
+      }
+    });
+  }
+  function addToMaps(layer){
+    layer.groups=[]; layer.bounds=null;
+    if(typeof L==='undefined') return;
+    getMaps().forEach(function(m){
+      var gj=buildGJ(layer,m);
+      if(layer.visible) gj.addTo(m);
+      layer.groups.push(gj);
+      if(!layer.bounds){ try{ var b=gj.getBounds(); if(b&&b.isValid()) layer.bounds=b; }catch(e){} }
+    });
+  }
+  function removeFromMaps(layer){ (layer.groups||[]).forEach(function(g){ try{ if(g._map) g._map.removeLayer(g); }catch(e){} }); layer.groups=[]; }
+  function setVisible(layer,on){
+    layer.visible=on; var M=getMaps();
+    (layer.groups||[]).forEach(function(g,i){ try{ if(on){ if(M[i]) g.addTo(M[i]); } else if(g._map){ g._map.removeLayer(g); } }catch(e){} });
+    persist();
+  }
+  function recolor(layer,col){ layer.color=col; removeFromMaps(layer); addToMaps(layer); persist(); renderList(); }
+  function setOpacity(layer,v){ layer.opacity=Math.max(0.1,Math.min(1,v)); applyOpacity(layer); persist(); }
+  function zoomTo(layer){ if(!layer.bounds){ status('Esa capa no tiene geometría con coordenadas.','warn'); return; } var M=getMaps(); if(M[0]){ try{ M[0].fitBounds(layer.bounds.pad(0.15)); }catch(e){} } }
+
+  // ---- ¿en qué capas KMZ cae este punto? (para la ficha de cada punto) ----
+  function ringHas(pt,ring){ var x=pt[0],y=pt[1],inside=false;
+    for(var i=0,j=ring.length-1;i<ring.length;j=i++){ var xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
+      if(((yi>y)!==(yj>y)) && (x<(xj-xi)*(y-yi)/((yj-yi)||1e-12)+xi)) inside=!inside; }
+    return inside; }
+  function polyHas(pt,coords){ if(!coords||!coords.length||!ringHas(pt,coords[0]))return false; for(var i=1;i<coords.length;i++){ if(ringHas(pt,coords[i]))return false; } return true; }
+  function layersAt(lat,lng){
+    var pt=[lng,lat], out=[];
+    LAYERS.forEach(function(l){ if(!l.visible)return; var names=[];
+      (l.geo.features||[]).forEach(function(f){ var g=f.geometry; if(!g)return; var nm=(f.properties.name||'').trim();
+        if(g.type==='Polygon'){ if(polyHas(pt,g.coordinates)) names.push(nm||'(área)'); }
+        else if(g.type==='MultiPolygon'){ if(g.coordinates.some(function(poly){return polyHas(pt,poly);})) names.push(nm||'(área)'); }
+      });
+      if(names.length) out.push({layer:l.name,color:l.color,names:names});
+    });
+    return out;
+  }
+  // capas visibles (para la convención en pantalla y en el PDF)
+  function visibleLayers(){ return LAYERS.filter(function(l){return l.visible;}).map(function(l){return {name:l.name,color:l.color,n:l.nfeat};}); }
+  function layersAtHTML(lat,lng){
+    var h=layersAt(lat,lng); if(!h.length) return '';
+    return h.map(function(x){ return '<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:'+esc(x.color)+';display:inline-block;border:1px solid rgba(255,255,255,.5)"></span>'+esc(x.layer)+': <b>'+esc(x.names.slice(0,4).join(', '))+(x.names.length>4?('  +'+(x.names.length-4)):'')+'</b></span>'; }).join('<br>');
+  }
+  function getLayersData(){ return LAYERS.map(function(l){ return {name:l.name,color:l.color,geo:l.geo}; }); }
+  window.KMZ={ layersAt:layersAt, layersAtHTML:layersAtHTML, visibleLayers:visibleLayers, getLayersData:getLayersData };
+
+  // ---------- persistencia ----------
+  function persist(){
+    try{
+      var slim=LAYERS.map(function(l){return {name:l.name,color:l.color,visible:l.visible,opacity:l.opacity,hidden:(l.hidden?Array.from(l.hidden):[]),geo:l.geo};});
+      localStorage.setItem('kmzLayers',JSON.stringify(slim));
+    }catch(e){ /* cuota excedida: se mantiene solo en memoria */ }
+  }
+  function restore(){
+    try{
+      var raw=localStorage.getItem('kmzLayers'); if(!raw) return;
+      var arr=JSON.parse(raw); if(!Array.isArray(arr)) return;
+      arr.forEach(function(o){ if(!o||!o.geo)return;
+        annotate(o.geo);
+        var layer={id:idc++,name:o.name||('Capa '+idc),color:o.color||PALETTE[(idc)%PALETTE.length],visible:o.visible!==false,opacity:(o.opacity==null?0.8:o.opacity),hidden:new Set(o.hidden||[]),geo:o.geo,groups:[],bounds:null,nfeat:(o.geo.features||[]).length};
+        addToMaps(layer); LAYERS.push(layer);
+      });
+    }catch(e){}
+  }
+
+  // ---------- UI ----------
+  function togglePanel(on){ var p=document.getElementById('kmzPanel'); if(!p)return; var show=(on==null)?(p.style.display==='none'||!p.style.display):on; p.style.display=show?'flex':'none'; var b=document.getElementById('kmzBtn'); if(b) b.classList.toggle('on',show); }
+  function geomKind(layer){ var poly=0,line=0,pt=0; (layer.geo.features||[]).forEach(function(f){ var t=f.geometry&&f.geometry.type; if(t==='Polygon'||t==='MultiPolygon')poly++; else if(t==='LineString')line++; else if(t==='Point')pt++; });
+    if(poly&&!line&&!pt) return 'poly'; if(line&&!poly&&!pt) return 'line'; if(pt&&!poly&&!line) return 'point'; return 'mixed'; }
+  function convIcon(kind,color){
+    if(kind==='poly') return '<span class="kmz-sym poly" style="background:'+esc(color)+'33;border-color:'+esc(color)+'"></span>';
+    if(kind==='line') return '<span class="kmz-sym line" style="background:'+esc(color)+'"></span>';
+    if(kind==='point') return '<span class="kmz-sym pt" style="background:'+esc(color)+'"></span>';
+    return '<span class="kmz-sym poly" style="background:'+esc(color)+'33;border-color:'+esc(color)+'"></span>';
+  }
+  function kindLabel(k){ return k==='poly'?'Áreas / polígonos':(k==='line'?'Líneas':(k==='point'?'Puntos':'Mixta')); }
+  function renderList(){
+    var box=document.getElementById('kmzList'); if(!box)return;
+    if(!LAYERS.length){ box.innerHTML='<div class="kmz-empty">Aún no has cargado capas. Usa “➕ Agregar KMZ / KML”. Puedes subir varios a la vez.</div>'; return; }
+    box.innerHTML=LAYERS.map(function(l){
+      var k=geomKind(l), op=Math.round(op01(l)*100), canExp=(l.nfeat>=2), exp=!!_expanded[l.id];
+      var feats='';
+      if(canExp && exp){
+        var term=_featSearch[l.id]||'';
+        feats='<div class="kmz-feats">'+
+          '<div class="kmz-fsearch"><input type="text" class="kmz-fq" placeholder="Buscar elemento…" value="'+esc(term)+'"><button class="kmz-fall" title="Mostrar los filtrados">Todos</button><button class="kmz-fnone" title="Ocultar los filtrados">Ninguno</button></div>'+
+          '<div class="kmz-fres">'+buildFeatsResults(l,term)+'</div>'+
+        '</div>';
+      }
+      return '<div class="kmz-row" data-id="'+l.id+'">'+
+        '<div class="kmz-r1">'+
+          (canExp?('<button class="kmz-exp" title="Ver elementos">'+(exp?'▾':'▸')+'</button>'):'<span class="kmz-exp ph"></span>')+
+          '<input type="checkbox" class="kmz-vis" '+(l.visible?'checked':'')+' title="Mostrar / ocultar toda la capa">'+
+          '<label class="kmz-sw" style="background:'+esc(l.color)+'" title="Cambiar color"><input type="color" value="'+esc(l.color)+'"></label>'+
+          '<span class="kmz-nm" title="'+esc(l.name)+'">'+esc(l.name)+'</span>'+
+          '<span class="kmz-ct" title="Elementos">'+l.nfeat+'</span>'+
+          '<button class="kmz-zoom" title="Centrar en esta capa">⊙</button>'+
+          '<button class="kmz-del" title="Quitar capa">✕</button>'+
+        '</div>'+
+        '<div class="kmz-r2">'+
+          '<span class="kmz-conv" title="Convención">'+convIcon(k,l.color)+kindLabel(k)+'</span>'+
+          '<span class="kmz-op-wrap" title="Transparencia">◑<input type="range" class="kmz-op" min="10" max="100" value="'+op+'"><span class="kmz-opv">'+op+'%</span></span>'+
+        '</div>'+ feats +
+      '</div>';
+    }).join('');
+    box.querySelectorAll('.kmz-row').forEach(function(row){
+      var id=+row.dataset.id, layer=LAYERS.find(function(x){return x.id===id;}); if(!layer)return;
+      row.querySelector('.kmz-vis').addEventListener('change',function(e){ setVisible(layer,e.target.checked); });
+      row.querySelector('.kmz-sw input').addEventListener('input',function(e){ recolor(layer,e.target.value); });
+      row.querySelector('.kmz-zoom').addEventListener('click',function(){ zoomTo(layer); });
+      row.querySelector('.kmz-del').addEventListener('click',function(){ removeFromMaps(layer); LAYERS=LAYERS.filter(function(x){return x.id!==id;}); persist(); renderList(); status('Capa eliminada.',''); });
+      var op=row.querySelector('.kmz-op'), opv=row.querySelector('.kmz-opv');
+      op.addEventListener('input',function(e){ var v=+e.target.value; if(opv)opv.textContent=v+'%'; setOpacity(layer,v/100); });
+      var exb=row.querySelector('.kmz-exp'); if(exb && exb.tagName==='BUTTON') exb.addEventListener('click',function(){ _expanded[id]=!_expanded[id]; renderList(); });
+      var fq=row.querySelector('.kmz-fq'), fres=row.querySelector('.kmz-fres');
+      if(fq && fres){ fq.addEventListener('input',function(e){ _featSearch[id]=e.target.value; fres.innerHTML=buildFeatsResults(layer,_featSearch[id]); bindFeatChecks(row,layer); }); }
+      var fall=row.querySelector('.kmz-fall'), fnone=row.querySelector('.kmz-fnone');
+      if(fall) fall.addEventListener('click',function(){ applyBulkFeats(layer,_featSearch[id]||'',true); if(fres){fres.innerHTML=buildFeatsResults(layer,_featSearch[id]||'');bindFeatChecks(row,layer);} });
+      if(fnone) fnone.addEventListener('click',function(){ applyBulkFeats(layer,_featSearch[id]||'',false); if(fres){fres.innerHTML=buildFeatsResults(layer,_featSearch[id]||'');bindFeatChecks(row,layer);} });
+      bindFeatChecks(row,layer);
+    });
+  }
+  var _expanded={}, _featSearch={};
+  function handleFiles(fileList){
+    var files=Array.prototype.slice.call(fileList||[]);   // copia: el input se limpia tras llamar
+    if(!files.length) return;
+    status('Procesando '+files.length+' archivo(s)…','');
+    var done=0, ok=0, errs=[];
+    files.forEach(function(file){
+      readFile(file).then(function(geo){
+        var nfeat=(geo.features||[]).length;
+        if(!nfeat){ errs.push(file.name+': sin geometrías'); }
+        else{
+          var base=(file.name||'Capa').replace(/\.(kmz|kml)$/i,'');
+          annotate(geo);
+          var layer={id:idc++,name:base,color:PALETTE[LAYERS.length%PALETTE.length],visible:true,opacity:0.8,hidden:new Set(),geo:geo,groups:[],bounds:null,nfeat:nfeat};
+          addToMaps(layer); LAYERS.push(layer); ok++;
+          if(LAYERS.length===1||(LAYERS.length&&ok===1)) zoomTo(layer);
+        }
+      }).catch(function(e){ errs.push((file.name||'archivo')+': '+e.message); })
+      .then(function(){ done++; if(done===files.length){ renderList(); persist();
+        status((ok?('✔ '+ok+' capa(s) cargada(s). '):'')+(errs.length?('⚠ '+errs.join(' · ')):''), errs.length?'warn':'ok'); } });
+    });
+  }
+
+  function build(){
+    if(document.getElementById('kmzBtn')) return;
+    // botón en la cabecera
+    var header=document.querySelector('header');
+    if(header){
+      var b=document.createElement('button'); b.id='kmzBtn'; b.title='Capas KMZ / KML sobre los mapas'; b.innerHTML='🗂 Capas';
+      var badge=document.getElementById('userBadge');
+      if(badge&&badge.parentNode===header) header.insertBefore(b,badge); else header.appendChild(b);
+      b.addEventListener('click',function(){ togglePanel(); });
+    }
+    // panel flotante
+    var p=document.createElement('div'); p.id='kmzPanel'; p.style.display='none';
+    p.innerHTML=''+
+      '<div class="kmz-hd"><b>🗂 Capas KMZ / KML</b><button id="kmzClose" title="Cerrar">✕</button></div>'+
+      '<div class="kmz-body">'+
+        '<label class="kmz-add">➕ Agregar KMZ / KML<input type="file" id="kmzFile" accept=".kmz,.kml" multiple style="display:none"></label>'+
+        '<div class="kmz-hint">Se dibujan sobre los cuatro mapas. Puedes prender/apagar, cambiar color, centrar (⊙) o quitar cada capa. También salen en el PDF.</div>'+
+        '<div class="kmz-msg" id="kmzMsg"></div>'+
+        '<div class="kmz-list" id="kmzList"></div>'+
+      '</div>';
+    document.body.appendChild(p);
+    document.getElementById('kmzClose').addEventListener('click',function(){ togglePanel(false); });
+    document.getElementById('kmzFile').addEventListener('change',function(e){ handleFiles(e.target.files); e.target.value=''; });
+    renderList();
+    restore();
+    if(LAYERS.length) renderList();
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',build); else build();
+})();
+
+</script>
+<script>
+/* ===== MÓDULO AMPAROS ADMINISTRATIVOS — aditivo, capa propia con su botón =====
+   Sube el Excel de amparos (ID, Latitud_Y, Longitud_X, Resolucion, Fecha, Municipio)
+   y dibuja los PUNTOS tal cual, coloreados por resolución. Sin inventar áreas.
+   Toggle/color/opacidad por resolución, tamaño de punto, sale en el PDF. */
+(function(){
+  'use strict';
+  var PALETTE=['#e6194b','#3cb44b','#4363d8','#f58231','#911eb4','#42d4f4','#f032e6','#bfef45','#fabed4','#469990','#dcbeff','#9a6324','#00e5ff','#800000','#aaffc3','#808000'];
+  var RAW=[], RES=[], byRes={}, ptSize=6, _maps=null, PANE_Z=490, meta={file:'',n:0};
+  var byResColor={}, byResVis={}, byResOp={};
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function norm(s){ if(s==null)return''; return String(s).trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+  function getMaps(){ if(_maps&&_maps.length)return _maps;
+    try{ if(typeof allMaps!=='undefined'&&allMaps&&allMaps.length){_maps=allMaps;return _maps;} }catch(e){}
+    try{ if(typeof maps!=='undefined'&&maps){_maps=Object.values(maps);return _maps;} }catch(e){}
+    _maps=[]; return _maps; }
+  function status(m,c){ var el=document.getElementById('ampMsg'); if(!el)return; el.textContent=m||''; el.className='amp-msg'+(c?(' '+c):''); }
+
+  function ensureXLSX(){ return new Promise(function(res,rej){ if(window.XLSX)return res(window.XLSX);
+    var s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=function(){res(window.XLSX);}; s.onerror=function(){rej(new Error('No se pudo cargar el lector de Excel (¿sin internet?).'));}; document.head.appendChild(s); }); }
+
+  // ---------- parseo del Excel ----------
+  function pickCol(headers,cands){ for(var i=0;i<headers.length;i++){ var h=norm(headers[i]); for(var j=0;j<cands.length;j++){ if(h.indexOf(cands[j])>=0) return i; } } return -1; }
+  function fmtFecha(v){ if(v==null||v==='')return''; if(v instanceof Date && !isNaN(v)) return v.toISOString().slice(0,10);
+    if(typeof v==='number'){ var d=new Date(Date.UTC(1899,11,30)+v*86400000); return d.toISOString().slice(0,10); }
+    var s=String(v); var m=s.match(/\d{4}-\d{2}-\d{2}/); if(m)return m[0]; var d2=new Date(s); if(!isNaN(d2)) return d2.toISOString().slice(0,10); return s; }
+  function parseWorkbook(wb){
+    var best=null,bestN=-1;
+    wb.SheetNames.forEach(function(nm){ var ws=wb.Sheets[nm]; var arr=window.XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+      if(!arr.length)return; var hdr=arr[0]||[]; var iLat=pickCol(hdr,['LATITUD','LAT_Y','LAT']); var iLon=pickCol(hdr,['LONGITUD','LON_X','LONG','LON']);
+      if(iLat>=0&&iLon>=0&&arr.length>bestN){ best={arr:arr,hdr:hdr,iLat:iLat,iLon:iLon}; bestN=arr.length; } });
+    if(!best) throw new Error('No encuentro columnas de Latitud/Longitud en el Excel.');
+    var hdr=best.hdr, iId=pickCol(hdr,['ID']), iRes=pickCol(hdr,['RESOLUC']), iFec=pickCol(hdr,['FECHA']), iMun=pickCol(hdr,['MUNICIPIO','MUNIC']);
+    var out=[];
+    for(var r=1;r<best.arr.length;r++){ var row=best.arr[r]; if(!row)continue;
+      var la=parseFloat(row[best.iLat]), lo=parseFloat(row[best.iLon]); if(!isFinite(la)||!isFinite(lo))continue;
+      var fecTxt=fmtFecha(iFec>=0?row[iFec]:'');
+      out.push({ id:(iId>=0?row[iId]:r), lat:la, lon:lo, res:(iRes>=0?String(row[iRes]==null?'':row[iRes]):'—'),
+        fecha:fecTxt, year:(fecTxt.match(/(\d{4})/)?fecTxt.match(/(\d{4})/)[1]:''), muni:(iMun>=0?String(row[iMun]==null?'':row[iMun]):'') });
+    }
+    return out;
+  }
+
+  // construye el modelo (agrupa por resolución solo para leyenda/toggle/color)
+  function rebuild(){
+    byRes={}; RES=[];
+    var groups={}; RAW.forEach(function(p){ (groups[p.res]||(groups[p.res]=[])).push(p); });
+    RES=Object.keys(groups).sort(function(a,b){ var na=+a,nb=+b; return (isFinite(na)&&isFinite(nb))?na-nb:String(a).localeCompare(b); });
+    RES.forEach(function(res,ri){
+      var pts=groups[res];
+      byRes[res]={ res:res, color:(byResColor[res]||PALETTE[ri%PALETTE.length]), visible:(byResVis[res]!==false),
+        opacity:(byResOp[res]==null?0.95:byResOp[res]), pts:pts, npts:pts.length, fecha:pts[0].fecha, muni:pts[0].muni, groups:[] };
+      byResColor[res]=byRes[res].color;
+    });
+  }
+
+  // ---------- render (solo puntos) ----------
+  function ensurePane(m){ if(typeof L==='undefined')return null;
+    if(!m.getPane('ampPane')){ var p=m.createPane('ampPane'); p.style.zIndex=PANE_Z; }
+    if(!m.__ampRenderer){ try{ m.__ampRenderer=L.canvas({pane:'ampPane',padding:0.8}); }catch(e){ m.__ampRenderer=null; } }
+    return m.__ampRenderer; }
+  function clearLayer(o){ (o.groups||[]).forEach(function(g){ try{ if(g._map)g._map.removeLayer(g);}catch(e){} }); o.groups=[]; }
+  function drawRes(o){
+    clearLayer(o); if(typeof L==='undefined')return;
+    getMaps().forEach(function(m){
+      var rend=ensurePane(m), grp=L.layerGroup();
+      o.pts.forEach(function(p){
+        var cm=L.circleMarker([p.lat,p.lon],{pane:'ampPane',renderer:rend,radius:ptSize,color:'#fff',weight:1,fillColor:o.color,fillOpacity:o.opacity});
+        cm.bindTooltip('Amparo · Res '+esc(o.res),{direction:'top'});
+        cm.bindPopup('<b>Amparo administrativo</b><br>Resolución: <b>'+esc(o.res)+'</b><br>Fecha: '+esc(p.fecha||'—')+'<br>Municipio: '+esc(p.muni||'—')+'<br>ID: '+esc(p.id)+'<br>'+p.lat.toFixed(5)+', '+p.lon.toFixed(5));
+        cm.addTo(grp);
+      });
+      if(o.visible) grp.addTo(m);
+      o.groups.push(grp);
+    });
+  }
+  function drawAll(){ RES.forEach(function(res){ drawRes(byRes[res]); }); }
+  function boundsAll(){ var b=null; RAW.forEach(function(p){ var ll=[p.lat,p.lon]; if(!b)b=L.latLngBounds(ll,ll); else b.extend(ll); }); return b; }
+  function zoomRes(o){ var b=null; o.pts.forEach(function(p){ var ll=[p.lat,p.lon]; if(!b)b=L.latLngBounds(ll,ll); else b.extend(ll); }); if(b){ var M=getMaps(); if(M[0])try{M[0].fitBounds(b.pad(0.2));}catch(e){} } }
+
+  // leyenda para el PDF
+  function visibleLegend(){ return RES.filter(function(r){return byRes[r].visible;}).map(function(r){return {name:'Amparo Res '+r,color:byRes[r].color,n:byRes[r].npts};}); }
+  window.AMPAROS={ visibleLegend:visibleLegend };
+
+  // ---------- persistencia ----------
+  function persist(){ try{ localStorage.setItem('amparosData',JSON.stringify({raw:RAW,size:ptSize,meta:meta,color:byResColor,vis:byResVis,op:byResOp})); }catch(e){} }
+  function restore(){ try{ var raw=localStorage.getItem('amparosData'); if(!raw)return false; var d=JSON.parse(raw);
+      if(!d||!d.raw||!d.raw.length)return false; RAW=d.raw; ptSize=d.size||6; meta=d.meta||{file:'',n:RAW.length};
+      byResColor=d.color||{}; byResVis=d.vis||{}; byResOp=d.op||{}; rebuild(); drawAll(); return true; }catch(e){ return false; } }
+
+  // ---------- UI ----------
+  function togglePanel(on){ var p=document.getElementById('ampPanel'); if(!p)return; var show=(on==null)?(p.style.display==='none'||!p.style.display):on; p.style.display=show?'flex':'none'; var b=document.getElementById('ampBtn'); if(b)b.classList.toggle('on',show); }
+  function renderList(){
+    var box=document.getElementById('ampList'); if(!box)return;
+    if(!RES.length){ box.innerHTML='<div class="amp-empty">Sube el Excel de amparos (ID, Latitud, Longitud, Resolución, Fecha, Municipio). Se dibujan los puntos coloreados por resolución.</div>'; return; }
+    var head='<div class="amp-dist"><label>Tamaño de punto <b id="ampSzV">'+ptSize+'</b></label><input type="range" id="ampSz" min="2" max="14" step="1" value="'+ptSize+'"></div>';
+    var rows=RES.map(function(res){ var o=byRes[res], op=Math.round(o.opacity*100);
+      return '<div class="amp-row" data-res="'+esc(res)+'">'+
+        '<div class="amp-r1"><input type="checkbox" class="amp-vis" '+(o.visible?'checked':'')+' title="Mostrar / ocultar">'+
+          '<label class="amp-sw" style="background:'+esc(o.color)+'" title="Cambiar color"><input type="color" value="'+esc(o.color)+'"></label>'+
+          '<span class="amp-nm" title="Resolución '+esc(res)+'">Res '+esc(res)+'</span>'+
+          '<span class="amp-ct" title="'+o.npts+' puntos">'+o.npts+'</span>'+
+          '<button class="amp-zoom" title="Centrar">⊙</button></div>'+
+        '<div class="amp-r2"><span class="amp-meta">'+esc(o.fecha||'')+'</span>'+
+          '<span class="amp-op-wrap" title="Transparencia">◑<input type="range" class="amp-op" min="15" max="100" value="'+op+'"><span class="amp-opv">'+op+'%</span></span></div>'+
+      '</div>'; }).join('');
+    box.innerHTML=head+'<div class="amp-tools"><button id="ampAllOn">Todas</button><button id="ampAllOff">Ninguna</button><button id="ampFit">Ver todo</button></div>'+rows;
+    var sz=document.getElementById('ampSz');
+    sz.addEventListener('input',function(e){ document.getElementById('ampSzV').textContent=e.target.value; ptSize=+e.target.value; drawAll(); });
+    sz.addEventListener('change',function(){ persist(); });
+    document.getElementById('ampAllOn').addEventListener('click',function(){ RES.forEach(function(r){ byRes[r].visible=true; byResVis[r]=true; }); drawAll(); persist(); renderList(); });
+    document.getElementById('ampAllOff').addEventListener('click',function(){ RES.forEach(function(r){ byRes[r].visible=false; byResVis[r]=false; clearLayer(byRes[r]); }); persist(); renderList(); });
+    document.getElementById('ampFit').addEventListener('click',function(){ var b=boundsAll(); if(b){var M=getMaps(); if(M[0])try{M[0].fitBounds(b.pad(0.15));}catch(e){}} });
+    box.querySelectorAll('.amp-row').forEach(function(row){ var res=row.dataset.res, o=byRes[res]; if(!o)return;
+      row.querySelector('.amp-vis').addEventListener('change',function(e){ o.visible=e.target.checked; byResVis[res]=o.visible; if(o.visible){var M=getMaps();o.groups.forEach(function(g,i){if(M[i])g.addTo(M[i]);});}else{clearLayer(o);} persist(); });
+      row.querySelector('.amp-sw input').addEventListener('input',function(e){ o.color=e.target.value; byResColor[res]=o.color; drawRes(o); persist(); row.querySelector('.amp-sw').style.background=o.color; });
+      row.querySelector('.amp-zoom').addEventListener('click',function(){ zoomRes(o); });
+      var opr=row.querySelector('.amp-op'), opv=row.querySelector('.amp-opv');
+      opr.addEventListener('input',function(e){ var v=+e.target.value; opv.textContent=v+'%'; o.opacity=v/100; byResOp[res]=o.opacity; drawRes(o); });
+      opr.addEventListener('change',function(){ persist(); });
+    });
+  }
+  function handleFile(file){
+    if(!file)return; status('Leyendo '+esc(file.name)+'…','');
+    ensureXLSX().then(function(){ return file.arrayBuffer(); }).then(function(buf){
+      var wb=window.XLSX.read(new Uint8Array(buf),{type:'array',cellDates:true});
+      var pts=parseWorkbook(wb);
+      if(!pts.length){ status('No encontré filas con coordenadas válidas.','warn'); return; }
+      RAW=pts; meta={file:file.name,n:pts.length}; byResColor={};byResVis={};byResOp={};
+      rebuild(); drawAll(); persist(); renderList();
+      var b=boundsAll(); if(b){var M=getMaps(); if(M[0])try{M[0].fitBounds(b.pad(0.15));}catch(e){}}
+      status('✔ '+pts.length+' amparos · '+RES.length+' resoluciones dibujadas.','ok');
+    }).catch(function(e){ status('Error: '+e.message,'warn'); });
+  }
+  function build(){
+    if(document.getElementById('ampBtn'))return;
+    var header=document.querySelector('header');
+    if(header){ var b=document.createElement('button'); b.id='ampBtn'; b.title='Amparos administrativos (Excel de coordenadas)'; b.innerHTML='📐 Amparos';
+      var kb=document.getElementById('kmzBtn'), badge=document.getElementById('userBadge');
+      if(kb&&kb.nextSibling) header.insertBefore(b,kb.nextSibling); else if(badge&&badge.parentNode===header) header.insertBefore(b,badge); else header.appendChild(b);
+      b.addEventListener('click',function(){ togglePanel(); }); }
+    var p=document.createElement('div'); p.id='ampPanel'; p.style.display='none';
+    p.innerHTML='<div class="amp-hd"><b>📐 Amparos administrativos</b><button id="ampClose" title="Cerrar">✕</button></div>'+
+      '<div class="amp-body">'+
+        '<label class="amp-add">📄 Subir Excel de amparos<input type="file" id="ampFile" accept=".xlsx,.xls,.csv" style="display:none"></label>'+
+        '<div class="amp-hint">Dibuja los puntos de cada amparo, coloreados por resolución. Puedes prender/apagar, cambiar color y transparencia por resolución. También salen en el PDF.</div>'+
+        '<div class="amp-msg" id="ampMsg"></div>'+
+        '<div class="amp-list" id="ampList"></div>'+
+      '</div>';
+    document.body.appendChild(p);
+    document.getElementById('ampClose').addEventListener('click',function(){ togglePanel(false); });
+    document.getElementById('ampFile').addEventListener('change',function(e){ handleFile(e.target.files[0]); e.target.value=''; });
+    renderList(); restore(); renderList();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',build); else build();
+})();
+
+</script>
+<script>
+/* ===== EXPORTAR KMZ PROPIO — aditivo =====
+   Arma un KMZ propio combinando: (1) los puntos que el usuario ubicó manualmente
+   y (2) los puntos/áreas de los KMZ que tenga cargados. El usuario elige cuáles
+   incluir y les pone nombre. */
+(function(){
+  'use strict';
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function getPoints(){ try{ if(typeof points!=='undefined' && Array.isArray(points)) return points; }catch(e){} return []; }
+  function dms(p){ try{ if(typeof coordDMS==='function') return coordDMS(p.lat,p.lng);}catch(e){} return (p.lat!=null?p.lat.toFixed(5):'')+', '+(p.lng!=null?p.lng.toFixed(5):''); }
+  function anm(a){ try{ if(typeof formatANMDetail==='function') return formatANMDetail(a)||''; }catch(e){} return ''; }
+  function defName(p){ return p.label || ('P'+(p.idx||'')+(p.mun?(' · '+p.mun):'')); }
+  function kmzLayers(){ try{ if(window.KMZ && window.KMZ.getLayersData) return window.KMZ.getLayersData()||[]; }catch(e){} return []; }
+
+  function ensureJSZip(){ return new Promise(function(res,rej){ if(window.JSZip)return res(window.JSZip);
+    var s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload=function(){res(window.JSZip);}; s.onerror=function(){rej(new Error('no jszip'));}; document.head.appendChild(s); }); }
+
+  // --- KML de un punto manual (con su ficha completa) ---
+  function manualPM(p,nm){
+    var estado=p.tit?'Legal (título vigente)':(p.sol?'Solicitud en trámite':'Sin título · posible ilícita');
+    var desc='<![CDATA['+'Coordenadas: '+esc(dms(p))+'<br>Lat/Lon: '+(p.lat!=null?p.lat.toFixed(6):'')+', '+(p.lng!=null?p.lng.toFixed(6):'')+'<br>'+
+      'Municipio: '+esc(p.mun||'—')+', '+esc(p.dep||'—')+'<br>Vereda: '+esc(p.vereda||'—')+'<br>'+
+      'Título: '+(p.tit?('SÍ · '+esc(anm(p.tit))):'NO')+'<br>Solicitud: '+(p.sol?('SÍ · '+esc(anm(p.sol))):'NO')+'<br>'+
+      'Área protegida: '+esc(p.runap||'NO')+'<br>RF Ley 2ª: '+esc(p.rfLey2||'NO')+'<br>Estado: '+esc(estado)+']]>';
+    return '<Placemark><name>'+esc(nm)+'</name><description>'+desc+'</description><Point><coordinates>'+p.lng+','+p.lat+',0</coordinates></Point></Placemark>';
+  }
+  // --- KML de una geometría GeoJSON (punto/línea/polígono) ---
+  function coordsStr(arr){ return arr.map(function(c){return c[0]+','+c[1]+',0';}).join(' '); }
+  function geoPM(f,nm,layerName){
+    var g=f.geometry; if(!g) return '';
+    var desc='<![CDATA['+(f.properties&&f.properties.description?esc(f.properties.description)+'<br>':'')+'Capa: '+esc(layerName)+']]>';
+    var geom='';
+    if(g.type==='Point') geom='<Point><coordinates>'+g.coordinates[0]+','+g.coordinates[1]+',0</coordinates></Point>';
+    else if(g.type==='LineString') geom='<LineString><coordinates>'+coordsStr(g.coordinates)+'</coordinates></LineString>';
+    else if(g.type==='Polygon'){ var rings=g.coordinates.map(function(r,i){ var t='<'+(i===0?'outerBoundaryIs':'innerBoundaryIs')+'><LinearRing><coordinates>'+coordsStr(r)+'</coordinates></LinearRing></'+(i===0?'outerBoundaryIs':'innerBoundaryIs')+'>'; return t; }).join(''); geom='<Polygon>'+rings+'</Polygon>'; }
+    else return '';
+    return '<Placemark><name>'+esc(nm)+'</name><description>'+desc+'</description>'+geom+'</Placemark>';
+  }
+
+  function setMsg(m,c){ var el=document.getElementById('xkzMsg'); if(el){el.textContent=m||'';el.className='xkz-msg'+(c?(' '+c):'');} }
+  function download(blob,fname){ var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500); }
+
+  function doExport(){
+    var box=document.getElementById('xkzList'); if(!box) return;
+    var pts=getPoints(), lays=kmzLayers(), pm=[], count=0;
+    // manuales
+    box.querySelectorAll('.xkz-row[data-src="manual"]').forEach(function(r){
+      var p=pts.find(function(x){return String(x.id)===String(r.dataset.id);}); if(!p)return;
+      var nm=r.querySelector('.xkz-n').value; p.label=nm;
+      if(r.querySelector('.xkz-c').checked){ pm.push(manualPM(p,(nm&&nm.trim())?nm.trim():defName(p))); count++; }
+    });
+    // puntos de KMZ
+    box.querySelectorAll('.xkz-row[data-src="kmz"]').forEach(function(r){
+      if(!r.querySelector('.xkz-c').checked) return;
+      var li=+r.dataset.layer, fi=+r.dataset.feat, lay=lays[li]; if(!lay)return;
+      var f=lay.geo.features[fi]; if(!f)return;
+      var nm=r.querySelector('.xkz-n').value; pm.push(geoPM(f,(nm&&nm.trim())?nm.trim():('Punto'),lay.name)); count++;
+    });
+    // áreas/líneas de KMZ (por capa)
+    box.querySelectorAll('.xkz-row[data-src="kmzshapes"]').forEach(function(r){
+      if(!r.querySelector('.xkz-c').checked) return;
+      var li=+r.dataset.layer, lay=lays[li]; if(!lay)return;
+      (lay.geo.features||[]).forEach(function(f){ if(f.geometry && f.geometry.type!=='Point'){ pm.push(geoPM(f,(f.properties&&f.properties.name)||lay.name,lay.name)); count++; } });
+    });
+    if(!count){ setMsg('Selecciona al menos un punto o capa.','warn'); return; }
+    var docName=(document.getElementById('xkzName').value||'Mis puntos BRCMI').trim();
+    var fname=docName.replace(/[^\w\-]+/g,'_').replace(/^_+|_+$/g,'')||'puntos';
+    var kml='<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>'+esc(docName)+'</name>'+pm.join('')+'</Document></kml>';
+    setMsg('Generando KMZ…','');
+    ensureJSZip().then(function(JSZip){ var zip=new JSZip(); zip.file('doc.kml',kml); return zip.generateAsync({type:'blob',compression:'DEFLATE'}); })
+    .then(function(blob){ download(blob,fname+'.kmz'); setMsg('✔ KMZ exportado con '+count+' elemento(s).','ok'); })
+    .catch(function(){ download(new Blob([kml],{type:'application/vnd.google-earth.kml+xml'}),fname+'.kml'); setMsg('Sin conexión para comprimir: exporté .kml (funciona igual).','warn'); });
+  }
+
+  function groupBlock(title,inner){ return '<div class="xkz-grp"><div class="xkz-gh">'+title+'</div>'+inner+'</div>'; }
+  function openModal(){
+    var pts=getPoints(), lays=kmzLayers();
+    var m=document.getElementById('xkzModal'); if(!m){ m=document.createElement('div'); m.id='xkzModal'; document.body.appendChild(m); }
+    // grupo manuales
+    var manRows = pts.length? pts.map(function(p,i){ p.idx=p.idx||i+1; var checked=(p.selected!==false);
+      return '<div class="xkz-row" data-src="manual" data-id="'+esc(p.id)+'">'+
+        '<input type="checkbox" class="xkz-c" '+(checked?'checked':'')+'>'+
+        '<span class="xkz-i">#'+p.idx+'</span>'+
+        '<input type="text" class="xkz-n" value="'+esc(defName(p))+'" placeholder="Nombre del punto">'+
+        '<span class="xkz-co" title="'+esc(dms(p))+'">'+esc(p.mun||'—')+'</span></div>'; }).join('')
+      : '<div class="xkz-empty2">No has ubicado puntos manuales.</div>';
+    var blocks=[ groupBlock('📍 Mis puntos ('+pts.length+')', manRows) ];
+    // grupos por KMZ
+    lays.forEach(function(lay,li){
+      var feats=(lay.geo&&lay.geo.features)||[];
+      var ptFeats=[], nShapes=0;
+      feats.forEach(function(f,fi){ if(f.geometry&&f.geometry.type==='Point') ptFeats.push({f:f,fi:fi}); else if(f.geometry&&f.geometry.type!=='Point') nShapes++; });
+      if(!ptFeats.length && !nShapes) return;
+      var sw='<span class="xkz-sw" style="background:'+esc(lay.color||'#888')+'"></span>';
+      var inner='';
+      inner+=ptFeats.map(function(o){ var nm=(o.f.properties&&o.f.properties.name)||'Punto';
+        return '<div class="xkz-row" data-src="kmz" data-layer="'+li+'" data-feat="'+o.fi+'">'+
+          '<input type="checkbox" class="xkz-c">'+
+          '<span class="xkz-i" style="min-width:14px">•</span>'+
+          '<input type="text" class="xkz-n" value="'+esc(nm)+'">'+
+          '<span class="xkz-co">'+esc(o.f.geometry.coordinates[1].toFixed(4))+', '+esc(o.f.geometry.coordinates[0].toFixed(4))+'</span></div>'; }).join('');
+      if(nShapes) inner+='<div class="xkz-row" data-src="kmzshapes" data-layer="'+li+'"><input type="checkbox" class="xkz-c"><span class="xkz-i" style="min-width:14px">▲</span><span style="flex:1;font-size:12px">Incluir '+nShapes+' área(s)/línea(s) de esta capa</span></div>';
+      blocks.push(groupBlock(sw+' 🗂 '+esc(lay.name)+' ('+ptFeats.length+' pto'+(nShapes?(' · '+nShapes+' área/línea'):'')+')', inner));
+    });
+    m.innerHTML='<div class="xkz-box">'+
+      '<div class="xkz-hd"><b>📍 Exportar KMZ propio</b><button id="xkzX" title="Cerrar">✕</button></div>'+
+      '<div class="xkz-bd">'+
+        '<label class="xkz-lbl">Nombre del archivo / capa</label><input type="text" id="xkzName" value="Mis puntos BRCMI">'+
+        '<div class="xkz-tools"><div class="spacer"></div><button id="xkzAll" class="gh">Marcar todo</button><button id="xkzNone" class="gh">Desmarcar todo</button></div>'+
+        '<div class="xkz-list" id="xkzList">'+blocks.join('')+'</div>'+
+        '<div class="xkz-msg" id="xkzMsg"></div>'+
+      '</div>'+
+      '<div class="xkz-ft"><button id="xkzCancel">Cancelar</button><button id="xkzGo" class="go">⬇ Exportar KMZ</button></div>'+
+    '</div>';
+    m.classList.add('open');
+    document.getElementById('xkzX').onclick=close; document.getElementById('xkzCancel').onclick=close; document.getElementById('xkzGo').onclick=doExport;
+    var list=document.getElementById('xkzList');
+    document.getElementById('xkzAll').onclick=function(){ list.querySelectorAll('.xkz-c').forEach(function(c){c.checked=true;}); };
+    document.getElementById('xkzNone').onclick=function(){ list.querySelectorAll('.xkz-c').forEach(function(c){c.checked=false;}); };
+    m.onclick=function(e){ if(e.target===m) close(); };
+  }
+  function close(){ var m=document.getElementById('xkzModal'); if(m) m.classList.remove('open'); }
+
+  function build(){
+    if(document.getElementById('xkzBtn')) return;
+    var btn=document.createElement('button'); btn.id='xkzBtn'; btn.className='ghost'; btn.textContent='⬇ KMZ propio'; btn.title='Nombrar y exportar tus puntos (y los de los KMZ) como KMZ';
+    var ref=document.getElementById('exportBtn');
+    if(ref&&ref.parentNode){ ref.parentNode.insertBefore(btn,ref.nextSibling); } else { document.body.appendChild(btn); }
+    btn.addEventListener('click',openModal);
+  }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',build); else build();
 })();
 
