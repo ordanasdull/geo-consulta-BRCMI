@@ -1636,6 +1636,8 @@ body.fit2 .controls .tb-right .user{max-width:120px} body.fit2 .controls h1.tb-t
 #anSelBar .sb-b{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;height:26px;padding:0 9px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
 #anSelBar .sb-b:hover{border-color:var(--accent);color:var(--accent)}
 #anSelBar .sb-del:hover{border-color:var(--danger);color:var(--danger)}
+#anSelBar .sb-all{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);cursor:pointer;white-space:nowrap}
+#anSelBar .sb-all input{accent-color:var(--accent);margin:0}
 #anSelBar .sb-ok{background:var(--accent);color:#000;border-color:var(--accent)}
 body.fullscreen #anSelBar{top:10px!important}
 
@@ -1665,15 +1667,15 @@ body.fullscreen #anSelBar{top:10px!important}
 .map-cell:hover .leaflet-control-zoom{opacity:.45}
 .leaflet-control-zoom:hover{opacity:1}
 /* cuadro de capas de cada mapa: pequeño, solo muestra las capas encendidas; al pasar el cursor muestra todas */
-.map-cell .toggles{font-size:8.5px!important;padding:2px 6px!important;gap:1px!important;background:rgba(14,17,22,.45)!important;backdrop-filter:none!important;border-color:transparent!important;opacity:.6;transition:opacity .15s}
+.map-cell .toggles{font-size:9.5px!important;padding:4px 8px!important;gap:2px!important;background:rgba(14,17,22,.74)!important;backdrop-filter:none!important;border:1px solid rgba(255,255,255,.12)!important;opacity:1;transition:opacity .15s;color:#e6edf3!important}
 .map-cell .toggles label{gap:4px!important;line-height:1.35}
-.map-cell .toggles input{width:9px!important;height:9px!important}
-.map-cell .toggles label:not(:has(input:checked)){display:none!important}
-.map-cell .toggles::before{content:"capas ▾";font-size:7.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);text-align:right}
+.map-cell .toggles input{width:10px!important;height:10px!important}
+.map-cell .toggles label:not(:has(input:checked)){opacity:.72}
+.map-cell .toggles::before{content:none}
 .map-cell .toggles:hover{opacity:1;background:rgba(14,17,22,.9)!important;border-color:var(--border)!important;padding:4px 8px!important;font-size:10px!important}
 .map-cell .toggles:hover label{display:flex!important}
 .map-cell .toggles:hover input{width:11px!important;height:11px!important}
-.map-cell .toggles:hover::before{content:"capas de este mapa"}
+
 /* arrastrar el cuadro tomándolo del nombre */
 .map-cell .map-label{cursor:grab}
 
@@ -4733,14 +4735,15 @@ window.getMeasurementsData = () => measurements.map(m => ({
 // --- persistencia local: las mediciones sobreviven a recargar la página ---
 function persistMeasurements() {
   try {
-    localStorage.setItem('geoMeasurements', JSON.stringify(measurements.map(m => ({
+    window.__measJSON = (JSON.stringify(measurements.map(m => ({
       id: m.id, mode: m.mode, map: Math.max(0, allMaps.indexOf(m.map)), v: m.vertices.map(x => [x.lat, x.lng]), lp: m.labelLL ? [m.labelLL.lat, m.labelLL.lng] : null
     }))));
   } catch(e) {}
 }
 function restoreMeasurements() {
   try {
-    const raw = localStorage.getItem('geoMeasurements'); if (!raw) return;
+    localStorage.removeItem('geoMeasurements'); return;  // sesión limpia: no se traen mediciones de otras sesiones
+    const raw = null; if (!raw) return;
     const arr = JSON.parse(raw); if (!Array.isArray(arr)) return;
     arr.forEach(o => {
       const map = allMaps[o.map] || allMaps[0];
@@ -6931,7 +6934,7 @@ window.__GEO_MUNI={"type":"FeatureCollection","features":[{"type":"Feature","pro
   var HINT0 = 'Elige un gráfico y haz clic en el mapa. Un clic selecciona · arrastrar mueve · doble clic escribe · Esc suelta · Supr borra.';
 
   function persist(){
-    try { localStorage.setItem('geoAnnotations', JSON.stringify(ITEMS.map(function(it){
+    try { window.__annotJSON = (JSON.stringify(ITEMS.map(function(it){
       var o = { id:it.id, type:it.type, color:it.color, size:it.size };
       if (it.type==='arrow') { o.a=[it.a.lat,it.a.lng]; o.b=[it.b.lat,it.b.lng]; }
       else { o.ll=[it.ll.lat,it.ll.lng]; }
@@ -6944,7 +6947,8 @@ window.__GEO_MUNI={"type":"FeatureCollection","features":[{"type":"Feature","pro
   }
   function restore(){
     try {
-      var arr = JSON.parse(localStorage.getItem('geoAnnotations')||'[]'); if(!Array.isArray(arr)) return;
+      localStorage.removeItem('geoAnnotations'); return;  // sesión limpia: no se traen gráficos de otras sesiones
+      var arr = []; if(!Array.isArray(arr)) return;
       arr.forEach(function(o){
         var it = { id:o.id||nextId, type:o.type, color:o.color||'#ffffff', size:K(o.size), views:[] };
         if (o.type==='arrow') { if(!o.a||!o.b) return; it.a=L.latLng(o.a[0],o.a[1]); it.b=L.latLng(o.b[0],o.b[1]); }
@@ -6985,14 +6989,25 @@ window.__GEO_MUNI={"type":"FeatureCollection","features":[{"type":"Feature","pro
     b.innerHTML = '<span class="sb-t"></span>'+
       '<span class="sb-cols">'+['#ffffff','#111111','#e01e1e','#ffd23d','#3fb950'].map(function(c){ return '<button type="button" class="sb-c" data-c="'+c+'" style="background:'+c+'"></button>'; }).join('')+'</span>'+
       '<span class="sb-sz" title="Tamaño">◐ <input type="range" min="0.4" max="3" step="0.05"></span>'+
+      '<label class="sb-all" title="La barra de tamaño cambia todos los OBJ a la vez"><input type="checkbox"> Todos los OBJ</label>'+
+      '<button type="button" class="sb-b sb-eq" title="Todos los OBJ quedan del mismo tamaño que este">⇔ Igualar todos</button>'+
       '<button type="button" class="sb-b sb-ed" title="Escribir el texto (también: doble clic sobre la figura)">✎ Escribir</button>'+
       '<button type="button" class="sb-b sb-del" title="Borrar (tecla Supr)">🗑 Borrar</button>'+
       '<button type="button" class="sb-b sb-ok" title="Terminar (Esc o clic en el mapa)">✓ Listo</button>';
     document.body.appendChild(b);
     b.addEventListener('mousedown', function(e){ e.stopPropagation(); });
     b.querySelectorAll('.sb-c').forEach(function(x){ x.addEventListener('click', function(){ var t = document.querySelector('.an-c[data-c="'+x.dataset.c+'"]'); if (t && !t.disabled) t.click(); paintSel(); }); });
-    var r = b.querySelector('.sb-sz input'), sz = document.querySelector('.an-sz');
-    r.addEventListener('input', function(){ if (sz) { sz.value = r.value; sz.dispatchEvent(new Event('input')); } });
+    var r = b.querySelector('.sb-sz input'), sz = document.querySelector('.an-sz'), allCb = b.querySelector('.sb-all input');
+    function objs(){ return ITEMS.filter(function(x){ return x.type === 'obj'; }); }
+    function resizeObj(x, px){ x.sizeM = px * mpp(M()[visIdx()], x.ll.lat); x.views.forEach(function(_, j){ sizeObjView(x, j); }); refreshLab(x); }
+    r.addEventListener('input', function(){
+      if (sel && sel.type === 'obj' && allCb.checked) { var px = OBJ_BASE * (+r.value); objs().forEach(function(x){ resizeObj(x, px); }); return; }
+      if (sz) { sz.value = r.value; sz.dispatchEvent(new Event('input')); } });
+    b.querySelector('.sb-eq').addEventListener('click', function(){
+      if (!sel || sel.type !== 'obj') return; var ref = sel.sizeM, n = 0;
+      objs().forEach(function(x){ if (x !== sel) { x.sizeM = ref; x.views.forEach(function(_, j){ sizeObjView(x, j); }); refreshLab(x); n++; } });
+      persist(); try { showStatus(n ? ('Listo: '+(n+1)+' OBJ con el mismo tamaño') : 'Solo hay un OBJ en el mapa', 'ok', 2200); } catch(e){}
+    });
     r.addEventListener('change', function(){ if (sz) sz.dispatchEvent(new Event('change')); });
     b.querySelector('.sb-ed').addEventListener('click', function(){ if (!sel) return; var it = sel, k = visIdx(); if (it.type === 'text') editTxt(it, k); else editLab(it, k); });
     b.querySelector('.sb-del').addEventListener('click', function(){ if (sel) removeItem(sel); });
@@ -7003,6 +7018,9 @@ window.__GEO_MUNI={"type":"FeatureCollection","features":[{"type":"Feature","pro
     var b = selBar(), it = sel; b.classList.toggle('show', !!it); if (!it) return;
     b.querySelector('.sb-t').textContent = TYPE_NAME[it.type] || '';
     b.querySelector('.sb-cols').style.display = it.type === 'obj' ? 'none' : '';
+    var nObj = ITEMS.filter(function(x){ return x.type === 'obj'; }).length, showAll = it.type === 'obj' && nObj > 1;
+    b.querySelector('.sb-all').style.display = showAll ? '' : 'none'; b.querySelector('.sb-eq').style.display = showAll ? '' : 'none';
+    b.querySelector('.sb-eq').textContent = '⇔ Igualar todos (' + nObj + ')';
     b.querySelectorAll('.sb-c').forEach(function(x){ x.classList.toggle('on', String(it.color).toLowerCase() === x.dataset.c); });
     var r = b.querySelector('.sb-sz input'); r.value = Math.max(0.4, Math.min(3, it.type === 'obj' ? (objPx(it, M()[visIdx()]) / OBJ_BASE) : K(it.size)));
     var bar = document.getElementById('controlsArea'); b.style.top = ((bar ? bar.getBoundingClientRect().bottom : 44) + 8) + 'px';
@@ -8360,7 +8378,7 @@ window.__GEO_MUNI={"type":"FeatureCollection","features":[{"type":"Feature","pro
   function signature(){
     var parts = [];
     try { parts.push((typeof points !== 'undefined' ? points : []).map(function(p){ return [p.id, p.lat.toFixed(6), p.lng.toFixed(6), getRiskClass(p), p.idx].join(','); }).join(';')); } catch(e){}
-    try { parts.push(localStorage.getItem('geoAnnotations') || ''); parts.push(localStorage.getItem('geoMeasurements') || ''); } catch(e){}
+    try { parts.push(window.__annotJSON || ''); parts.push(window.__measJSON || ''); } catch(e){}
     try { parts.push(JSON.stringify((window.KMZ && window.KMZ.snapshot ? window.KMZ.snapshot() : []).map(function(l){ return [l.name, l.color, l.opacity, l.hidden.length]; }))); } catch(e){}
     try { var a = window.AMPAROS && window.AMPAROS.snapshot && window.AMPAROS.snapshot(); parts.push(a ? a.pts.length + ':' + a.size + ':' + (a.pts[0] ? a.pts[0][2] : '') : ''); } catch(e){}
     try { parts.push(MARKER_SIZE); } catch(e){}
